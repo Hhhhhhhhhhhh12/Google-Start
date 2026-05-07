@@ -27,6 +27,11 @@ const exampleIdea: BusinessIdea = {
     commercialCompetition: 6,
     notes: 'Viele Anbieter reagieren schlecht auf Bewertungen.',
     painPoints: ['keine Rückmeldung', 'schlechte Kommunikation'],
+    keywordData: [],
+    competitors: [],
+    painPointEntries: [],
+    trendDirection: 'stable',
+    trendNotes: '',
     checklist: {
         keywordPlannerChecked: false,
         googleTrendsChecked: false,

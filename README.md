@@ -17,21 +17,25 @@ Implementiert sind:
 
 - React + Vite + TypeScript Setup
 - Datenmodell für Business-Ideen
-- Scoring-Modell mit Tests
+- Scoring-Modell mit Tests (14/14 passing)
 - Research Query Builder mit Tests
-- Beispielansicht mit Score und ersten Recherchelinks
+- Multi-Ideen-Sidebar mit Score-Anzeige
+- Speicherung in localStorage (offline-first)
+- Editor für Titel, Region, Zielgruppe, Keywords, Notizen
+- Quellen-Checkliste (Keyword Planner, Trends, Maps, Reviews, CPC)
+- Evidence-Quality Badge (incomplete → strong)
+- Gruppierte Recherche-Links (Google Search, Maps, Trends, Pain Points)
 
 Noch nicht implementiert:
 
-- Speicherung in localStorage
-- Editor für mehrere Ideen
+- Erweiterte Research-Workflow-Felder (Suchvolumen, Trend-Notizen, Competitor-Details)
 - Vergleichstabelle
 - Import/Export
-- echte API-Anbindungen
+- Business Idea Generator
 
 ## Wichtig
 
-Die App nutzt derzeit keine Google APIs und betreibt kein Scraping. Recherchelinks werden nur lokal generiert und manuell geöffnet.
+Die App nutzt keine Google APIs und betreibt kein Scraping. Recherchelinks werden nur lokal generiert und manuell geöffnet.
 
 ## Entwicklung
 
@@ -40,33 +44,8 @@ npm install
 npm run dev
 npm run test
 npm run build
-
+```
 
 ## Roadmap
 
-### Feature: Business Idea Generator
-
-The app should later suggest possible local business ideas based on user-provided research signals.
-
-Input examples:
-- region
-- interest areas
-- keyword lists
-- manually collected Google Trends / Keyword Planner terms
-- copied review snippets or pain points
-- local service categories
-
-Expected output:
-- suggested business idea title
-- target audience
-- possible keywords
-- generated research queries
-- assumed pain point
-- validation checklist
-- warning that the suggestion is a hypothesis, not validated market proof
-
-Constraints:
-- no Google scraping
-- no paid APIs in the MVP
-- all suggestions should be explainable
-- generated ideas must be clearly marked as hypotheses
+Siehe [Roadmap.md](./Roadmap.md) für die vollständige Projektplanung.

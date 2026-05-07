@@ -1,447 +1,385 @@
-import { useState, useMemo, useEffect, type ChangeEvent } from 'react'
+import { useState } from 'react'
 import './App.css'
-import { calculateIdeaScore } from './lib/scoring'
-import { buildResearchQueries } from './lib/queryBuilder'
-import { loadIdeas, saveIdeas } from './lib/storage'
+import { generateMarketAnalysis } from './lib/marketAnalysis'
+import { deriveIdeasMock, type DerivedIdea } from './lib/aiMock'
+import { scrapeGoogleMaps, scrapeSearchMetadata } from './lib/scraper'
 import type { BusinessIdea } from './types'
 
-const createNewIdea = (): BusinessIdea => ({
-  id: crypto.randomUUID(),
-  title: 'Neue Geschäftsidee',
-  region: '',
-  targetAudience: '',
-  keywords: [],
-  competitorCount: 0,
-  professionalCompetitorCount: 0,
-  complaintDensity: 5,
-  urgency: 5,
-  willingnessToPay: 5,
-  commercialCompetition: 5,
-  notes: '',
-  painPoints: [],
-  checklist: {
-    keywordPlannerChecked: false,
-    googleTrendsChecked: false,
-    googleMapsChecked: false,
-    reviewsChecked: false,
-    cpcChecked: false,
-  },
-  createdAt: Date.now(),
-  updatedAt: Date.now(),
-})
+type AppMode = 'evaluate' | 'derive';
 
 function App() {
-  const [ideas, setIdeas] = useState<BusinessIdea[]>([])
-  const [activeId, setActiveId] = useState<string | null>(null)
-  const [keywordText, setKeywordText] = useState('')
-
-  // Initial Load
-  useEffect(() => {
-    const stored = loadIdeas()
-    if (stored.length > 0) {
-      setIdeas(stored)
-      setActiveId(stored[0].id)
-      setKeywordText(stored[0].keywords.join('\n'))
-    } else {
-      const firstIdea = createNewIdea()
-      setIdeas([firstIdea])
-      setActiveId(firstIdea.id)
-      setKeywordText('')
-    }
-  }, [])
-
-  // Auto-Save
-  useEffect(() => {
-    if (ideas.length > 0) {
-      saveIdeas(ideas)
-    }
-  }, [ideas])
-
-  const parsedKeywords = useMemo(() => {
-    return keywordText
-      .split(/\r?\n/)
-      .map((k) => k.trim())
-      .filter((k) => k.length > 0)
-  }, [keywordText])
-
-  // Sync keywords to ideas state
-  useEffect(() => {
-    if (!activeId) return
-    setIdeas((prev) => {
-      const currentIdea = prev.find(i => i.id === activeId)
-      if (currentIdea && JSON.stringify(currentIdea.keywords) === JSON.stringify(parsedKeywords)) {
-        return prev
-      }
-      return prev.map((i) =>
-        i.id === activeId ? { ...i, keywords: parsedKeywords, updatedAt: Date.now() } : i
-      )
-    })
-  }, [parsedKeywords, activeId])
-
-  const activeIdea = useMemo(
-    () => ideas.find((i) => i.id === activeId) || null,
-    [ideas, activeId]
-  )
-
-  const handleSelectIdea = (id: string) => {
-    setActiveId(id)
-    const idea = ideas.find((i) => i.id === id)
-    if (idea) {
-      setKeywordText(idea.keywords?.join('\n') || '')
-    }
+  const [mode, setMode] = useState<AppMode>('evaluate')
+  
+  const [serperApiKey, setSerperApiKey] = useState(localStorage.getItem('serper_api_key') || '')
+  
+  const handleSaveApiKey = (val: string) => {
+    setSerperApiKey(val)
+    localStorage.setItem('serper_api_key', val)
   }
 
-  const handleAddIdea = () => {
-    const newIdea = createNewIdea()
-    setIdeas((prev) => [newIdea, ...prev])
-    setActiveId(newIdea.id)
-    setKeywordText('')
+  // Evaluate State
+  const [ideaTitle, setIdeaTitle] = useState('')
+  const [ideaRegion, setIdeaRegion] = useState('')
+  const [isEvaluating, setIsEvaluating] = useState(false)
+  const [report, setReport] = useState<any | null>(null)
+
+  // Derive State
+  const [deriveSearchTerms, setDeriveSearchTerms] = useState('')
+  const [deriveRegion, setDeriveRegion] = useState('')
+  const [deriveInterests, setDeriveInterests] = useState('')
+  const [isDeriving, setIsDeriving] = useState(false)
+  const [derivedIdeas, setDerivedIdeas] = useState<DerivedIdea[] | null>(null)
+
+  const handleSaveApiKey = (val: string) => {
+    setSerperApiKey(val)
+    localStorage.setItem('serper_api_key', val)
   }
 
-  const handleDeleteIdea = (e: React.MouseEvent, id: string) => {
-    e.stopPropagation()
-    if (confirm('Diese Idee wirklich löschen?')) {
-      const remaining = ideas.filter((i) => i.id !== id)
-      setIdeas(remaining)
-      if (activeId === id) {
-        const nextId = remaining.length > 0 ? remaining[0].id : null
-        setActiveId(nextId)
-        if (nextId) {
-          const nextIdea = remaining.find(i => i.id === nextId)
-          setKeywordText(nextIdea?.keywords.join('\n') || '')
-        } else {
-          setKeywordText('')
-        }
-      }
-    }
+  const handleAutoPopulate = (idea: DerivedIdea) => {
+    setIdeaTitle(idea.title);
+    setIdeaRegion(deriveRegion || 'Lokal');
+    setMode('evaluate');
+    setReport(null);
   }
 
-  const handleDuplicateIdea = (e: React.MouseEvent, idea: BusinessIdea) => {
-    e.stopPropagation()
-    const duplicate = {
-      ...idea,
+  const handleEvaluate = async () => {
+    if (!ideaTitle) return;
+    setIsEvaluating(true);
+    setReport(null);
+    
+    // Create a temporary BusinessIdea object for the analysis engine
+    let tempIdea: BusinessIdea = {
       id: crypto.randomUUID(),
-      title: `${idea.title} (Kopie)`,
+      title: ideaTitle,
+      region: ideaRegion,
+      targetAudience: 'Zielgruppe offen',
+      keywords: [ideaTitle],
+      keywordData: [],
+      competitorCount: 0,
+      professionalCompetitorCount: 0,
+      competitors: [],
+      complaintDensity: 5,
+      urgency: 5,
+      willingnessToPay: 5,
+      commercialCompetition: 5,
+      notes: '',
+      painPoints: [],
+      painPointEntries: [],
+      trendDirection: 'stable',
+      trendNotes: '',
+      checklist: {
+        keywordPlannerChecked: false,
+        googleTrendsChecked: false,
+        googleMapsChecked: false,
+        reviewsChecked: false,
+        cpcChecked: false,
+      },
       createdAt: Date.now(),
       updatedAt: Date.now(),
+    };
+
+    try {
+      if (serperApiKey) {
+        // Real-time Data Power!
+        const query = `${ideaTitle} ${ideaRegion}`.trim();
+        const [mapsResults, searchMeta] = await Promise.all([
+          scrapeGoogleMaps(query, serperApiKey).catch(() => []),
+          scrapeSearchMetadata(ideaTitle, serperApiKey).catch(() => ({ adCount: 0, totalResults: 0 }))
+        ]);
+
+        tempIdea = {
+          ...tempIdea,
+          competitors: mapsResults.slice(0, 5),
+          competitorCount: mapsResults.length,
+          professionalCompetitorCount: Math.round(mapsResults.length * 0.3), // Heuristic
+          commercialCompetition: Math.min(10, Math.max(1, searchMeta.adCount * 3)),
+          checklist: {
+            ...tempIdea.checklist,
+            googleMapsChecked: mapsResults.length > 0,
+            cpcChecked: searchMeta.adCount > 0,
+          }
+        };
+      } else {
+        // Fallback or simulation delay
+        await new Promise(r => setTimeout(r, 1500));
+      }
+
+      const analysis = generateMarketAnalysis(tempIdea);
+      setReport(analysis);
+    } catch (err) {
+      console.error(err);
+      alert('Es gab ein Problem beim Abrufen der Daten.');
+    } finally {
+      setIsEvaluating(false);
     }
-    setIdeas((prev) => [duplicate, ...prev])
-    setActiveId(duplicate.id)
-    setKeywordText(duplicate.keywords.join('\n'))
   }
 
-  const handleInputChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    if (!activeId) return
-    const { name, value, type } = e.target
-    const val = type === 'range' || type === 'number' ? Number(value) : value
 
-    setIdeas((prev) =>
-      prev.map((i) =>
-        i.id === activeId ? { ...i, [name]: val, updatedAt: Date.now() } : i
-      )
-    )
-  }
 
-  const handleChecklistChange = (key: keyof BusinessIdea['checklist']) => {
-    if (!activeId) return
-    setIdeas((prev) =>
-      prev.map((i) =>
-        i.id === activeId
-          ? {
-              ...i,
-              checklist: { ...i.checklist, [key]: !i.checklist[key] },
-              updatedAt: Date.now(),
-            }
-          : i
-      )
-    )
-  }
-
-  const handleKeywordTextChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
-    setKeywordText(e.target.value)
-  }
-
-  const score = useMemo(
-    () => (activeIdea ? calculateIdeaScore(activeIdea) : null),
-    [activeIdea]
-  )
-
-  const groupedQueries = useMemo(() => {
-    if (!activeIdea) return {}
-    const queries = buildResearchQueries(activeIdea)
-    return {
-      'Google Search': queries.filter(q => q.label.includes('Suche') || q.label.includes('Check')),
-      'Google Maps': queries.filter(q => q.label.includes('Maps')),
-      'Google Trends': queries.filter(q => q.label.includes('Trends')),
-      'Pain Point Research': queries.filter(q => q.label.includes('Problem') || q.label.includes('Beschwerde') || q.label.includes('Reddit')),
+  const handleDerive = async () => {
+    if (!deriveSearchTerms && !deriveInterests) return;
+    setIsDeriving(true);
+    setDerivedIdeas(null);
+    try {
+      // We'll use a combination of terms for the mock
+      const combinedInput = `${deriveSearchTerms} ${deriveInterests}`.trim();
+      const results = await deriveIdeasMock(combinedInput);
+      setDerivedIdeas(results);
+    } finally {
+      setIsDeriving(false);
     }
-  }, [activeIdea])
+  }
 
   return (
     <div className="app-container">
-      <aside className="sidebar">
-        <header className="sidebar-header">
-          <h2 style={{ marginBottom: 0 }}>Scanner</h2>
-        </header>
-        
-        <div className="sidebar-content">
-          <div className="idea-list">
-            {ideas.map((i) => (
-              <button
-                key={i.id}
-                className={`idea-item ${activeId === i.id ? 'active' : ''}`}
-                onClick={() => handleSelectIdea(i.id)}
-              >
-                <span className="idea-item-title">{i.title || 'Ohne Titel'}</span>
-                <div className="idea-item-meta">
-                  <span>{i.region || 'Region offen'}</span>
-                  <span>{calculateIdeaScore(i).finalScore} pts</span>
-                </div>
-                <div style={{ marginTop: '8px', display: 'flex', gap: '8px' }}>
-                   <span 
-                    style={{ fontSize: '0.7rem', textDecoration: 'underline' }} 
-                    onClick={(e) => handleDuplicateIdea(e, i)}
-                   >
-                     Kopieren
-                   </span>
-                   <span 
-                    style={{ fontSize: '0.7rem', textDecoration: 'underline', color: '#ef4444' }} 
-                    onClick={(e) => handleDeleteIdea(e, i.id)}
-                   >
-                     Löschen
-                   </span>
-                </div>
-              </button>
-            ))}
-          </div>
+      <header className="app-header">
+        <div className="api-config">
+          <input 
+            type="password" 
+            placeholder="Serper API Key..." 
+            value={serperApiKey}
+            onChange={(e) => handleSaveApiKey(e.target.value)}
+          />
         </div>
-
-        <footer className="sidebar-footer">
-          <button className="btn-primary" onClick={handleAddIdea}>
-            + Neue Idee
-          </button>
-        </footer>
-      </aside>
-
+      </header>
       <main className="main-content">
-        {!activeIdea ? (
-          <div style={{ textAlign: 'center', marginTop: '100px' }}>
-             <h3>Wähle eine Idee aus oder erstelle eine neue.</h3>
+        <section className="hero-card">
+          <p className="eyebrow">AI Business Validator</p>
+          <h1>Ideen Scout</h1>
+          <p className="intro">
+            Gib deine Geschäftsidee ein und erhalte datenbasierte Fakten, oder finde neue Ideen aus aktuellen Suchanfragen.
+          </p>
+          
+          <div className="tab-navigation">
+            <button 
+              className={`tab-button ${mode === 'evaluate' ? 'active' : ''}`}
+              onClick={() => setMode('evaluate')}
+            >
+              1. Idee validieren
+            </button>
+            <button 
+              className={`tab-button ${mode === 'derive' ? 'active' : ''}`}
+              onClick={() => setMode('derive')}
+            >
+              2. Ideen ableiten
+            </button>
           </div>
-        ) : (
-          <>
-            <section className="hero-card">
-              <p className="eyebrow">Local-first Research Tool</p>
-              <h1>Local Demand Scanner</h1>
-              <p className="intro">
-                Validiere deine Business-Idee anhand von Marktsignalen.
-              </p>
+        </section>
+
+        {mode === 'evaluate' && (
+          <div className="dashboard-grid single-col">
+            <section className="panel form-panel">
+              <div className="form-group">
+                <label htmlFor="title">Deine Geschäftsidee</label>
+                <input
+                  id="title"
+                  value={ideaTitle}
+                  onChange={(e) => setIdeaTitle(e.target.value)}
+                  placeholder="z.B. Mobiler Fahrrad-Reparaturservice"
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="region">Region (optional)</label>
+                <input
+                  id="region"
+                  value={ideaRegion}
+                  onChange={(e) => setIdeaRegion(e.target.value)}
+                  placeholder="z.B. Berlin Kreuzberg"
+                />
+              </div>
+              <button 
+                className="btn-primary large" 
+                onClick={handleEvaluate}
+                disabled={isEvaluating || !ideaTitle}
+              >
+                {isEvaluating ? 'Analysiere Daten...' : 'Zahlen & Fakten abrufen'}
+              </button>
             </section>
 
-            <div className="dashboard-grid">
-              <section className="panel form-panel">
-                <div className="form-section">
-                  <span className="section-label">
-                    1. Idee & Kontext
-                  </span>
-                  
-                  <div className="form-group">
-                    <label htmlFor="title">Titel der Idee</label>
-                    <input
-                      id="title"
-                      name="title"
-                      value={activeIdea.title}
-                      onChange={handleInputChange}
-                      placeholder="z.B. Gartenhilfe Müllheim"
-                    />
+            {report && (
+              <section className="panel results-panel fade-in">
+                <div className="report-header">
+                  <div className="score-badge">
+                    <strong>{report.scoreAtGeneration || report.demandScore}</strong>
+                    <span>Score</span>
                   </div>
-
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label htmlFor="region">Region</label>
-                      <input
-                        id="region"
-                        name="region"
-                        value={activeIdea.region}
-                        onChange={handleInputChange}
-                        placeholder="z.B. Freiburg"
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label htmlFor="targetAudience">Zielgruppe</label>
-                      <input
-                        id="targetAudience"
-                        name="targetAudience"
-                        value={activeIdea.targetAudience}
-                        onChange={handleInputChange}
-                        placeholder="z.B. Senioren"
-                      />
-                    </div>
+                  <div className="report-intro">
+                    <h2>Analyse-Ergebnis</h2>
+                    <p className="summary-text">{report.verdict || report.summary}</p>
                   </div>
-
-                  <div className="form-group">
-                    <label htmlFor="keywords">Keywords (pro Zeile eins)</label>
-                    <textarea
-                      id="keywords"
-                      rows={4}
-                      value={keywordText}
-                      onChange={handleKeywordTextChange}
-                      placeholder="Gartenpflege&#10;Rasen mähen"
-                    />
+                </div>
+                
+                <div className="metrics-grid">
+                  <div className="metric-card">
+                    <span className="metric-label">Konkurrenz</span>
+                    <span className="metric-value">{report.metrics.competition}</span>
+                  </div>
+                  <div className="metric-card">
+                    <span className="metric-label">Suchvolumen</span>
+                    <span className="metric-value">{report.metrics.searchVolume}</span>
+                  </div>
+                  <div className="metric-card">
+                    <span className="metric-label">Trend</span>
+                    <span className="metric-value">{report.metrics.trend}</span>
+                  </div>
+                  <div className="metric-card">
+                    <span className="metric-label">CPC (Ads)</span>
+                    <span className="metric-value">{report.metrics.cpc}</span>
                   </div>
                 </div>
 
-                <div className="form-section">
-                  <span className="section-label score-influencer">
-                    2. Google Signal Validation (Evidence)
-                  </span>
-
-                  <div className="form-group">
-                    <label>Quellen-Checkliste</label>
-                    <p className="helper-text">Markiere, welche Quellen du bereits geprüft hast.</p>
-                    <div className="checklist-group">
-                      {[
-                        { key: 'keywordPlannerChecked', label: 'Keyword Planner (Volumen)' },
-                        { key: 'googleTrendsChecked', label: 'Google Trends (Interesse)' },
-                        { key: 'googleMapsChecked', label: 'Google Maps (Konkurrenz)' },
-                        { key: 'reviewsChecked', label: 'Bewertungen/Rezensionen (Pains)' },
-                        { key: 'cpcChecked', label: 'Google Ads CPC (Kommerziell)' },
-                      ].map((item) => (
-                        <label key={item.key} className="checklist-item">
-                          <input
-                            type="checkbox"
-                            checked={activeIdea.checklist[item.key as keyof BusinessIdea['checklist']]}
-                            onChange={() => handleChecklistChange(item.key as keyof BusinessIdea['checklist'])}
-                          />
-                          <span>{item.label}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label htmlFor="competitorCount">Lokale Anbieter (Maps)</label>
-                      <input
-                        id="competitorCount"
-                        name="competitorCount"
-                        type="number"
-                        min="0"
-                        value={activeIdea.competitorCount}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label htmlFor="professionalCompetitorCount">Starke Profis</label>
-                      <input
-                        id="professionalCompetitorCount"
-                        name="professionalCompetitorCount"
-                        type="number"
-                        min="0"
-                        max={activeIdea.competitorCount}
-                        value={activeIdea.professionalCompetitorCount}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                  </div>
-
-                  {[
-                    { id: 'complaintDensity', label: 'Beschwerdedichte', value: activeIdea.complaintDensity, help: 'Wie viele negative Rezensionen/Pains hast du gefunden?' },
-                    { id: 'urgency', label: 'Dringlichkeit', value: activeIdea.urgency, help: 'Wie akut ist das Problem für den Kunden?' },
-                    { id: 'willingnessToPay', label: 'Zahlungsbereitschaft', value: activeIdea.willingnessToPay, help: 'Wie hoch ist der geschätzte Ticketpreis?' },
-                    { id: 'commercialCompetition', label: 'Werbedruck (CPC)', value: activeIdea.commercialCompetition, help: 'Wie viele Ads laufen auf die Keywords?' },
-                  ].map((field) => (
-                    <div className="form-group" key={field.id}>
-                      <label htmlFor={field.id}>{field.label}</label>
-                      <p className="helper-text">{field.help}</p>
-                      <div className="slider-group">
-                        <input
-                          id={field.id}
-                          name={field.id}
-                          type="range"
-                          min="1"
-                          max="10"
-                          value={field.value}
-                          onChange={handleInputChange}
-                        />
-                        <span>{field.value}</span>
+                <div className="report-grid">
+                  <div className="report-column">
+                    <h3>SWOT Analyse</h3>
+                    <div className="swot-grid">
+                      <div className="swot-item strengths">
+                        <strong>Stärken</strong>
+                        <ul>{report.swot.strengths.map((s, i) => <li key={i}>{s}</li>)}</ul>
                       </div>
+                      <div className="swot-item weaknesses">
+                        <strong>Schwächen</strong>
+                        <ul>{report.swot.weaknesses.map((s, i) => <li key={i}>{s}</li>)}</ul>
+                      </div>
+                      <div className="swot-item opportunities">
+                        <strong>Chancen</strong>
+                        <ul>{report.swot.opportunities.map((s, i) => <li key={i}>{s}</li>)}</ul>
+                      </div>
+                      <div className="swot-item threats">
+                        <strong>Risiken</strong>
+                        <ul>{report.swot.threats.map((s, i) => <li key={i}>{s}</li>)}</ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="report-column">
+                    <h3>Target Persona</h3>
+                    <div className="persona-card">
+                      <h4>{report.persona.name}</h4>
+                      <p><strong>Pains:</strong> {report.persona.painPoints.join(', ')}</p>
+                      <p><strong>Zahlungsbereitschaft:</strong> {report.persona.willingnessToPay}</p>
+                    </div>
+
+                    <h3>Erlös-Modelle</h3>
+                    <ul className="revenue-list">
+                      {report.revenueModels.map((m, i) => <li key={i}>{m}</li>)}
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="strategy-box">
+                  <h3>Go-to-Market Strategie</h3>
+                  <p>{report.strategy}</p>
+                </div>
+
+                <div className="next-steps-container">
+                  <h3>Nächste Schritte</h3>
+                  <div className="steps-list">
+                    {report.nextSteps.map((step, idx) => (
+                      <div key={idx} className="step-item">
+                        <span className="step-number">{idx + 1}</span>
+                        <p>{step}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="sources-section">
+                  <h4>Belegte Quellen</h4>
+                  <ul>
+                    {report.sources.map((source, idx) => (
+                      <li key={idx}>✓ {source}</li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="action-footer">
+                  <a 
+                    href={`https://trends.google.com/trends/explore?q=${encodeURIComponent(ideaTitle)}&geo=DE`}
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="btn-secondary details-btn"
+                  >
+                    <span>Details & Trends</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                      <polyline points="15 3 21 3 21 9"></polyline>
+                      <line x1="10" y1="14" x2="21" y2="3"></line>
+                    </svg>
+                  </a>
+                </div>
+              </section>
+            )}
+          </div>
+        )}
+
+        {mode === 'derive' && (
+          <div className="dashboard-grid single-col">
+            <section className="panel form-panel">
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="searchTerms">Suchtrends / Keywords</label>
+                  <input
+                    id="searchTerms"
+                    value={deriveSearchTerms}
+                    onChange={(e) => setDeriveSearchTerms(e.target.value)}
+                    placeholder="z.B. Photovoltaik Reinigung"
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="deriveRegion">Ziel-Region</label>
+                  <input
+                    id="deriveRegion"
+                    value={deriveRegion}
+                    onChange={(e) => setDeriveRegion(e.target.value)}
+                    placeholder="z.B. Hamburg"
+                  />
+                </div>
+              </div>
+              <div className="form-group">
+                <label htmlFor="interests">Interessen / Branchen</label>
+                <textarea
+                  id="interests"
+                  rows={2}
+                  value={deriveInterests}
+                  onChange={(e) => setDeriveInterests(e.target.value)}
+                  placeholder="z.B. Handwerk, Nachhaltigkeit, Senioren..."
+                />
+              </div>
+              <button 
+                className="btn-primary large" 
+                onClick={handleDerive}
+                disabled={isDeriving || (!deriveSearchTerms && !deriveInterests)}
+              >
+                {isDeriving ? 'Generiere Ideen...' : 'Ideen ableiten'}
+              </button>
+            </section>
+
+            {derivedIdeas && (
+              <section className="panel results-panel fade-in">
+                <div className="panel-header">
+                  <h2>Abgeleitete Geschäftsideen</h2>
+                  <span className="badge-hypothesis">Hypothesen-Modus</span>
+                </div>
+                <div className="ideas-list">
+                  {derivedIdeas.map((idea, idx) => (
+                    <div key={idx} className="idea-card">
+                      <div className="idea-card-header">
+                        <h3>{idea.title}</h3>
+                        <button 
+                          className="btn-outline small"
+                          onClick={() => handleAutoPopulate(idea)}
+                        >
+                          Validieren
+                        </button>
+                      </div>
+                      <p><strong>Warum:</strong> {idea.reason}</p>
+                      <p><strong>Potenzial:</strong> {idea.potential}</p>
                     </div>
                   ))}
                 </div>
               </section>
-
-              <section className="results-column">
-                <article className="panel score-display">
-                  <h2>Demand Score</h2>
-                  <strong>{score?.finalScore}</strong>
-                  <p className="muted">von 100 Punkten</p>
-                  
-                  <div className={`quality-badge ${score?.evidenceQuality}`}>
-                    Evidence: {score?.evidenceQuality}
-                  </div>
-
-                  <div className="score-explanation">
-                    <strong>Wichtig:</strong> Der Score ist nur so belastbar wie deine Recherche. Nutze die Checkliste links, um die Datenqualität zu erhöhen.
-                  </div>
-                  
-                  <div className="score-grid">
-                    <div className="score-item">Lücke<span>{score?.competitionGap}%</span></div>
-                    <div className="score-item">Pain<span>{score?.painScore}%</span></div>
-                    <div className="score-item">Komm.<span>{score?.commercialScore}%</span></div>
-                    <div className="score-item">Dringl.<span>{score?.urgencyScore}%</span></div>
-                  </div>
-
-                  <div className="why-score">
-                    <h4>Warum dieser Score?</h4>
-                    <div className="breakdown-list">
-                      <div className="breakdown-row">
-                        <div className="breakdown-header">
-                          <span className="breakdown-label">Konkurrenzlücke</span>
-                          <span className="breakdown-value">{score?.competitionGap}%</span>
-                        </div>
-                        <p className="breakdown-desc">
-                          {activeIdea.competitorCount} Anbieter / {activeIdea.professionalCompetitorCount} Profis.
-                        </p>
-                      </div>
-
-                      <div className="breakdown-row">
-                        <div className="breakdown-header">
-                          <span className="breakdown-label">Keyword-Breite</span>
-                          <span className="breakdown-value">{score?.keywordBreadthScore}%</span>
-                        </div>
-                        <p className="breakdown-desc">
-                          {activeIdea.keywords.length} Begriffe validiert.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </article>
-
-                <article className="panel">
-                  <h2>Recherche-Links</h2>
-                  {Object.entries(groupedQueries).map(([group, queries]) => (
-                    queries.length > 0 && (
-                      <div key={group} className="query-group">
-                        <h3>{group}</h3>
-                        <ul className="query-list">
-                          {queries.map((query: { url: string; label: string; query: string }, idx: number) => (
-                            <li key={`${idx}-${query.query}`}>
-                              <a href={query.url} target="_blank" rel="noreferrer">
-                                {query.label}
-                              </a>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )
-                  ))}
-                </article>
-              </section>
-            </div>
-          </>
+            )}
+          </div>
         )}
       </main>
     </div>

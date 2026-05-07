@@ -1,24 +1,55 @@
+export interface KeywordData {
+  term: string;
+  monthlyVolume?: number; // manually entered from Google Keyword Planner
+}
+
+export interface CompetitorEntry {
+  name: string;
+  rating: number;      // 1.0 - 5.0
+  reviewCount: number;
+}
+
+export interface PainPointEntry {
+  text: string;
+  category: 'service' | 'price' | 'availability' | 'quality' | 'other';
+}
+
+export type TrendDirection = 'rising' | 'stable' | 'declining' | 'seasonal';
+
 export interface BusinessIdea {
   id: string;
   title: string;
   region: string;
   targetAudience: string;
   keywords: string[];
-  
+
+  // Phase 2: Keyword Planner Data
+  keywordData: KeywordData[];
+
   // Research Data
   competitorCount: number;
   professionalCompetitorCount: number;
-  
+
+  // Phase 2: Competitor Deep-Dive
+  competitors: CompetitorEntry[];
+
   // Qualitative Scores (1-10)
   complaintDensity: number; // Beschwerdedichte
   urgency: number; // Dringlichkeit
   willingnessToPay: number; // Zahlungsbereitschaft
   commercialCompetition: number; // Kommerzieller Druck
-  
+
   // Notes & Snippets
   notes: string;
   painPoints: string[];
-  
+
+  // Phase 2: Structured Pain Points
+  painPointEntries: PainPointEntry[];
+
+  // Phase 2: Trends
+  trendDirection: TrendDirection;
+  trendNotes: string;
+
   // Checklist
   checklist: {
     keywordPlannerChecked: boolean;
@@ -28,9 +59,12 @@ export interface BusinessIdea {
     cpcChecked: boolean;
   };
 
+  marketAnalysis?: MarketAnalysis;
+
   createdAt: number;
   updatedAt: number;
 }
+
 
 export interface IdeaScores {
   competitionGap: number;
@@ -38,7 +72,9 @@ export interface IdeaScores {
   commercialScore: number;
   urgencyScore: number;
   keywordBreadthScore: number;
+  trendScore: number;
   evidenceQuality: 'incomplete' | 'weak' | 'usable' | 'strong';
+  evidencePercent: number;
   finalScore: number;
 }
 
@@ -50,4 +86,36 @@ export interface ScoreInput {
   willingnessToPay: number;
   commercialCompetition: number;
   keywordCount: number;
+  trendDirection: TrendDirection;
+  painPointEntryCount: number;
+  averageCompetitorRating: number;
+  totalSearchVolume: number;
+}
+
+export interface MarketAnalysis {
+  verdict: string;
+  demandAnalysis: string;
+  competitionAnalysis: string;
+  strategyRecommendation: string;
+  nextSteps: string[];
+  metrics: {
+    competition: string;
+    searchVolume: string;
+    trend: string;
+    cpc: string;
+  };
+  sources: string[];
+  swot: {
+    strengths: string[];
+    weaknesses: string[];
+    opportunities: string[];
+    threats: string[];
+  };
+  persona: {
+    name: string;
+    painPoints: string[];
+    willingnessToPay: string;
+  };
+  generatedAt: number;
+  scoreAtGeneration: number;
 }
