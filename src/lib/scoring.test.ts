@@ -52,13 +52,13 @@ describe('scoring', () => {
         expect(result.finalScore).toBeDefined();
     });
 
-    it('calculates a score from a full business idea', () => {
+    it('calculates a score from a full business idea and responds to keyword changes', () => {
         const idea: BusinessIdea = {
             id: 'idea-1',
             title: 'Test Idea',
             region: 'Test Region',
             targetAudience: 'Test Audience',
-            keywords: ['k1', 'k2', 'k3'],
+            keywords: [],
             competitorCount: 4,
             professionalCompetitorCount: 1,
             complaintDensity: 7,
@@ -71,6 +71,13 @@ describe('scoring', () => {
             updatedAt: Date.now(),
         };
 
-        expect(calculateIdeaScore(idea).finalScore).toBeGreaterThan(0);
+        const score0 = calculateIdeaScore(idea);
+        expect(score0.keywordBreadthScore).toBe(0);
+        expect(score0.finalScore).toBe(68); // 81*0.25 + 70*0.25 + 70*0.2 + 80*0.2 + 0*0.1 = 20.25 + 17.5 + 14 + 16 = 67.75 -> 68
+
+        const ideaWithKeywords = { ...idea, keywords: ['k1', 'k2'] };
+        const score2 = calculateIdeaScore(ideaWithKeywords);
+        expect(score2.keywordBreadthScore).toBe(16);
+        expect(score2.finalScore).toBe(69); // 67.75 + 1.6 = 69.35 -> 69
     });
 });

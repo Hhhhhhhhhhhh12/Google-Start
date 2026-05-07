@@ -50,6 +50,28 @@ function App() {
     }
   }, [ideas])
 
+  const parsedKeywords = useMemo(() => {
+    return keywordText
+      .split(/\r?\n/)
+      .map((k) => k.trim())
+      .filter((k) => k.length > 0)
+  }, [keywordText])
+
+  // Sync keywords to ideas state
+  useEffect(() => {
+    if (!activeId) return
+    setIdeas((prev) => {
+      const currentIdea = prev.find(i => i.id === activeId)
+      // Only update if keywords actually changed to avoid unnecessary re-renders
+      if (currentIdea && JSON.stringify(currentIdea.keywords) === JSON.stringify(parsedKeywords)) {
+        return prev
+      }
+      return prev.map((i) =>
+        i.id === activeId ? { ...i, keywords: parsedKeywords, updatedAt: Date.now() } : i
+      )
+    })
+  }, [parsedKeywords, activeId])
+
   const activeIdea = useMemo(
     () => ideas.find((i) => i.id === activeId) || null,
     [ideas, activeId]
@@ -59,7 +81,7 @@ function App() {
     setActiveId(id)
     const idea = ideas.find((i) => i.id === id)
     if (idea) {
-      setKeywordText(idea.keywords.join('\n'))
+      setKeywordText(idea.keywords?.join('\n') || '')
     }
   }
 
@@ -76,9 +98,13 @@ function App() {
       const remaining = ideas.filter((i) => i.id !== id)
       setIdeas(remaining)
       if (activeId === id) {
-        setActiveId(remaining.length > 0 ? remaining[0].id : null)
-        if (remaining.length > 0) {
-          setKeywordText(remaining[0].keywords.join('\n'))
+        const nextId = remaining.length > 0 ? remaining[0].id : null
+        setActiveId(nextId)
+        if (nextId) {
+          const nextIdea = remaining.find(i => i.id === nextId)
+          setKeywordText(nextIdea?.keywords.join('\n') || '')
+        } else {
+          setKeywordText('')
         }
       }
     }
@@ -112,26 +138,15 @@ function App() {
     )
   }
 
-  const handleKeywordChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
-    if (!activeId) return
-    const text = e.target.value
-    setKeywordText(text)
-    const keywords = text
-      .split('\n')
-      .map((k) => k.trim())
-      .filter(Boolean)
-
-    setIdeas((prev) =>
-      prev.map((i) =>
-        i.id === activeId ? { ...i, keywords, updatedAt: Date.now() } : i
-      )
-    )
+  const handleKeywordTextChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    setKeywordText(e.target.value)
   }
 
   const score = useMemo(
     () => (activeIdea ? calculateIdeaScore(activeIdea) : null),
     [activeIdea]
   )
+
   const researchQueries = useMemo(
     () => (activeIdea ? buildResearchQueries(activeIdea).slice(0, 8) : []),
     [activeIdea]
@@ -263,7 +278,7 @@ function App() {
                       id="keywords"
                       rows={4}
                       value={keywordText}
-                      onChange={handleKeywordChange}
+                      onChange={handleKeywordTextChange}
                       placeholder="Gartenpflege&#10;Rasen mähen"
                     />
                     <p className="helper-text">
