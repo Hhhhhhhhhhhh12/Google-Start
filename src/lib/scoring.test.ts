@@ -67,6 +67,13 @@ describe('scoring', () => {
             commercialCompetition: 6,
             notes: '',
             painPoints: [],
+            checklist: {
+                keywordPlannerChecked: false,
+                googleTrendsChecked: false,
+                googleMapsChecked: false,
+                reviewsChecked: false,
+                cpcChecked: false,
+            },
             createdAt: Date.now(),
             updatedAt: Date.now(),
         };

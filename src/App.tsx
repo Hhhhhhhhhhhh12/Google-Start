@@ -19,6 +19,13 @@ const createNewIdea = (): BusinessIdea => ({
   commercialCompetition: 5,
   notes: '',
   painPoints: [],
+  checklist: {
+    keywordPlannerChecked: false,
+    googleTrendsChecked: false,
+    googleMapsChecked: false,
+    reviewsChecked: false,
+    cpcChecked: false,
+  },
   createdAt: Date.now(),
   updatedAt: Date.now(),
 })
@@ -62,7 +69,6 @@ function App() {
     if (!activeId) return
     setIdeas((prev) => {
       const currentIdea = prev.find(i => i.id === activeId)
-      // Only update if keywords actually changed to avoid unnecessary re-renders
       if (currentIdea && JSON.stringify(currentIdea.keywords) === JSON.stringify(parsedKeywords)) {
         return prev
       }
@@ -138,6 +144,21 @@ function App() {
     )
   }
 
+  const handleChecklistChange = (key: keyof BusinessIdea['checklist']) => {
+    if (!activeId) return
+    setIdeas((prev) =>
+      prev.map((i) =>
+        i.id === activeId
+          ? {
+              ...i,
+              checklist: { ...i.checklist, [key]: !i.checklist[key] },
+              updatedAt: Date.now(),
+            }
+          : i
+      )
+    )
+  }
+
   const handleKeywordTextChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setKeywordText(e.target.value)
   }
@@ -147,10 +168,16 @@ function App() {
     [activeIdea]
   )
 
-  const researchQueries = useMemo(
-    () => (activeIdea ? buildResearchQueries(activeIdea).slice(0, 8) : []),
-    [activeIdea]
-  )
+  const groupedQueries = useMemo(() => {
+    if (!activeIdea) return {}
+    const queries = buildResearchQueries(activeIdea)
+    return {
+      'Google Search': queries.filter(q => q.label.includes('Suche') || q.label.includes('Check')),
+      'Google Maps': queries.filter(q => q.label.includes('Maps')),
+      'Google Trends': queries.filter(q => q.label.includes('Trends')),
+      'Pain Point Research': queries.filter(q => q.label.includes('Problem') || q.label.includes('Beschwerde') || q.label.includes('Reddit')),
+    }
+  }, [activeIdea])
 
   return (
     <div className="app-container">
@@ -217,7 +244,7 @@ function App() {
               <section className="panel form-panel">
                 <div className="form-section">
                   <span className="section-label">
-                    Diese Angaben beeinflussen vor allem die Recherchelinks und den Report.
+                    1. Idee & Kontext
                   </span>
                   
                   <div className="form-group">
@@ -255,24 +282,6 @@ function App() {
                   </div>
 
                   <div className="form-group">
-                    <label htmlFor="notes">Notizen</label>
-                    <textarea
-                      id="notes"
-                      name="notes"
-                      rows={3}
-                      value={activeIdea.notes}
-                      onChange={handleInputChange}
-                      placeholder="Besondere Beobachtungen..."
-                    />
-                  </div>
-                </div>
-
-                <div className="form-section">
-                  <span className="section-label score-influencer">
-                    Diese Angaben beeinflussen den Preliminary Demand Score.
-                  </span>
-
-                  <div className="form-group">
                     <label htmlFor="keywords">Keywords (pro Zeile eins)</label>
                     <textarea
                       id="keywords"
@@ -281,14 +290,40 @@ function App() {
                       onChange={handleKeywordTextChange}
                       placeholder="Gartenpflege&#10;Rasen mähen"
                     />
-                    <p className="helper-text">
-                      Mehr relevante Suchbegriffe erhöhen die Keyword-Breite.
-                    </p>
+                  </div>
+                </div>
+
+                <div className="form-section">
+                  <span className="section-label score-influencer">
+                    2. Google Signal Validation (Evidence)
+                  </span>
+
+                  <div className="form-group">
+                    <label>Quellen-Checkliste</label>
+                    <p className="helper-text">Markiere, welche Quellen du bereits geprüft hast.</p>
+                    <div className="checklist-group">
+                      {[
+                        { key: 'keywordPlannerChecked', label: 'Keyword Planner (Volumen)' },
+                        { key: 'googleTrendsChecked', label: 'Google Trends (Interesse)' },
+                        { key: 'googleMapsChecked', label: 'Google Maps (Konkurrenz)' },
+                        { key: 'reviewsChecked', label: 'Bewertungen/Rezensionen (Pains)' },
+                        { key: 'cpcChecked', label: 'Google Ads CPC (Kommerziell)' },
+                      ].map((item) => (
+                        <label key={item.key} className="checklist-item">
+                          <input
+                            type="checkbox"
+                            checked={activeIdea.checklist[item.key as keyof BusinessIdea['checklist']]}
+                            onChange={() => handleChecklistChange(item.key as keyof BusinessIdea['checklist'])}
+                          />
+                          <span>{item.label}</span>
+                        </label>
+                      ))}
+                    </div>
                   </div>
                   
                   <div className="form-row">
                     <div className="form-group">
-                      <label htmlFor="competitorCount">Lokale Anbieter</label>
+                      <label htmlFor="competitorCount">Lokale Anbieter (Maps)</label>
                       <input
                         id="competitorCount"
                         name="competitorCount"
@@ -299,7 +334,7 @@ function App() {
                       />
                     </div>
                     <div className="form-group">
-                      <label htmlFor="professionalCompetitorCount">Starke Anbieter</label>
+                      <label htmlFor="professionalCompetitorCount">Starke Profis</label>
                       <input
                         id="professionalCompetitorCount"
                         name="professionalCompetitorCount"
@@ -313,13 +348,14 @@ function App() {
                   </div>
 
                   {[
-                    { id: 'complaintDensity', label: 'Beschwerdedichte', value: activeIdea.complaintDensity },
-                    { id: 'urgency', label: 'Dringlichkeit', value: activeIdea.urgency },
-                    { id: 'willingnessToPay', label: 'Zahlungsbereitschaft', value: activeIdea.willingnessToPay },
-                    { id: 'commercialCompetition', label: 'Kommerzieller Druck', value: activeIdea.commercialCompetition },
+                    { id: 'complaintDensity', label: 'Beschwerdedichte', value: activeIdea.complaintDensity, help: 'Wie viele negative Rezensionen/Pains hast du gefunden?' },
+                    { id: 'urgency', label: 'Dringlichkeit', value: activeIdea.urgency, help: 'Wie akut ist das Problem für den Kunden?' },
+                    { id: 'willingnessToPay', label: 'Zahlungsbereitschaft', value: activeIdea.willingnessToPay, help: 'Wie hoch ist der geschätzte Ticketpreis?' },
+                    { id: 'commercialCompetition', label: 'Werbedruck (CPC)', value: activeIdea.commercialCompetition, help: 'Wie viele Ads laufen auf die Keywords?' },
                   ].map((field) => (
                     <div className="form-group" key={field.id}>
                       <label htmlFor={field.id}>{field.label}</label>
+                      <p className="helper-text">{field.help}</p>
                       <div className="slider-group">
                         <input
                           id={field.id}
@@ -342,9 +378,13 @@ function App() {
                   <h2>Demand Score</h2>
                   <strong>{score?.finalScore}</strong>
                   <p className="muted">von 100 Punkten</p>
+                  
+                  <div className={`quality-badge ${score?.evidenceQuality}`}>
+                    Evidence: {score?.evidenceQuality}
+                  </div>
 
                   <div className="score-explanation">
-                    Der Score ist ein vorläufiger Entscheidungsfilter basierend auf deinen Eingaben.
+                    <strong>Wichtig:</strong> Der Score ist nur so belastbar wie deine Recherche. Nutze die Checkliste links, um die Datenqualität zu erhöhen.
                   </div>
                   
                   <div className="score-grid">
@@ -363,37 +403,7 @@ function App() {
                           <span className="breakdown-value">{score?.competitionGap}%</span>
                         </div>
                         <p className="breakdown-desc">
-                          Basierend auf {activeIdea.competitorCount} Anbietern ({activeIdea.professionalCompetitorCount} Profis).
-                        </p>
-                      </div>
-
-                      <div className="breakdown-row">
-                        <div className="breakdown-header">
-                          <span className="breakdown-label">Pain Score</span>
-                          <span className="breakdown-value">{score?.painScore}%</span>
-                        </div>
-                        <p className="breakdown-desc">
-                          Basierend auf der Beschwerdedichte von {activeIdea.complaintDensity}/10.
-                        </p>
-                      </div>
-
-                      <div className="breakdown-row">
-                        <div className="breakdown-header">
-                          <span className="breakdown-label">Kommerziell</span>
-                          <span className="breakdown-value">{score?.commercialScore}%</span>
-                        </div>
-                        <p className="breakdown-desc">
-                          Kombination aus Zahlungsbereitschaft und Werbedruck.
-                        </p>
-                      </div>
-
-                      <div className="breakdown-row">
-                        <div className="breakdown-header">
-                          <span className="breakdown-label">Dringlichkeit</span>
-                          <span className="breakdown-value">{score?.urgencyScore}%</span>
-                        </div>
-                        <p className="breakdown-desc">
-                          Akutheit des Problems ({activeIdea.urgency}/10).
+                          {activeIdea.competitorCount} Anbieter / {activeIdea.professionalCompetitorCount} Profis.
                         </p>
                       </div>
 
@@ -403,7 +413,7 @@ function App() {
                           <span className="breakdown-value">{score?.keywordBreadthScore}%</span>
                         </div>
                         <p className="breakdown-desc">
-                          Basierend auf {activeIdea.keywords.length} Suchbegriffen.
+                          {activeIdea.keywords.length} Begriffe validiert.
                         </p>
                       </div>
                     </div>
@@ -412,15 +422,22 @@ function App() {
 
                 <article className="panel">
                   <h2>Recherche-Links</h2>
-                  <ul className="query-list">
-                    {researchQueries.map((query, idx) => (
-                      <li key={`${idx}-${query.query}`}>
-                        <a href={query.url} target="_blank" rel="noreferrer">
-                          {query.label}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
+                  {Object.entries(groupedQueries).map(([group, queries]) => (
+                    queries.length > 0 && (
+                      <div key={group} className="query-group">
+                        <h3>{group}</h3>
+                        <ul className="query-list">
+                          {queries.map((query: { url: string; label: string; query: string }, idx: number) => (
+                            <li key={`${idx}-${query.query}`}>
+                              <a href={query.url} target="_blank" rel="noreferrer">
+                                {query.label}
+                              </a>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )
+                  ))}
                 </article>
               </section>
             </div>

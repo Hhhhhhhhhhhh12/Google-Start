@@ -19,7 +19,15 @@ export interface BusinessIdea {
   notes: string;
   painPoints: string[];
   
-  // Metadata
+  // Checklist
+  checklist: {
+    keywordPlannerChecked: boolean;
+    googleTrendsChecked: boolean;
+    googleMapsChecked: boolean;
+    reviewsChecked: boolean;
+    cpcChecked: boolean;
+  };
+
   createdAt: number;
   updatedAt: number;
 }
@@ -30,6 +38,7 @@ export interface IdeaScores {
   commercialScore: number;
   urgencyScore: number;
   keywordBreadthScore: number;
+  evidenceQuality: 'incomplete' | 'weak' | 'usable' | 'strong';
   finalScore: number;
 }
 

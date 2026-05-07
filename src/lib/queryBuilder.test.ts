@@ -27,6 +27,13 @@ const exampleIdea: BusinessIdea = {
     commercialCompetition: 6,
     notes: 'Viele Anbieter reagieren schlecht auf Bewertungen.',
     painPoints: ['keine Rückmeldung', 'schlechte Kommunikation'],
+    checklist: {
+        keywordPlannerChecked: false,
+        googleTrendsChecked: false,
+        googleMapsChecked: false,
+        reviewsChecked: false,
+        cpcChecked: false,
+    },
     createdAt: Date.now(),
     updatedAt: Date.now(),
 };

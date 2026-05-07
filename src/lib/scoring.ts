@@ -44,7 +44,7 @@ export function calculateKeywordBreadthScore(keywordCount: number): number {
     return Math.round(clamp(keywordCount * 8));
 }
 
-export function calculateScore(input: ScoreInput): IdeaScores {
+export function calculateScore(input: ScoreInput): Omit<IdeaScores, 'evidenceQuality'> {
     const competitionGap = calculateCompetitionGap(
         input.competitorCount,
         input.professionalCompetitorCount,
@@ -78,8 +78,17 @@ export function calculateScore(input: ScoreInput): IdeaScores {
     };
 }
 
+export function calculateEvidenceQuality(idea: BusinessIdea): 'incomplete' | 'weak' | 'usable' | 'strong' {
+    const checkedCount = Object.values(idea.checklist || {}).filter(Boolean).length;
+    
+    if (checkedCount <= 1) return 'incomplete';
+    if (checkedCount <= 3) return 'weak';
+    if (checkedCount <= 4) return 'usable';
+    return 'strong';
+}
+
 export function calculateIdeaScore(idea: BusinessIdea): IdeaScores {
-    return calculateScore({
+    const scores = calculateScore({
         competitorCount: idea.competitorCount,
         professionalCompetitorCount: idea.professionalCompetitorCount,
         complaintDensity: idea.complaintDensity,
@@ -88,4 +97,9 @@ export function calculateIdeaScore(idea: BusinessIdea): IdeaScores {
         commercialCompetition: idea.commercialCompetition,
         keywordCount: idea.keywords.length,
     });
+
+    return {
+        ...scores,
+        evidenceQuality: calculateEvidenceQuality(idea),
+    };
 }
