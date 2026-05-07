@@ -40,3 +40,33 @@ npm install
 npm run dev
 npm run test
 npm run build
+
+
+## Roadmap
+
+### Feature: Business Idea Generator
+
+The app should later suggest possible local business ideas based on user-provided research signals.
+
+Input examples:
+- region
+- interest areas
+- keyword lists
+- manually collected Google Trends / Keyword Planner terms
+- copied review snippets or pain points
+- local service categories
+
+Expected output:
+- suggested business idea title
+- target audience
+- possible keywords
+- generated research queries
+- assumed pain point
+- validation checklist
+- warning that the suggestion is a hypothesis, not validated market proof
+
+Constraints:
+- no Google scraping
+- no paid APIs in the MVP
+- all suggestions should be explainable
+- generated ideas must be clearly marked as hypotheses

@@ -4,21 +4,21 @@ export interface BusinessIdea {
   region: string;
   targetAudience: string;
   keywords: string[];
-
+  
   // Research Data
   competitorCount: number;
   professionalCompetitorCount: number;
-
+  
   // Qualitative Scores (1-10)
-  complaintDensity: number; // How many people are complaining?
-  urgency: number; // How fast do they need it?
-  willingnessToPay: number; // How much value is at stake?
-  commercialCompetition: number; // How much are others spending on ads?
-
+  complaintDensity: number; // Beschwerdedichte
+  urgency: number; // Dringlichkeit
+  willingnessToPay: number; // Zahlungsbereitschaft
+  commercialCompetition: number; // Kommerzieller Druck
+  
   // Notes & Snippets
   notes: string;
   painPoints: string[];
-
+  
   // Metadata
   createdAt: number;
   updatedAt: number;
@@ -32,6 +32,7 @@ export interface IdeaScores {
   keywordBreadthScore: number;
   finalScore: number;
 }
+
 export interface ScoreInput {
   competitorCount: number;
   professionalCompetitorCount: number;

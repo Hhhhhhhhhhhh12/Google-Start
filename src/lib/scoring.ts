@@ -63,8 +63,8 @@ export function calculateScore(input: ScoreInput): IdeaScores {
     const finalScore = Math.round(
         competitionGap * 0.25 +
         painScore * 0.25 +
-        commercialScore * 0.25 +
-        urgencyScore * 0.15 +
+        commercialScore * 0.2 +
+        urgencyScore * 0.2 +
         keywordBreadthScore * 0.1,
     );
 
