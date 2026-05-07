@@ -1,73 +1,42 @@
-# React + TypeScript + Vite
+# Local Demand Scanner
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Local Demand Scanner ist eine lokale React/Vite-App zur Bewertung regionaler Business-Ideen.
 
-Currently, two official plugins are available:
+Die App kombiniert manuell erhobene Signale:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Keyword-Ideen
+- lokale Konkurrenzsignale
+- Pain Points aus Rezensionen
+- Dringlichkeit
+- Zahlungsbereitschaft
+- kommerzieller Konkurrenzdruck
 
-## React Compiler
+## Aktueller Stand
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Implementiert sind:
 
-## Expanding the ESLint configuration
+- React + Vite + TypeScript Setup
+- Datenmodell für Business-Ideen
+- Scoring-Modell mit Tests
+- Research Query Builder mit Tests
+- Beispielansicht mit Score und ersten Recherchelinks
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Noch nicht implementiert:
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- Speicherung in localStorage
+- Editor für mehrere Ideen
+- Vergleichstabelle
+- Import/Export
+- echte API-Anbindungen
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Wichtig
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Die App nutzt derzeit keine Google APIs und betreibt kein Scraping. Recherchelinks werden nur lokal generiert und manuell geöffnet.
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Entwicklung
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+```bash
+npm install
+npm run dev
+npm run test
+npm run build

@@ -1,121 +1,88 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
 import './App.css'
+import { calculateIdeaScore } from './lib/scoring'
+import { buildResearchQueries } from './lib/queryBuilder'
+import type { BusinessIdea } from './types'
+
+const exampleIdea: BusinessIdea = {
+  id: 'idea-1',
+  title: 'Google-Bewertungsmanagement für lokale Unternehmen',
+  region: 'Müllheim / Markgräflerland / Freiburg',
+  targetAudience: 'Arztpraxen, Handwerksbetriebe, Restaurants, lokale Dienstleister',
+  keywords: [
+    'google bewertung löschen lassen',
+    'negative google bewertung entfernen',
+    'reputationsmanagement freiburg',
+    'google maps bewertung melden',
+    'apple maps bewertung löschen',
+    '1 sterne bewertung entfernen',
+  ],
+  competitorCount: 4,
+  professionalCompetitorCount: 1,
+  complaintDensity: 7,
+  urgency: 8,
+  willingnessToPay: 8,
+  commercialCompetition: 6,
+  notes:
+    'Viele Anbieter reagieren schlecht oder gar nicht auf Rezensionen. Ein seriöses Angebot sollte Prüfung, Antwortstrategie und Aufbau neuer Bewertungen kombinieren.',
+  painPoints: ['keine Rückmeldung', 'schlechte Kommunikation'],
+  createdAt: Date.now(),
+  updatedAt: Date.now(),
+}
+
+const score = calculateIdeaScore(exampleIdea)
+const researchQueries = buildResearchQueries(exampleIdea).slice(0, 5)
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
+    <main className="app-shell">
+      <section className="hero-card">
+        <p className="eyebrow">Local-first Research Tool</p>
+        <h1>Local Demand Scanner</h1>
+        <p className="intro">
+          Prüfe lokale Business-Ideen anhand von Suchbegriffen, Konkurrenzsignalen,
+          Pain Points, Dringlichkeit und Zahlungsbereitschaft.
+        </p>
       </section>
 
-      <div className="ticks"></div>
+      <section className="dashboard-grid">
+        <article className="panel">
+          <h2>Beispielidee</h2>
+          <h3>{exampleIdea.title}</h3>
+          <p>{exampleIdea.region}</p>
+          <p className="muted">{exampleIdea.targetAudience}</p>
+        </article>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
+        <article className="panel score-panel">
+          <h2>Nachfrage-Score</h2>
+          <strong>{score.finalScore}</strong>
+          <p className="muted">von 100 Punkten</p>
+        </article>
+
+        <article className="panel">
+          <h2>Score-Bausteine</h2>
+          <ul className="score-list">
+            <li>Konkurrenzlücke: {score.competitionGap}</li>
+            <li>Pain Score: {score.painScore}</li>
+            <li>Kommerzieller Druck: {score.commercialScore}</li>
+            <li>Dringlichkeit: {score.urgencyScore}</li>
+            <li>Keyword-Breite: {score.keywordBreadthScore}</li>
           </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
+        </article>
+
+        <article className="panel">
+          <h2>Erste Recherche-Abfragen</h2>
+          <ul className="query-list">
+            {researchQueries.map((query) => (
+              <li key={`${query.category}-${query.query}`}>
+                <a href={query.url} target="_blank" rel="noreferrer">
+                  {query.label}
+                </a>
+              </li>
+            ))}
           </ul>
-        </div>
+        </article>
       </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+    </main>
   )
 }
 
