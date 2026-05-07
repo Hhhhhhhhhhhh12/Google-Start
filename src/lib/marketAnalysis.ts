@@ -111,20 +111,26 @@ export function generateMarketAnalysis(idea: BusinessIdea): MarketAnalysis {
     strategyRecommendation,
     nextSteps,
     metrics: {
-      competition: compVerdict.label,
-      searchVolume: totalVolume > 0 ? `${totalVolume} / Monat` : 'Unbekannt',
+      competition: compVerdict.label === 'Unbekannt' ? 'Daten fehlen' : compVerdict.label,
+      searchVolume: totalVolume > 0 ? `${totalVolume.toLocaleString()} / Monat` : idea.checklist.keywordPlannerChecked ? 'Simuliert (Demo)' : 'API Key benötigt',
       trend: idea.trendDirection === 'rising' ? 'Steigend' : idea.trendDirection === 'seasonal' ? 'Saisonal' : idea.trendDirection === 'declining' ? 'Sinkend' : 'Stabil',
-      cpc: '---'
+      cpc: idea.checklist.cpcChecked ? 'Daten vorhanden' : '---',
+      totalResults: idea.organicResults?.[0] ? undefined : 0
     },
     sources: [
-      'Manuelle Recherche',
+      'Google Search (Live)',
+      'Google Maps (Live)',
       'Wettbewerbs-Scan',
-      'Lokale Nachfrage-Signale'
     ],
+    organicEvidence: idea.organicResults,
     swot,
     persona,
+    revenueModels: idea.willingnessToPay > 7 
+      ? ['Premium-Einmalzahlung', 'Exklusiv-Wartung (Abo)', 'Service-Level-Agreements'] 
+      : ['Einmaliger Service-Fee', 'Material-Marge', 'Vermittlungsprovision'],
     generatedAt: Date.now(),
     scoreAtGeneration: scores.finalScore
   };
 }
+
 

@@ -1,6 +1,7 @@
-import type { BusinessIdea, CompetitorEntry, KeywordData } from '../types';
+import type { CompetitorEntry, KeywordData } from '../types';
 
 export interface ScrapeResult {
+// ...
     competitors: CompetitorEntry[];
     keywords: KeywordData[];
 }
@@ -32,10 +33,16 @@ export async function scrapeGoogleMaps(
     }));
 }
 
+export interface OrganicResult {
+    title: string;
+    link: string;
+    snippet: string;
+}
+
 export async function scrapeSearchMetadata(
     query: string,
     apiKey: string
-): Promise<{ adCount: number; resultCount: number }> {
+): Promise<{ adCount: number; resultCount: number; organic: OrganicResult[] }> {
     if (!apiKey) throw new Error('API Key fehlt');
 
     const response = await fetch('https://google.serper.dev/search', {
@@ -55,6 +62,11 @@ export async function scrapeSearchMetadata(
     return {
         adCount: (data.ads || []).length,
         resultCount: data.searchParameters?.totalResults || 0,
+        organic: (data.organic || []).map((o: any) => ({
+            title: o.title,
+            link: o.link,
+            snippet: o.snippet
+        }))
     };
 }
 

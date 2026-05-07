@@ -1,4 +1,4 @@
-import type { BusinessIdea, IdeaScores, ScoreInput, TrendDirection } from '../types';
+import type { BusinessIdea, IdeaScores, ScoreInput, TrendDirection, ScoringWeights } from '../types';
 
 export function clamp(value: number, min = 0, max = 100): number {
     if (Number.isNaN(value)) return min;
@@ -54,7 +54,7 @@ export function calculateTrendScore(trendDirection: TrendDirection): number {
     }
 }
 
-export function calculateScore(input: ScoreInput): Omit<IdeaScores, 'evidenceQuality' | 'evidencePercent'> {
+export function calculateScore(input: ScoreInput, weights?: ScoringWeights): Omit<IdeaScores, 'evidenceQuality' | 'evidencePercent'> {
     const competitionGap = calculateCompetitionGap(
         input.competitorCount,
         input.professionalCompetitorCount,
@@ -71,25 +71,33 @@ export function calculateScore(input: ScoreInput): Omit<IdeaScores, 'evidenceQua
     const keywordBreadthScore = calculateKeywordBreadthScore(input.keywordCount);
     const trendScore = calculateTrendScore(input.trendDirection);
 
-    // New Factor: Search Volume Intensity (Logarithmic scale for volume)
-    // 0 -> 0, 100 -> 30, 1000 -> 70, 10000+ -> 100
     const volumeScore = Math.round(clamp(Math.log10(input.totalSearchVolume + 1) * 25));
 
-    // New Factor: Quality Gap (Low ratings = high opportunity)
-    // 5.0 rating -> 0 score, 1.0 rating -> 100 score
     const qualityGapScore = input.averageCompetitorRating > 0 
         ? Math.round(clamp((5 - input.averageCompetitorRating) * 25))
-        : 50; // Neutral if no data
+        : 50;
+
+    // Use custom weights or default
+    const w = weights || {
+        demand: 25,      // volume + trend
+        competition: 30, // gap + quality
+        urgency: 20,     // urgency + pain
+        profitability: 25 // commercial + keyword breadth
+    };
+
+    const totalWeight = w.demand + w.competition + w.urgency + w.profitability;
+    const normalize = (val: number) => val / (totalWeight || 1);
+
+    const demandWeight = normalize(w.demand);
+    const competitionWeight = normalize(w.competition);
+    const urgencyWeight = normalize(w.urgency);
+    const profitabilityWeight = normalize(w.profitability);
 
     const finalScore = Math.round(
-        competitionGap * 0.15 +
-        painScore * 0.15 +
-        commercialScore * 0.15 +
-        urgencyScore * 0.10 +
-        keywordBreadthScore * 0.10 +
-        trendScore * 0.15 +
-        volumeScore * 0.10 +
-        qualityGapScore * 0.10
+        (volumeScore * 0.6 + trendScore * 0.4) * demandWeight +
+        (competitionGap * 0.7 + qualityGapScore * 0.3) * competitionWeight +
+        (urgencyScore * 0.5 + painScore * 0.5) * urgencyWeight +
+        (commercialScore * 0.7 + keywordBreadthScore * 0.3) * profitabilityWeight
     );
 
     return {
@@ -99,7 +107,7 @@ export function calculateScore(input: ScoreInput): Omit<IdeaScores, 'evidenceQua
         urgencyScore,
         keywordBreadthScore,
         trendScore,
-        finalScore,
+        finalScore: clamp(finalScore, 0, 100),
     };
 }
 
@@ -160,10 +168,11 @@ export function calculateIdeaScore(idea: BusinessIdea): IdeaScores {
         trendDirection: idea.trendDirection || 'stable',
         painPointEntryCount: (idea.painPointEntries || []).length,
         averageCompetitorRating: idea.competitors?.length
-            ? idea.competitors.reduce((sum, c) => sum + c.rating, 0) / idea.competitors.length
+            ? idea.competitors.reduce((sum: number, c: any) => sum + c.rating, 0) / idea.competitors.length
             : 0,
-        totalSearchVolume: (idea.keywordData || []).reduce((sum, kd) => sum + (kd.monthlyVolume || 0), 0),
-    });
+        totalSearchVolume: (idea.keywordData || []).reduce((sum: number, kd: any) => sum + (kd.monthlyVolume || 0), 0),
+    }, idea.weights);
+
 
     return {
         ...scores,

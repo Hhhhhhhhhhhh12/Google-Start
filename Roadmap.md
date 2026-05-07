@@ -39,12 +39,12 @@ Transition from preliminary scoring to manual validation with a guided workflow.
 - [x] **Pain Point Tags**: Categorize pain points (Service, Preis, Erreichbarkeit, Qualität).
 - [x] **Pain Point Count**: Contribute tagged pain points to scoring.
 
-### 2.5 Evidence Quality Enhancement
-- [ ] **Granular Progress**: Show completion percentage per checklist category.
-- [ ] **Confidence Score**: Weighted confidence based on data completeness.
-- [ ] **Visual Progress Bar**: Replace simple badge with detailed progress visualization.
+### 2.5 Evidence Quality Enhancement (Abgeschlossen)
+- [x] **Granular Progress**: Show completion percentage per checklist category.
+- [x] **Confidence Score**: Weighted confidence based on data completeness.
+- [x] **Visual Progress Bar**: Replace simple badge with detailed progress visualization.
 
-### 2.6 Shortened Market Analysis (Verkürzte Marktanalyse)
+### 2.6 Shortened Market Analysis (Verkürzte Marktanalyse) (Abgeschlossen)
 - [x] **Logic Engine**: Local evaluation of demand, competition, and strategy.
 - [x] **Interactive UI**: One-click analysis generation with loading states.
 - [x] **Professional Report**: Structured textual summary with actionable next steps.
@@ -52,19 +52,18 @@ Transition from preliminary scoring to manual validation with a guided workflow.
 ## ✅ Phase 3: Business Idea Generator (Abgeschlossen)
 Suggest possible local business ideas based on user-provided research signals.
 
-- [x] **Idea Derivation Logic**: Local algorithm to generate hypotheses based on trends and signals.
-- [x] **Generator Input Form**: Simple textarea for trend/search term input.
-- [x] **Hypothesis Marking**: All generated ideas clearly labeled.
-- [x] **Auto-Population**: Immediate presentation of generated ideas.
-- [x] **Constraints**: Offline-first, explainable logic using `generatorEngine.ts`.
+- [x] **Idea Derivation Logic**: Local algorithm to generate improvement suggestions and pivots (B2B, Subscriptions, Nicheing) based on weaknesses.
+- [x] **Generator Input Form**: Region, interest areas, keyword lists, service categories.
+- [x] **Hypothesis Marking**: All generated ideas clearly labeled as unvalidated hypotheses.
+- [x] **Auto-Population**: Generated ideas pre-fill the scanner form for immediate validation.
+- [x] **Constraints**: No scraping, no paid APIs, all suggestions must be explainable. (Serper.dev integration initiated via UI).
 
-## ✅ Phase 4: Future Considerations (Teilweise Abgeschlossen)
-- [x] **Comparison Mode**: Side-by-side comparison of multiple validated ideas (implemented in Scout UI).
+## ✅ Phase 4: Future Considerations (Abgeschlossen)
+- [x] **Data Export**: Export validated idea reports as Markdown (implemented).
 - [x] **Advanced Aesthetics**: Premium design system with cards, grids, and animations.
 - [x] **AI-Driven Scout**: Simplified, tabbed interface for rapid validation and derivation.
-- [ ] **Data Export**: Export validated idea reports as PDF or Markdown.
-- [ ] **Custom Weighting**: Allow users to adjust the scoring algorithm parameters.
+- [x] **Comparison Mode**: Side-by-side comparison of multiple validated ideas (implemented in Scout UI).
+- [x] **Custom Weighting**: Allow users to adjust the scoring algorithm parameters (implemented).
 
 ## 🏁 Project Summary
 The Local Demand Scanner has successfully evolved into **Ideen Scout**—a premium, local-first AI business validator. It combines deep heuristic scoring with a streamlined user experience to provide professional-grade market insights in seconds.
-

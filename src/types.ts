@@ -16,14 +16,30 @@ export interface PainPointEntry {
 
 export type TrendDirection = 'rising' | 'stable' | 'declining' | 'seasonal';
 
+export interface OrganicResult {
+  title: string;
+  link: string;
+  snippet: string;
+}
+
+export interface ScoringWeights {
+
+  demand: number;
+  competition: number;
+  urgency: number;
+  profitability: number;
+}
+
 export interface BusinessIdea {
   id: string;
   title: string;
   region: string;
   targetAudience: string;
   keywords: string[];
+  weights?: ScoringWeights;
 
   // Phase 2: Keyword Planner Data
+
   keywordData: KeywordData[];
 
   // Research Data
@@ -32,6 +48,9 @@ export interface BusinessIdea {
 
   // Phase 2: Competitor Deep-Dive
   competitors: CompetitorEntry[];
+  
+  // Hard Evidence from Google
+  organicResults?: OrganicResult[];
 
   // Qualitative Scores (1-10)
   complaintDensity: number; // Beschwerdedichte
@@ -103,8 +122,10 @@ export interface MarketAnalysis {
     searchVolume: string;
     trend: string;
     cpc: string;
+    totalResults?: number;
   };
   sources: string[];
+  organicEvidence?: OrganicResult[];
   swot: {
     strengths: string[];
     weaknesses: string[];
@@ -116,6 +137,7 @@ export interface MarketAnalysis {
     painPoints: string[];
     willingnessToPay: string;
   };
+  revenueModels: string[];
   generatedAt: number;
   scoreAtGeneration: number;
 }
