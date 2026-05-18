@@ -123,6 +123,8 @@ export function generateMarketAnalysis(idea: BusinessIdea): MarketAnalysis {
       'Wettbewerbs-Scan',
     ],
     organicEvidence: idea.organicResults,
+    peopleAlsoAsk: idea.peopleAlsoAsk,
+    relatedSearches: idea.relatedSearches,
     swot,
     persona,
     revenueModels: idea.willingnessToPay > 7 

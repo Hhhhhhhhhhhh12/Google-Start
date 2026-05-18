@@ -1,21 +1,26 @@
-import type { EvaluationReport } from './aiMock';
+import type { MarketAnalysis } from '../types'
 
-export function generateReportMarkdown(title: string, region: string, report: EvaluationReport): string {
-  const date = new Date().toLocaleDateString('de-DE');
-  
+export function generateReportMarkdown(
+  title: string,
+  region: string,
+  report: MarketAnalysis
+): string {
+  const date = new Date().toLocaleDateString('de-DE')
+
   return `# Marktanalyse: ${title}
 **Region:** ${region || 'Lokal/Nicht angegeben'}
 **Datum:** ${date}
-**Demand Score:** ${report.demandScore}/100
+**Score:** ${report.scoreAtGeneration}/100
 
 ## Zusammenfassung
-${report.summary}
+${report.verdict}
 
 ## Marktkennzahlen
 - **Konkurrenz:** ${report.metrics.competition}
 - **Suchvolumen:** ${report.metrics.searchVolume}
 - **Trend:** ${report.metrics.trend}
 - **CPC (Ads):** ${report.metrics.cpc}
+${report.metrics.totalResults ? `- **Google Treffer:** ${report.metrics.totalResults.toLocaleString('de-DE')}` : ''}
 
 ## SWOT Analyse
 ### Stärken
@@ -37,7 +42,7 @@ ${report.swot.threats.map(s => `- ${s}`).join('\n')}
 
 ## Strategie & Erlösmodelle
 **Go-to-Market Strategie:**
-${report.strategy}
+${report.strategyRecommendation}
 
 **Empfohlene Erlösmodelle:**
 ${report.revenueModels.map(m => `- ${m}`).join('\n')}
@@ -47,5 +52,5 @@ ${report.nextSteps.map((step, i) => `${i + 1}. ${step}`).join('\n')}
 
 ---
 *Generiert von Ideen Scout - Local Demand Engine*
-`;
+`
 }

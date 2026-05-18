@@ -1,143 +1,137 @@
 export interface KeywordData {
-  term: string;
-  monthlyVolume?: number; // manually entered from Google Keyword Planner
+  term: string
+  monthlyVolume?: number
 }
 
 export interface CompetitorEntry {
-  name: string;
-  rating: number;      // 1.0 - 5.0
-  reviewCount: number;
+  name: string
+  rating: number
+  reviewCount: number
 }
 
 export interface PainPointEntry {
-  text: string;
-  category: 'service' | 'price' | 'availability' | 'quality' | 'other';
+  text: string
+  category: 'service' | 'price' | 'availability' | 'quality' | 'other'
 }
 
-export type TrendDirection = 'rising' | 'stable' | 'declining' | 'seasonal';
+export type TrendDirection = 'rising' | 'stable' | 'declining' | 'seasonal'
 
 export interface OrganicResult {
-  title: string;
-  link: string;
-  snippet: string;
+  title: string
+  link: string
+  snippet: string
 }
 
 export interface ScoringWeights {
-
-  demand: number;
-  competition: number;
-  urgency: number;
-  profitability: number;
+  demand: number
+  competition: number
+  urgency: number
+  profitability: number
 }
 
 export interface BusinessIdea {
-  id: string;
-  title: string;
-  region: string;
-  targetAudience: string;
-  keywords: string[];
-  weights?: ScoringWeights;
+  id: string
+  title: string
+  region: string
+  targetAudience: string
+  keywords: string[]
+  weights?: ScoringWeights
 
-  // Phase 2: Keyword Planner Data
+  keywordData: KeywordData[]
 
-  keywordData: KeywordData[];
+  competitorCount: number
+  professionalCompetitorCount: number
+  competitors: CompetitorEntry[]
 
-  // Research Data
-  competitorCount: number;
-  professionalCompetitorCount: number;
+  organicResults?: OrganicResult[]
+  peopleAlsoAsk?: string[]
+  relatedSearches?: string[]
 
-  // Phase 2: Competitor Deep-Dive
-  competitors: CompetitorEntry[];
-  
-  // Hard Evidence from Google
-  organicResults?: OrganicResult[];
+  complaintDensity: number
+  urgency: number
+  willingnessToPay: number
+  commercialCompetition: number
 
-  // Qualitative Scores (1-10)
-  complaintDensity: number; // Beschwerdedichte
-  urgency: number; // Dringlichkeit
-  willingnessToPay: number; // Zahlungsbereitschaft
-  commercialCompetition: number; // Kommerzieller Druck
+  notes: string
+  painPoints: string[]
+  painPointEntries: PainPointEntry[]
 
-  // Notes & Snippets
-  notes: string;
-  painPoints: string[];
+  trendDirection: TrendDirection
+  trendNotes: string
 
-  // Phase 2: Structured Pain Points
-  painPointEntries: PainPointEntry[];
-
-  // Phase 2: Trends
-  trendDirection: TrendDirection;
-  trendNotes: string;
-
-  // Checklist
   checklist: {
-    keywordPlannerChecked: boolean;
-    googleTrendsChecked: boolean;
-    googleMapsChecked: boolean;
-    reviewsChecked: boolean;
-    cpcChecked: boolean;
-  };
+    keywordPlannerChecked: boolean
+    googleTrendsChecked: boolean
+    googleMapsChecked: boolean
+    reviewsChecked: boolean
+    cpcChecked: boolean
+  }
 
-  marketAnalysis?: MarketAnalysis;
+  marketAnalysis?: MarketAnalysis
 
-  createdAt: number;
-  updatedAt: number;
+  createdAt: number
+  updatedAt: number
 }
 
-
 export interface IdeaScores {
-  competitionGap: number;
-  painScore: number;
-  commercialScore: number;
-  urgencyScore: number;
-  keywordBreadthScore: number;
-  trendScore: number;
-  evidenceQuality: 'incomplete' | 'weak' | 'usable' | 'strong';
-  evidencePercent: number;
-  finalScore: number;
+  competitionGap: number
+  painScore: number
+  commercialScore: number
+  urgencyScore: number
+  keywordBreadthScore: number
+  trendScore: number
+  evidenceQuality: 'incomplete' | 'weak' | 'usable' | 'strong'
+  evidencePercent: number
+  finalScore: number
 }
 
 export interface ScoreInput {
-  competitorCount: number;
-  professionalCompetitorCount: number;
-  complaintDensity: number;
-  urgency: number;
-  willingnessToPay: number;
-  commercialCompetition: number;
-  keywordCount: number;
-  trendDirection: TrendDirection;
-  painPointEntryCount: number;
-  averageCompetitorRating: number;
-  totalSearchVolume: number;
+  competitorCount: number
+  professionalCompetitorCount: number
+  complaintDensity: number
+  urgency: number
+  willingnessToPay: number
+  commercialCompetition: number
+  keywordCount: number
+  trendDirection: TrendDirection
+  painPointEntryCount: number
+  averageCompetitorRating: number
+  totalSearchVolume: number
 }
 
 export interface MarketAnalysis {
-  verdict: string;
-  demandAnalysis: string;
-  competitionAnalysis: string;
-  strategyRecommendation: string;
-  nextSteps: string[];
+  verdict: string
+  demandAnalysis: string
+  competitionAnalysis: string
+  strategyRecommendation: string  // war fälschlicherweise 'strategy' in App.tsx
+  nextSteps: string[]
   metrics: {
-    competition: string;
-    searchVolume: string;
-    trend: string;
-    cpc: string;
-    totalResults?: number;
-  };
-  sources: string[];
-  organicEvidence?: OrganicResult[];
+    competition: string
+    searchVolume: string
+    trend: string
+    cpc: string
+    totalResults?: number
+  }
+  sources: string[]
+  organicEvidence?: OrganicResult[]
+  peopleAlsoAsk?: string[]
+  relatedSearches?: string[]
   swot: {
-    strengths: string[];
-    weaknesses: string[];
-    opportunities: string[];
-    threats: string[];
-  };
+    strengths: string[]
+    weaknesses: string[]
+    opportunities: string[]
+    threats: string[]
+  }
   persona: {
-    name: string;
-    painPoints: string[];
-    willingnessToPay: string;
-  };
-  revenueModels: string[];
-  generatedAt: number;
-  scoreAtGeneration: number;
+    name: string
+    painPoints: string[]
+    willingnessToPay: string
+  }
+  revenueModels: string[]
+  generatedAt: number
+  scoreAtGeneration: number
+  // Felder die App.tsx an MarketAnalysis anhängt:
+  checklist?: BusinessIdea['checklist']
+  evidencePercent?: number
+  evidenceQuality?: 'incomplete' | 'weak' | 'usable' | 'strong'
 }

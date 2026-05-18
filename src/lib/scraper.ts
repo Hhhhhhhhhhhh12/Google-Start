@@ -42,7 +42,13 @@ export interface OrganicResult {
 export async function scrapeSearchMetadata(
     query: string,
     apiKey: string
-): Promise<{ adCount: number; resultCount: number; organic: OrganicResult[] }> {
+): Promise<{ 
+    adCount: number; 
+    resultCount: number; 
+    organic: OrganicResult[];
+    peopleAlsoAsk?: string[];
+    relatedSearches?: string[];
+}> {
     if (!apiKey) throw new Error('API Key fehlt');
 
     const response = await fetch('https://google.serper.dev/search', {
@@ -66,7 +72,9 @@ export async function scrapeSearchMetadata(
             title: o.title,
             link: o.link,
             snippet: o.snippet
-        }))
+        })),
+        peopleAlsoAsk: (data.peopleAlsoAsk || []).map((q: any) => q.question),
+        relatedSearches: (data.relatedSearches || []).map((r: any) => r.query)
     };
 }
 
