@@ -1,0 +1,117 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #f3f4f6;
+}
+
+/* ---- Header ---- */
+.header {
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.logo { display: flex; align-items: center; gap: 8px; }
+.logoIcon { font-size: 1.3rem; }
+.logoText { font-size: 1.1rem; font-weight: 800; color: #111827; letter-spacing: -0.02em; }
+.tagline { font-size: 0.78rem; color: #9ca3af; margin: 0; }
+
+/* ---- Body ---- */
+.body {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ---- Main ---- */
+.main {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ---- Tab Bar (mobile only by default, visible on all sizes for switching) ---- */
+.tabBar {
+  display: none;
+  border-bottom: 1px solid #e5e7eb;
+  background: #fff;
+}
+
+.tab {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-bottom: 2px solid transparent;
+}
+
+.tabActive { color: #6366f1; border-bottom-color: #6366f1; }
+
+.tabBadge {
+  background: #e0e7ff;
+  color: #6366f1;
+  border-radius: 999px;
+  padding: 0 6px;
+  font-size: 0.7rem;
+}
+
+/* ---- Frames ---- */
+.frames {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  flex: 1;
+  overflow: hidden;
+}
+
+.frameWrap {
+  overflow: hidden;
+  border-left: 1px solid #e5e7eb;
+}
+
+/* On desktop, always show both frames */
+.frameVisible { display: flex; flex-direction: column; height: 100%; }
+.frameHidden { display: flex; flex-direction: column; height: 100%; }
+
+/* ---- Responsive: <= 1023px ---- */
+@media (max-width: 1023px) {
+  .body {
+    grid-template-columns: 1fr;
+  }
+
+  /* Hide sidebar, integrate into collapsible or top */
+  .body > aside {
+    display: none;
+  }
+
+  .tabBar { display: flex; }
+
+  .frames {
+    grid-template-columns: 1fr;
+  }
+
+  .frameHidden { display: none; }
+  .frameVisible { display: flex; flex-direction: column; height: 100%; }
+}
+
+/* ---- Responsive: <= 640px ---- */
+@media (max-width: 640px) {
+  .header { padding: 10px 14px; }
+  .tagline { display: none; }
+}

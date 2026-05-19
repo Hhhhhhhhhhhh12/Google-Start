@@ -1,0 +1,47 @@
+.panel {
+  background: #fff;
+  border-right: 1px solid #e5e7eb;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow-y: auto;
+}
+
+.title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+.section { display: flex; flex-direction: column; gap: 8px; }
+
+.sectionTitle {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #6b7280;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.count {
+  background: #e0e7ff;
+  color: #6366f1;
+  border-radius: 999px;
+  padding: 1px 7px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.error {
+  font-size: 0.8rem;
+  color: #ef4444;
+  margin: 0;
+}
