@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { sanitiseSkill } from '../../lib/urlSafety'
 import styles from './SkillTags.module.css'
 
 interface Props {
@@ -11,9 +12,9 @@ export function SkillTags({ skills, onAdd, onRemove }: Props) {
   const [input, setInput] = useState('')
 
   const handleAdd = () => {
-    const trimmed = input.trim().toLowerCase()
-    if (trimmed && !skills.includes(trimmed)) {
-      onAdd(trimmed)
+    const clean = sanitiseSkill(input)
+    if (clean && !skills.includes(clean)) {
+      onAdd(clean)
       setInput('')
     }
   }

@@ -12,7 +12,7 @@ export function ScoreBadge({ score, noData }: Props) {
   }
   const color = scoreColor(score)
   return (
-    <span className={styles.badge} style={{ background: color + '22', color, border: `1px solid ${color}55` }}>
+    <span className={styles.badge} style={{ background: color, color: '#fff' }}>
       {score}% · {scoreLabel(score)}
     </span>
   )

@@ -1,5 +1,6 @@
 import type { SkillGapItem } from '../../types'
 import { ProgressBar } from '../shared/ProgressBar'
+import { safeHref } from '../../lib/urlSafety'
 import styles from './GapItem.module.css'
 
 interface Props {
@@ -20,14 +21,14 @@ export function GapItem({ item, maxFreq }: Props) {
       <ProgressBar value={frequency} max={maxFreq} color="#6366f1" />
 
       <div className={styles.resources}>
-        <a href={training.courseraUrl} target="_blank" rel="noopener noreferrer" className={styles.link}>
+        <a href={safeHref(training.courseraUrl)} target="_blank" rel="noopener noreferrer" className={styles.link}>
           🎓 Coursera
         </a>
-        <a href={training.udemyUrl} target="_blank" rel="noopener noreferrer" className={styles.link}>
+        <a href={safeHref(training.udemyUrl)} target="_blank" rel="noopener noreferrer" className={styles.link}>
           🎬 Udemy
         </a>
         {training.certification && (
-          <a href={training.certUrl} target="_blank" rel="noopener noreferrer" className={`${styles.link} ${styles.cert}`}>
+          <a href={safeHref(training.certUrl)} target="_blank" rel="noopener noreferrer" className={`${styles.link} ${styles.cert}`}>
             🏅 {training.certification}
           </a>
         )}

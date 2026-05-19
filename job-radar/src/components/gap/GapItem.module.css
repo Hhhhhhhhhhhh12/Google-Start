@@ -1,14 +1,17 @@
 .item {
   background: #fff;
   border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 14px 16px;
+  border-radius: 14px;
+  padding: 16px 18px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  transition: box-shadow 0.15s;
+  gap: 10px;
+  transition: box-shadow 0.18s, transform 0.18s;
 }
-.item:hover { box-shadow: 0 2px 10px rgba(0,0,0,0.07); }
+.item:hover {
+  box-shadow: 0 4px 20px rgba(99,102,241,0.10);
+  transform: translateY(-1px);
+}
 
 .header {
   display: flex;
@@ -24,11 +27,12 @@
 }
 
 .freq {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: #6b7280;
   background: #f3f4f6;
-  padding: 2px 8px;
+  padding: 3px 10px;
   border-radius: 999px;
+  font-weight: 600;
 }
 
 .resources {
@@ -40,24 +44,24 @@
 
 .link {
   font-size: 0.75rem;
-  font-weight: 500;
+  font-weight: 600;
   color: #6366f1;
   text-decoration: none;
   background: #ede9fe;
-  padding: 3px 10px;
+  padding: 4px 11px;
   border-radius: 999px;
-  transition: background 0.12s;
+  transition: background 0.12s, color 0.12s;
 }
-.link:hover { background: #ddd6fe; color: #4f46e5; }
+.link:hover { background: #c7d2fe; color: #3730a3; }
 
 .cert {
   background: #fef9c3;
-  color: #854d0e;
+  color: #92400e;
 }
-.cert:hover { background: #fef08a; color: #713f12; }
+.cert:hover { background: #fde68a; color: #713f12; }
 
 .time {
-  font-size: 0.75rem;
+  font-size: 0.73rem;
   color: #9ca3af;
   padding: 3px 8px;
 }

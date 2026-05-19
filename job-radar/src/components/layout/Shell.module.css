@@ -9,18 +9,29 @@
 
 /* ---- Header ---- */
 .header {
-  background: #fff;
+  background: linear-gradient(to right, #ffffff, #fafbff);
   border-bottom: 1px solid #e5e7eb;
-  padding: 12px 20px;
+  box-shadow: 0 1px 4px rgba(99,102,241,0.06);
+  padding: 12px 24px;
   display: flex;
   align-items: center;
   gap: 16px;
   flex-shrink: 0;
+  z-index: 10;
 }
 
 .logo { display: flex; align-items: center; gap: 8px; }
 .logoIcon { font-size: 1.3rem; }
-.logoText { font-size: 1.1rem; font-weight: 800; color: #111827; letter-spacing: -0.02em; }
+.logoText {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #111827;
+  letter-spacing: -0.03em;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
 .tagline { font-size: 0.78rem; color: #9ca3af; margin: 0; }
 
 /* ---- Body ---- */
@@ -38,7 +49,7 @@
   overflow: hidden;
 }
 
-/* ---- Tab Bar (mobile only by default, visible on all sizes for switching) ---- */
+/* ---- Tab Bar ---- */
 .tabBar {
   display: none;
   border-bottom: 1px solid #e5e7eb;
@@ -47,7 +58,7 @@
 
 .tab {
   flex: 1;
-  padding: 10px 16px;
+  padding: 11px 16px;
   border: none;
   background: none;
   cursor: pointer;
@@ -57,18 +68,20 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 7px;
   border-bottom: 2px solid transparent;
+  transition: color 0.15s;
 }
-
+.tab:hover { color: #6366f1; }
 .tabActive { color: #6366f1; border-bottom-color: #6366f1; }
 
 .tabBadge {
-  background: #e0e7ff;
-  color: #6366f1;
+  background: #6366f1;
+  color: #fff;
   border-radius: 999px;
-  padding: 0 6px;
-  font-size: 0.7rem;
+  padding: 1px 7px;
+  font-size: 0.68rem;
+  font-weight: 700;
 }
 
 /* ---- Frames ---- */
@@ -85,27 +98,15 @@
   border-left: 1px solid #e5e7eb;
 }
 
-/* On desktop, always show both frames */
 .frameVisible { display: flex; flex-direction: column; height: 100%; }
-.frameHidden { display: flex; flex-direction: column; height: 100%; }
+.frameHidden  { display: flex; flex-direction: column; height: 100%; }
 
 /* ---- Responsive: <= 1023px ---- */
 @media (max-width: 1023px) {
-  .body {
-    grid-template-columns: 1fr;
-  }
-
-  /* Hide sidebar, integrate into collapsible or top */
-  .body > aside {
-    display: none;
-  }
-
+  .body { grid-template-columns: 1fr; }
+  .body > aside { display: none; }
   .tabBar { display: flex; }
-
-  .frames {
-    grid-template-columns: 1fr;
-  }
-
+  .frames { grid-template-columns: 1fr; }
   .frameHidden { display: none; }
   .frameVisible { display: flex; flex-direction: column; height: 100%; }
 }

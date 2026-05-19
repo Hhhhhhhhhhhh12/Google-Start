@@ -1,7 +1,7 @@
 .panel {
-  background: #fff;
+  background: #f9fafb;
   border-right: 1px solid #e5e7eb;
-  padding: 20px;
+  padding: 20px 16px;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -9,20 +9,22 @@
 }
 
 .title {
-  font-size: 1rem;
-  font-weight: 700;
-  color: #111827;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #374151;
   margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
 .section { display: flex; flex-direction: column; gap: 8px; }
 
 .sectionTitle {
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-size: 0.75rem;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: #6b7280;
+  letter-spacing: 0.06em;
+  color: #9ca3af;
   margin: 0;
   display: flex;
   align-items: center;
@@ -34,8 +36,8 @@
   color: #6366f1;
   border-radius: 999px;
   padding: 1px 7px;
-  font-size: 0.7rem;
-  font-weight: 700;
+  font-size: 0.68rem;
+  font-weight: 800;
   text-transform: none;
   letter-spacing: 0;
 }
@@ -44,4 +46,7 @@
   font-size: 0.8rem;
   color: #ef4444;
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }

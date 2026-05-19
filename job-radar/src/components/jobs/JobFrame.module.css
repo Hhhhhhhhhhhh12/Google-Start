@@ -17,43 +17,52 @@
 }
 
 .title {
-  font-size: 1rem;
-  font-weight: 700;
-  color: #111827;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #374151;
   margin: 0;
   display: flex;
   align-items: center;
   gap: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
 .count {
   background: #e0e7ff;
   color: #6366f1;
   border-radius: 999px;
-  padding: 1px 8px;
-  font-size: 0.75rem;
-  font-weight: 700;
+  padding: 2px 9px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: none;
+  letter-spacing: 0;
 }
 
 .actions { display: flex; align-items: center; gap: 10px; }
 
-.timestamp { font-size: 0.75rem; color: #9ca3af; }
+.timestamp { font-size: 0.72rem; color: #9ca3af; }
 
 .refreshBtn {
-  padding: 6px 14px;
+  padding: 7px 16px;
   background: #6366f1;
   color: white;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   font-size: 0.82rem;
-  font-weight: 600;
+  font-weight: 700;
   display: flex;
   align-items: center;
   gap: 6px;
+  transition: background 0.15s, box-shadow 0.15s;
+  box-shadow: 0 2px 6px rgba(99,102,241,0.3);
 }
-.refreshBtn:hover:not(:disabled) { background: #4f46e5; }
-.refreshBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+.refreshBtn:hover:not(:disabled) {
+  background: #4f46e5;
+  box-shadow: 0 4px 12px rgba(99,102,241,0.4);
+}
+.refreshBtn:disabled { opacity: 0.6; cursor: not-allowed; box-shadow: none; }
 
 .spinner {
   width: 12px; height: 12px;
@@ -65,7 +74,7 @@
 }
 
 .spinnerLarge {
-  width: 32px; height: 32px;
+  width: 36px; height: 36px;
   border: 3px solid #e0e7ff;
   border-top-color: #6366f1;
   border-radius: 50%;
@@ -76,16 +85,24 @@
 @keyframes spin { to { transform: rotate(360deg); } }
 
 .warnings { display: flex; flex-direction: column; gap: 4px; }
-.warning { font-size: 0.78rem; color: #92400e; background: #fef3c7; padding: 6px 10px; border-radius: 6px; margin: 0; }
+.warning {
+  font-size: 0.78rem;
+  color: #92400e;
+  background: #fef3c7;
+  padding: 7px 12px;
+  border-radius: 8px;
+  margin: 0;
+  border-left: 3px solid #f59e0b;
+}
 
 .loadingState {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  padding: 60px 20px;
-  color: #6b7280;
+  gap: 14px;
+  padding: 80px 20px;
+  color: #9ca3af;
   font-size: 0.9rem;
 }
 
@@ -93,10 +110,12 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  padding: 60px 20px;
+  gap: 14px;
+  padding: 80px 20px;
   color: #9ca3af;
   font-size: 0.9rem;
+  text-align: center;
 }
+.empty::before { content: "📭"; font-size: 2.5rem; }
 
 .list { display: flex; flex-direction: column; gap: 10px; }

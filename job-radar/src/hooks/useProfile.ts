@@ -22,10 +22,10 @@ export function useProfile() {
     try {
       const text = await extractTextFromPdf(file)
       const skills = extractSkills(text)
+      // rawCvText intentionally omitted — CV text is never persisted (PII minimisation)
       const updated: UserProfile = {
         id: 'singleton',
         skills,
-        rawCvText: text.slice(0, 3000), // keep first 3000 chars for reference
         updatedAt: Date.now(),
       }
       saveProfile(updated)

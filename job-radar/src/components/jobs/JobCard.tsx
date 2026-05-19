@@ -1,6 +1,7 @@
 import type { Job } from '../../types'
 import { ScoreBadge } from '../shared/ScoreBadge'
 import { SOURCE_LABELS, SOURCE_COLORS } from '../../constants/feedUrls'
+import { safeHref } from '../../lib/urlSafety'
 import styles from './JobCard.module.css'
 
 interface Props {
@@ -29,7 +30,7 @@ export function JobCard({ job }: Props) {
       </div>
 
       <h3 className={styles.title}>
-        <a href={job.url} target="_blank" rel="noopener noreferrer">{job.title}</a>
+        <a href={safeHref(job.url)} target="_blank" rel="noopener noreferrer">{job.title}</a>
       </h3>
 
       {job.company && <p className={styles.company}>{job.company}</p>}

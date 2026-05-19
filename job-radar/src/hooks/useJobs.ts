@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import type { Job, FeedConfig } from '../types'
 import { loadStorage, saveStorage, isCacheStale } from '../lib/storage'
 import { fetchFeed } from '../lib/rssClient'
@@ -96,6 +96,9 @@ export function useJobs(userSkills: string[]) {
       refresh()
     }
   }, [lastFetchedAt, refresh])
+
+  // Cancel any in-flight requests when the hook unmounts
+  useEffect(() => () => { abortRef.current?.abort() }, [])
 
   return { jobs, feedStatuses, fetching, lastFetchedAt, refresh, loadOrFetch }
 }

@@ -1,14 +1,17 @@
 .card {
   background: #fff;
   border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 14px 16px;
+  border-radius: 14px;
+  padding: 16px 18px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  transition: box-shadow 0.15s;
+  gap: 8px;
+  transition: box-shadow 0.18s, transform 0.18s;
 }
-.card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+.card:hover {
+  box-shadow: 0 4px 20px rgba(99,102,241,0.10);
+  transform: translateY(-1px);
+}
 
 .header {
   display: flex;
@@ -19,43 +22,46 @@
 
 .meta { display: flex; align-items: center; gap: 8px; }
 
-.source { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+.source { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; }
 
 .date { font-size: 0.72rem; color: #9ca3af; }
 
 .title {
   font-size: 0.95rem;
-  font-weight: 600;
+  font-weight: 700;
   margin: 0;
+  line-height: 1.35;
 }
 .title a { color: #111827; text-decoration: none; }
-.title a:hover { color: #6366f1; text-decoration: underline; }
+.title a:hover { color: #6366f1; }
 
 .company { font-size: 0.8rem; color: #6b7280; margin: 0; }
 
 .skills {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
-  margin-top: 4px;
+  gap: 5px;
+  margin-top: 2px;
 }
 
 .skillMatch {
-  padding: 2px 8px;
+  padding: 2px 9px;
   background: #dcfce7;
-  color: #166534;
+  color: #15803d;
+  border: 1px solid #86efac;
   border-radius: 999px;
   font-size: 0.72rem;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .skillMiss {
-  padding: 2px 8px;
+  padding: 2px 9px;
   background: #fee2e2;
-  color: #991b1b;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
   border-radius: 999px;
   font-size: 0.72rem;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .noData { font-size: 0.78rem; color: #9ca3af; margin: 0; font-style: italic; }
