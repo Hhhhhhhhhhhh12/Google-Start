@@ -35,12 +35,12 @@ function App() {
   }, [ideas])
 
   const [serperApiKey, setSerperApiKey] = useState(
-    localStorage.getItem('serper_api_key') || ''
+    sessionStorage.getItem('serper_api_key') || ''
   )
 
   const handleSaveApiKey = (val: string) => {
     setSerperApiKey(val)
-    localStorage.setItem('serper_api_key', val)
+    sessionStorage.setItem('serper_api_key', val)
   }
 
   // Evaluate State
@@ -49,6 +49,7 @@ function App() {
   const [targetAudience, setTargetAudience] = useState('')
   const [isEvaluating, setIsEvaluating] = useState(false)
   const [report, setReport] = useState<ReportType>(null)
+  const [evaluationError, setEvaluationError] = useState<string | null>(null)
 
   // Discover State
   const [deriveSearchTerms, setDeriveSearchTerms] = useState('')
@@ -101,6 +102,7 @@ function App() {
     if (!ideaTitle) return
     setIsEvaluating(true)
     setReport(null)
+    setEvaluationError(null)
 
     let idea = buildBaseIdea()
 
@@ -182,7 +184,7 @@ function App() {
       }
     } catch (err) {
       console.error(err)
-      alert('Es gab ein Problem beim Abrufen der Daten.')
+      setEvaluationError('Es gab ein Problem beim Abrufen der Daten. Bitte API-Key prüfen.')
     } finally {
       setIsEvaluating(false)
     }
@@ -324,6 +326,8 @@ function App() {
             onEvaluate={handleEvaluate}
             onExport={handleExport}
             ideas={ideas}
+            evaluationError={evaluationError}
+            onClearError={() => setEvaluationError(null)}
           />
         )}
 

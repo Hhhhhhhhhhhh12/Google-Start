@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import type { BusinessIdea, MarketAnalysis } from '../types'
 import { getImprovementSuggestions } from '../lib/improvementEngine'
+import { calculateIdeaScore } from '../lib/scoring'
 
 type ReportType = (MarketAnalysis & { evidencePercent?: number; evidenceQuality?: string }) | null
 
@@ -21,6 +22,8 @@ interface EvaluateViewProps {
   onEvaluate: () => void
   onExport: () => void
   ideas: BusinessIdea[]
+  evaluationError: string | null
+  onClearError: () => void
 }
 
 export default function EvaluateView({
@@ -40,6 +43,8 @@ export default function EvaluateView({
   onEvaluate,
   onExport,
   ideas,
+  evaluationError,
+  onClearError,
 }: EvaluateViewProps) {
   const evaluatedIdea = useMemo(() => {
     if (!report) return null
@@ -51,9 +56,22 @@ export default function EvaluateView({
     return getImprovementSuggestions(evaluatedIdea)
   }, [evaluatedIdea])
 
+  const scoreBreakdown = useMemo(() => {
+    if (!evaluatedIdea) return null
+    return calculateIdeaScore(evaluatedIdea)
+  }, [evaluatedIdea])
+
   return (
     <div className="dashboard-grid single-col">
       <section className="panel form-panel">
+        {evaluationError && (
+          <div className="error-banner" role="alert">
+            <span>⚠</span>
+            <span>{evaluationError}</span>
+            <button className="btn-icon" onClick={onClearError} aria-label="Fehler schließen">✕</button>
+          </div>
+        )}
+
         <div className="form-group">
           <label htmlFor="title">Deine Geschäftsidee</label>
           <input
@@ -147,7 +165,7 @@ export default function EvaluateView({
               <span>Score</span>
             </div>
             <div className="report-intro">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div className="flex-row">
                 <h2>Analyse-Ergebnis</h2>
                 {serperApiKey && (
                   <span className="badge-live">LIVE-DATEN SCAN</span>
@@ -233,6 +251,33 @@ export default function EvaluateView({
               <span className="metric-value">{report.metrics.cpc}</span>
             </div>
           </div>
+
+          {scoreBreakdown && (
+            <div className="score-breakdown">
+              <h3>Score-Aufschlüsselung</h3>
+              <div className="score-bars">
+                {[
+                  { label: 'Wettbewerbs-Lücke',      value: scoreBreakdown.competitionGap },
+                  { label: 'Problem-Stärke',          value: scoreBreakdown.painScore },
+                  { label: 'Kommerzielles Potenzial', value: scoreBreakdown.commercialScore },
+                  { label: 'Dringlichkeit',           value: scoreBreakdown.urgencyScore },
+                  { label: 'Keyword-Breite',          value: scoreBreakdown.keywordBreadthScore },
+                  { label: 'Trend-Signal',            value: scoreBreakdown.trendScore },
+                ].map(({ label, value }) => (
+                  <div key={label} className="score-bar-row">
+                    <span className="score-bar-label">{label}</span>
+                    <div className="score-bar-track">
+                      <div
+                        className={`score-bar-fill ${value >= 70 ? 'good' : value >= 40 ? 'medium' : 'weak'}`}
+                        style={{ width: `${value}%` }}
+                      />
+                    </div>
+                    <span className="score-bar-value">{value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="report-grid">
             <div className="report-column">
@@ -405,9 +450,8 @@ export default function EvaluateView({
             </div>
             <div className="footer-btns">
               <button
-                className="btn-secondary"
+                className="btn-secondary flex-row"
                 onClick={onExport}
-                style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />

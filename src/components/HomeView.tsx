@@ -20,7 +20,7 @@ export default function HomeView({ ideas, activeIdeaId: _activeIdeaId, onOpenIde
               <div key={idea.id} className="idea-card">
                 <div className="idea-card-header">
                   <h3>{idea.title}</h3>
-                  <div style={{ display: 'flex', gap: '8px' }}>
+                  <div className="flex-row">
                     <button
                       className="btn-outline small"
                       onClick={() => onOpenIdea(idea)}
@@ -30,6 +30,7 @@ export default function HomeView({ ideas, activeIdeaId: _activeIdeaId, onOpenIde
                     <button
                       className="btn-outline small danger"
                       onClick={() => onDeleteIdea(idea.id)}
+                      aria-label={`${idea.title} löschen`}
                     >
                       Löschen
                     </button>
