@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import type { BusinessIdea, MarketAnalysis } from '../types'
 import { getImprovementSuggestions } from '../lib/improvementEngine'
-import { calculateIdeaScore } from '../lib/scoring'
+import ScoreBreakdown from './ScoreBreakdown'
 
 type ReportType = (MarketAnalysis & { evidencePercent?: number; evidenceQuality?: string }) | null
 
@@ -56,11 +56,6 @@ export default function EvaluateView({
     return getImprovementSuggestions(evaluatedIdea)
   }, [evaluatedIdea])
 
-  const scoreBreakdown = useMemo(() => {
-    if (!evaluatedIdea) return null
-    return calculateIdeaScore(evaluatedIdea)
-  }, [evaluatedIdea])
-
   return (
     <div className="dashboard-grid single-col">
       <section className="panel form-panel">
@@ -105,10 +100,7 @@ export default function EvaluateView({
         </div>
 
         <div className="advanced-toggle">
-          <button
-            className="btn-text"
-            onClick={() => setShowAdvanced(!showAdvanced)}
-          >
+          <button className="btn-text" onClick={() => setShowAdvanced(!showAdvanced)}>
             {showAdvanced ? '− Weniger Einstellungen' : '+ Erweiterte Gewichtung'}
           </button>
         </div>
@@ -131,12 +123,7 @@ export default function EvaluateView({
                     min="0"
                     max="100"
                     value={weights[key]}
-                    onChange={e =>
-                      setWeights({
-                        ...weights,
-                        [key]: parseInt(e.target.value),
-                      })
-                    }
+                    onChange={e => setWeights({ ...weights, [key]: parseInt(e.target.value) })}
                   />
                   <span className="weight-val">{weights[key]}%</span>
                 </div>
@@ -167,9 +154,7 @@ export default function EvaluateView({
             <div className="report-intro">
               <div className="flex-row">
                 <h2>Analyse-Ergebnis</h2>
-                {serperApiKey && (
-                  <span className="badge-live">LIVE-DATEN SCAN</span>
-                )}
+                {serperApiKey && <span className="badge-live">LIVE-DATEN SCAN</span>}
               </div>
               <p className="summary-text">{report.verdict}</p>
 
@@ -178,13 +163,10 @@ export default function EvaluateView({
                   <div className="evidence-progress-header">
                     <span className="evidence-label">DATEN-QUALITÄT</span>
                     <span className={`quality-badge ${report.evidenceQuality}`}>
-                      {report.evidenceQuality === 'strong'
-                        ? 'Stark'
-                        : report.evidenceQuality === 'usable'
-                          ? 'Verwendbar'
-                          : report.evidenceQuality === 'weak'
-                            ? 'Schwach'
-                            : 'Unvollständig'}
+                      {report.evidenceQuality === 'strong' ? 'Stark'
+                        : report.evidenceQuality === 'usable' ? 'Verwendbar'
+                        : report.evidenceQuality === 'weak' ? 'Schwach'
+                        : 'Unvollständig'}
                     </span>
                   </div>
                   <div className="progress-bar-bg">
@@ -210,13 +192,9 @@ export default function EvaluateView({
                 ['googleTrendsChecked', 'Trend Stabilität'],
                 ['reviewsChecked', 'Kunden-Feedback'],
               ].map(([key, label]) => {
-                const checked =
-                  report.checklist?.[key as keyof typeof report.checklist]
+                const checked = report.checklist?.[key as keyof typeof report.checklist]
                 return (
-                  <div
-                    key={key}
-                    className={`evidence-item ${checked ? 'valid' : 'missing'}`}
-                  >
+                  <div key={key} className={`evidence-item ${checked ? 'valid' : 'missing'}`}>
                     <span className="status-icon">{checked ? '✓' : '○'}</span>
                     <span className="status-label">{label}</span>
                   </div>
@@ -252,32 +230,8 @@ export default function EvaluateView({
             </div>
           </div>
 
-          {scoreBreakdown && (
-            <div className="score-breakdown">
-              <h3>Score-Aufschlüsselung</h3>
-              <div className="score-bars">
-                {[
-                  { label: 'Wettbewerbs-Lücke',      value: scoreBreakdown.competitionGap },
-                  { label: 'Problem-Stärke',          value: scoreBreakdown.painScore },
-                  { label: 'Kommerzielles Potenzial', value: scoreBreakdown.commercialScore },
-                  { label: 'Dringlichkeit',           value: scoreBreakdown.urgencyScore },
-                  { label: 'Keyword-Breite',          value: scoreBreakdown.keywordBreadthScore },
-                  { label: 'Trend-Signal',            value: scoreBreakdown.trendScore },
-                ].map(({ label, value }) => (
-                  <div key={label} className="score-bar-row">
-                    <span className="score-bar-label">{label}</span>
-                    <div className="score-bar-track">
-                      <div
-                        className={`score-bar-fill ${value >= 70 ? 'good' : value >= 40 ? 'medium' : 'weak'}`}
-                        style={{ width: `${value}%` }}
-                      />
-                    </div>
-                    <span className="score-bar-value">{value}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          {/* Score Breakdown + What-If Simulator */}
+          {evaluatedIdea && <ScoreBreakdown evaluatedIdea={evaluatedIdea} />}
 
           <div className="report-grid">
             <div className="report-column">
@@ -307,13 +261,8 @@ export default function EvaluateView({
               <h3>Target Persona</h3>
               <div className="persona-card">
                 <h4>{report.persona.name}</h4>
-                <p>
-                  <strong>Pains:</strong> {report.persona.painPoints.join(', ')}
-                </p>
-                <p>
-                  <strong>Zahlungsbereitschaft:</strong>{' '}
-                  {report.persona.willingnessToPay}
-                </p>
+                <p><strong>Pains:</strong> {report.persona.painPoints.join(', ')}</p>
+                <p><strong>Zahlungsbereitschaft:</strong> {report.persona.willingnessToPay}</p>
               </div>
 
               <h3>Erlös-Modelle</h3>
@@ -348,12 +297,7 @@ export default function EvaluateView({
               <div className="organic-list">
                 {report.organicEvidence.map((item, i) => (
                   <div key={i} className="organic-item">
-                    <a
-                      href={item.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="organic-title"
-                    >
+                    <a href={item.link} target="_blank" rel="noopener noreferrer" className="organic-title">
                       {item.title}
                     </a>
                     <p className="organic-snippet">{item.snippet}</p>
@@ -406,20 +350,17 @@ export default function EvaluateView({
                   <div key={s.id} className={`suggestion-card ${s.impact}`}>
                     <div className="suggestion-header">
                       <span className={`suggestion-type-badge type-${s.type}`}>
-                        {s.type === 'pivot' ? 'Pivot' :
-                         s.type === 'niche' ? 'Nische' :
-                         s.type === 'premium' ? 'Premium' : 'Strategie'}
+                        {s.type === 'pivot' ? 'Pivot' : s.type === 'niche' ? 'Nische'
+                          : s.type === 'premium' ? 'Premium' : 'Strategie'}
                       </span>
                       <span className={`suggestion-impact-badge impact-${s.impact}`}>
-                        {s.impact === 'high' ? 'Hohe Wirkung' :
-                         s.impact === 'medium' ? 'Mittlere Wirkung' : 'Geringe Wirkung'}
+                        {s.impact === 'high' ? 'Hohe Wirkung'
+                          : s.impact === 'medium' ? 'Mittlere Wirkung' : 'Geringe Wirkung'}
                       </span>
                     </div>
                     <h4>{s.title}</h4>
                     <p className="suggestion-desc">{s.description}</p>
-                    <div className="suggestion-reason">
-                      <strong>Warum: </strong>{s.reason}
-                    </div>
+                    <div className="suggestion-reason"><strong>Warum: </strong>{s.reason}</div>
                   </div>
                 ))}
               </div>
@@ -449,10 +390,7 @@ export default function EvaluateView({
               </div>
             </div>
             <div className="footer-btns">
-              <button
-                className="btn-secondary flex-row"
-                onClick={onExport}
-              >
+              <button className="btn-secondary flex-row" onClick={onExport}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                   <polyline points="7 10 12 15 17 10" />
