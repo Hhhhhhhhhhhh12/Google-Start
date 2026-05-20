@@ -6,9 +6,10 @@ interface Props {
   items: SkillGapItem[]
   hasProfile: boolean
   hasJobs: boolean
+  onAddSkill?: (skill: string) => void
 }
 
-export function GapFrame({ items, hasProfile, hasJobs }: Props) {
+export function GapFrame({ items, hasProfile, hasJobs, onAddSkill }: Props) {
   const maxFreq = items[0]?.frequency ?? 1
 
   return (
@@ -41,7 +42,7 @@ export function GapFrame({ items, hasProfile, hasJobs }: Props) {
 
       <div className={styles.list}>
         {items.map((item) => (
-          <GapItem key={item.skill} item={item} maxFreq={maxFreq} />
+          <GapItem key={item.skill} item={item} maxFreq={maxFreq} onAddSkill={onAddSkill} />
         ))}
       </div>
     </section>

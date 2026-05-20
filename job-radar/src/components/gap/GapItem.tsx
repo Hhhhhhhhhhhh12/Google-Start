@@ -6,16 +6,29 @@ import styles from './GapItem.module.css'
 interface Props {
   item: SkillGapItem
   maxFreq: number
+  onAddSkill?: (skill: string) => void
 }
 
-export function GapItem({ item, maxFreq }: Props) {
+export function GapItem({ item, maxFreq, onAddSkill }: Props) {
   const { skill, frequency, training } = item
 
   return (
     <article className={styles.item}>
       <div className={styles.header}>
         <span className={styles.skill}>{skill}</span>
-        <span className={styles.freq}>{frequency} Stelle{frequency !== 1 ? 'n' : ''}</span>
+        <div className={styles.headerRight}>
+          <span className={styles.freq}>{frequency} Stelle{frequency !== 1 ? 'n' : ''}</span>
+          {onAddSkill && (
+            <button
+              className={styles.addBtn}
+              onClick={() => onAddSkill(skill)}
+              aria-label={`${skill} zum Profil hinzufügen`}
+              title="Zum Profil hinzufügen"
+            >
+              + Profil
+            </button>
+          )}
+        </div>
       </div>
 
       <ProgressBar value={frequency} max={maxFreq} color="#6366f1" />

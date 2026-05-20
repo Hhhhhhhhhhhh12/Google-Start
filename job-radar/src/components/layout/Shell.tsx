@@ -82,6 +82,7 @@ export function Shell(props: Props) {
                 items={props.gapItems}
                 hasProfile={skills.length > 0}
                 hasJobs={jobs.length > 0}
+                onAddSkill={props.onAddSkill}
               />
             </div>
           </div>
