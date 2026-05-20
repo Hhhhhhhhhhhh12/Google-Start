@@ -1,5 +1,6 @@
-# 📡 Job Radar
+# 🌊 Faro
 
+> **Scan jobs. Know your gaps. Level up.**
 > A privacy-first, offline-capable job matching tool for Data & ML professionals — built entirely in the browser with no backend required.
 
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6?logo=typescript&logoColor=white)
@@ -11,7 +12,7 @@
 
 ## What it does
 
-Job Radar pulls live job listings from public APIs, compares them against your skill profile, and tells you exactly where your gaps are — and how to close them.
+Faro pulls live job listings from public APIs, compares them against your skill profile, and tells you exactly where your gaps are — and how to close them.
 
 | Feature | Detail |
 |---|---|

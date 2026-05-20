@@ -31,10 +31,10 @@ export function Shell(props: Props) {
     <div className={styles.root}>
       <header className={styles.header}>
         <div className={styles.logo}>
-          <span className={styles.logoIcon}>📡</span>
-          <span className={styles.logoText}>Job Radar</span>
+          <span className={styles.logoIcon}>🌊</span>
+          <span className={styles.logoText}>Faro</span>
         </div>
-        <p className={styles.tagline}>Dein persönlicher Stellenscanner für Data & KI</p>
+        <p className={styles.tagline}>Scan jobs. Know your gaps. Level up.</p>
       </header>
 
       <div className={styles.body}>
