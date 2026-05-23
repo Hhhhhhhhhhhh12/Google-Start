@@ -25,7 +25,13 @@ export default function CompareView({ ideas, onOpenIdea }: CompareViewProps) {
 
         {validatedIdeas.length < 2 ? (
           <div className="compare-empty">
-            <p>Du benötigst mindestens 2 validierte Ideen für einen Vergleich.</p>
+            <p>
+              {ideas.length === 0
+                ? '📝 Keine Ideen gespeichert. Starte mit der Validierung!'
+                : ideas.length === 1
+                ? '➕ Nur 1 Idee vorhanden. Validiere eine weitere zum Vergleichen.'
+                : `🔍 ${ideas.length} Ideen gespeichert, aber nur ${ideas.filter(i => i.marketAnalysis).length} validiert. Validiere mindestens 2 zum Vergleichen.`}
+            </p>
           </div>
         ) : (
           <>

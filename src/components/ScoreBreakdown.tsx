@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { BusinessIdea, TrendDirection } from '../types'
 import { calculateIdeaScore, calculateScore } from '../lib/scoring'
 
@@ -51,6 +51,25 @@ export default function ScoreBreakdown({ evaluatedIdea }: ScoreBreakdownProps) {
   const [simActive, setSimActive] = useState(false)
   const [simInputs, setSimInputs] = useState<SimInputs | null>(null)
 
+  // Auto-close simulator when idea changes
+  useEffect(() => {
+    setSimActive(false)
+    setSimInputs(null)
+  }, [evaluatedIdea.id])
+
+  // Handle Escape key to close simulator
+  useEffect(() => {
+    if (!simActive) return
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setSimActive(false)
+        setSimInputs(null)
+      }
+    }
+    document.addEventListener('keydown', handleEscape)
+    return () => document.removeEventListener('keydown', handleEscape)
+  }, [simActive])
+
   const scoreBreakdown = useMemo(() => calculateIdeaScore(evaluatedIdea), [evaluatedIdea])
 
   const simulatedScores = useMemo(() => {
@@ -89,13 +108,21 @@ export default function ScoreBreakdown({ evaluatedIdea }: ScoreBreakdownProps) {
       <h3>Score-Aufschlüsselung</h3>
       <div className="score-bars">
         {BAR_COMPONENTS.map(({ label, key }) => {
-          const realVal = scoreBreakdown[key] as number
-          const simVal = simActive && simulatedScores ? simulatedScores[key] as number : null
+          const realVal = Math.max(0, Math.min(100, scoreBreakdown[key] as number))
+          const simVal = simActive && simulatedScores ? Math.max(0, Math.min(100, simulatedScores[key] as number)) : null
           const displayVal = simVal ?? realVal
           const delta = simVal !== null ? simVal - realVal : 0
 
           return (
-            <div key={key} className={`score-bar-row${simActive ? ' simulated' : ''}`}>
+            <div
+              key={key}
+              className={`score-bar-row${simActive ? ' simulated' : ''}`}
+              role="progressbar"
+              aria-valuenow={displayVal}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label={`${label}: ${displayVal} von 100`}
+            >
               <span className="score-bar-label">{label}</span>
               <div className="score-bar-track">
                 {simActive && simVal !== null && (

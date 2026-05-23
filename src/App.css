@@ -1661,7 +1661,7 @@ select {
   margin-right: 4px;
 }
 .sort-btn {
-  padding: 4px 12px;
+  padding: 8px 14px;
   border: 1px solid var(--color-border);
   border-radius: 8px;
   background: var(--color-surface);
@@ -1673,6 +1673,7 @@ select {
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  min-height: 44px;
 }
 .sort-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
 .sort-btn.active {
@@ -2439,6 +2440,19 @@ input[type="range"] {
   }
   .score-bar-label {
     font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .score-bar-row {
+    grid-template-columns: 90px 1fr 24px;
+    gap: 8px;
+  }
+  .score-bar-label {
+    font-size: 0.7rem;
+  }
+  .score-bar-value {
+    font-size: 0.8rem;
   }
 }
 

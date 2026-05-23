@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import type { BusinessIdea } from '../types'
 
 type SortKey = 'date' | 'score' | 'title' | 'region'
@@ -13,10 +13,17 @@ interface HomeViewProps {
 
 export default function HomeView({ ideas, activeIdeaId: _activeIdeaId, onOpenIdea, onDeleteIdea }: HomeViewProps) {
   const [search, setSearch] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
   const [sortKey, setSortKey] = useState<SortKey>('date')
   const [sortDir, setSortDir] = useState<SortDir>('desc')
   const [filterRegion, setFilterRegion] = useState('')
   const [filterMinScore, setFilterMinScore] = useState(0)
+
+  // Debounce search input (300ms)
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), 300)
+    return () => clearTimeout(timer)
+  }, [search])
 
   const regions = useMemo(() => {
     const set = new Set(ideas.map(i => i.region).filter(Boolean))
@@ -26,9 +33,9 @@ export default function HomeView({ ideas, activeIdeaId: _activeIdeaId, onOpenIde
   const filtered = useMemo(() => {
     let list = [...ideas]
 
-    // text search
-    if (search.trim()) {
-      const q = search.toLowerCase()
+    // text search (debounced)
+    if (debouncedSearch.trim()) {
+      const q = debouncedSearch.toLowerCase()
       list = list.filter(i =>
         i.title.toLowerCase().includes(q) ||
         i.region?.toLowerCase().includes(q) ||
@@ -67,7 +74,7 @@ export default function HomeView({ ideas, activeIdeaId: _activeIdeaId, onOpenIde
     })
 
     return list
-  }, [ideas, search, filterRegion, filterMinScore, sortKey, sortDir])
+  }, [ideas, debouncedSearch, filterRegion, filterMinScore, sortKey, sortDir])
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) {
@@ -81,6 +88,7 @@ export default function HomeView({ ideas, activeIdeaId: _activeIdeaId, onOpenIde
   const hasFilters = search || filterRegion || filterMinScore > 0
   const clearFilters = () => {
     setSearch('')
+    setDebouncedSearch('')
     setFilterRegion('')
     setFilterMinScore(0)
   }
@@ -189,7 +197,9 @@ export default function HomeView({ ideas, activeIdeaId: _activeIdeaId, onOpenIde
                       <div className="idea-card-body">
                         {score != null ? (
                           <div className="idea-score-row">
-                            <span className={`idea-score-badge ${scoreClass}`}>{score}</span>
+                            <span className={`idea-score-badge ${scoreClass}`}>
+                              {scoreClass === 'good' ? '✓' : scoreClass === 'medium' ? '≈' : '✗'} {score}
+                            </span>
                             <div className="idea-score-bar-bg">
                               <div
                                 className={`idea-score-bar-fill ${scoreClass}`}
