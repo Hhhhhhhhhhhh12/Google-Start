@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Faro — Scan jobs. Know your gaps. Level up. Job scanner for Data & AI professionals." />
+    <!-- Content-Security-Policy: allow fetches only to known job APIs; no inline scripts -->
+    <meta http-equiv="Content-Security-Policy"
+      content="default-src 'self';
+               script-src 'self';
+               style-src 'self' 'unsafe-inline';
+               connect-src 'self' https://www.arbeitnow.com https://jobicy.com;
+               img-src 'self' data:;
+               font-src 'self';
+               object-src 'none';
+               base-uri 'self';
+               form-action 'self';" />
+    <title>🌊 Faro</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
