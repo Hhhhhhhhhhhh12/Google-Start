@@ -97,7 +97,7 @@ export async function scrapeSearchVolume(
         });
 
         if (response.ok) {
-            const data = await response.json();
+            await response.json();
             results.push({
                 term: kw,
                 monthlyVolume: 0 // Serper doesn't provide volume directly in search, but we can store the fact we searched it

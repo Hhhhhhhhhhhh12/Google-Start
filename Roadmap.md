@@ -1,69 +1,110 @@
-# Roadmap - Local Demand Scanner
+# Roadmap — Ideen Scout
 
-## 🎯 Project Vision
-A local-first, API-free tool to filter and validate business ideas based on demand signals and competitor analysis.
+Lokaler Business-Ideen-Validator: datenbasierte Marktanalyse ohne Cloud, ohne Abo.
 
-## ✅ Phase 1: MVP (Abgeschlossen)
-- [x] **Core Stack**: React + Vite + TypeScript + Vanilla CSS setup.
-- [x] **Idea Management**: Multi-idea sidebar for switching between concepts.
-- [x] **Active Editing**: Form for Title, Region, Audience, and Notes.
-- [x] **Data Persistence**: `localStorage` integration for offline-first usage.
-- [x] **Scoring Engine**: Preliminary Demand Score calculation (0-100).
-- [x] **Keyword Integration**: Scoring contribution based on search term relevance.
-- [x] **Query Builder**: Automated generation of deep-link research queries.
-- [x] **UI Feedback**: Score explanation cards and visual indicators.
-- [x] **Testing**: Vitest suite for scoring logic and query generation.
-- [x] **Evidence Quality Badge**: Checklist-driven quality indicator (incomplete → strong).
-- [x] **Grouped Research Links**: Categorized deep-links (Search, Maps, Trends, Pain Points).
+---
 
-## ✅ Phase 2: Research Workflow (Abgeschlossen)
-Transition from preliminary scoring to manual validation with a guided workflow.
+## ✅ Phase 1: MVP & Scoring-Engine
 
-### 2.1 Keyword Planner Validation
-- [x] **Volume Input Fields**: Per-keyword field for manually entered monthly search volume.
-- [x] **Volume-Weighted Scoring**: Incorporate search volume data into score calculation.
-- [x] **Volume Summary**: Dashboard card showing total estimated monthly searches.
+- [x] React 19 + Vite + TypeScript + Vitest Setup
+- [x] Idee eingeben (Titel, Region, Zielgruppe)
+- [x] Demand-Score 0–100 mit gewichteten Komponenten
+- [x] Scoring-Faktoren: Konkurrenz, Suchvolumen, Trend, Dringlichkeit, Zahlungsbereitschaft, Pain Points
+- [x] Keyword-Tracking mit monatlichem Suchvolumen
+- [x] Trend-Richtung (steigend / stabil / fallend / saisonal)
+- [x] Competitor-Felder (Name, Rating, Bewertungen)
+- [x] Pain-Point-Tagging (Service, Preis, Erreichbarkeit, Qualität)
+- [x] Evidence-Quality-Fortschritt (unvollständig → stark)
+- [x] `localStorage` Persistenz — offline-first
+- [x] 21 Vitest-Tests für Scoring-Logik
 
-### 2.2 Google Trends Validation
-- [x] **Trend Stability Notes**: Text field per idea for seasonality observations.
-- [x] **Trend Direction Tag**: Dropdown (rising / stable / declining / seasonal).
-- [x] **Trend Score Factor**: Adjust score based on trend direction.
+---
 
-### 2.3 Google Maps Competitor Deep-Dive
-- [x] **Competitor Detail Fields**: Structured fields for top competitors (name, rating, review count).
-- [x] **Competitor Quality Assessment**: Auto-derived signal from average rating + review count.
-- [x] **Market Gap Indicator**: Visual indicator showing opportunity vs. saturation.
+## ✅ Phase 2: Marktanalyse & Report
 
-### 2.4 Review & Pain Point Collection
-- [x] **Pain Point Textarea**: Free-text field for pasting review snippets.
-- [x] **Pain Point Tags**: Categorize pain points (Service, Preis, Erreichbarkeit, Qualität).
-- [x] **Pain Point Count**: Contribute tagged pain points to scoring.
+- [x] Vollständiger Analysebericht mit SWOT-Matrix
+- [x] Target Persona (Demografie, Motivationen, Schmerzpunkte)
+- [x] Erlösmodelle (3 Empfehlungen mit Begründung)
+- [x] Go-to-Market-Strategie (erster Monat, erste 3 Monate)
+- [x] Organische Suchergebnisse & „People Also Ask" via Serper API
+- [x] Google Maps Konkurrenzdaten via Serper API
+- [x] Simulations-Modus (vollständig offline ohne API-Key)
+- [x] Export als Markdown-Datei
 
-### 2.5 Evidence Quality Enhancement (Abgeschlossen)
-- [x] **Granular Progress**: Show completion percentage per checklist category.
-- [x] **Confidence Score**: Weighted confidence based on data completeness.
-- [x] **Visual Progress Bar**: Replace simple badge with detailed progress visualization.
+---
 
-### 2.6 Shortened Market Analysis (Verkürzte Marktanalyse) (Abgeschlossen)
-- [x] **Logic Engine**: Local evaluation of demand, competition, and strategy.
-- [x] **Interactive UI**: One-click analysis generation with loading states.
-- [x] **Professional Report**: Structured textual summary with actionable next steps.
+## ✅ Phase 3: Ideen-Generator & Vergleich
 
-## ✅ Phase 3: Business Idea Generator (Abgeschlossen)
-Suggest possible local business ideas based on user-provided research signals.
+- [x] Ideen ableiten aus Suchbegriffen + Interessen (Mock-KI)
+- [x] Auto-Populate: abgeleitete Idee direkt in Validierung übernehmen
+- [x] CompareView: Ideen nebeneinander vergleichen
+- [x] Winner-Highlighting: Score-Bars, Rang-Badges, beste Werte hervorgehoben
+- [x] Detailvergleichs-Tabelle mit allen Metriken
 
-- [x] **Idea Derivation Logic**: Local algorithm to generate improvement suggestions and pivots (B2B, Subscriptions, Nicheing) based on weaknesses.
-- [x] **Generator Input Form**: Region, interest areas, keyword lists, service categories.
-- [x] **Hypothesis Marking**: All generated ideas clearly labeled as unvalidated hypotheses.
-- [x] **Auto-Population**: Generated ideas pre-fill the scanner form for immediate validation.
-- [x] **Constraints**: No scraping, no paid APIs, all suggestions must be explainable. (Serper.dev integration initiated via UI).
+---
 
-## ✅ Phase 4: Future Considerations (Abgeschlossen)
-- [x] **Data Export**: Export validated idea reports as Markdown (implemented).
-- [x] **Advanced Aesthetics**: Premium design system with cards, grids, and animations.
-- [x] **AI-Driven Scout**: Simplified, tabbed interface for rapid validation and derivation.
-- [x] **Comparison Mode**: Side-by-side comparison of multiple validated ideas (implemented in Scout UI).
-- [x] **Custom Weighting**: Allow users to adjust the scoring algorithm parameters (implemented).
+## ✅ Phase 4: Design-System & Architektur
 
-## 🏁 Project Summary
-The Local Demand Scanner has successfully evolved into **Ideen Scout**—a premium, local-first AI business validator. It combines deep heuristic scoring with a streamlined user experience to provide professional-grade market insights in seconds.
+- [x] CSS Custom Properties (`:root` mit 50+ semantischen Tokens)
+- [x] Alle Hex-Farben in Variablen überführt (info, danger, success, warning, orange, teal, slate, sky …)
+- [x] App.tsx von ~840 auf ~230 Zeilen reduziert (Monolith → Shell)
+- [x] Komponenten-Split: `HomeView`, `EvaluateView`, `DiscoverView`, `CompareView`
+- [x] `.flex-row` Utility-Klasse, `button:disabled`-Styling
+- [x] Mobile-Breakpoints bei 768px und 480px
+- [x] `sessionStorage` statt `localStorage` für API-Key (Security)
+- [x] In-Page Error-Banner statt `alert()`
+- [x] `aria-label` auf Delete-Buttons, `focus-visible` Outline
+
+---
+
+## ✅ Phase 5: Scoring-Transparenz & What-If-Simulator
+
+- [x] **Score-Aufschlüsselung**: 6 Komponenten als farbige Balken (grün/gelb/rot)
+- [x] **What-If-Simulator**: 8 Schieberegler + Trend-Dropdown für hypothetische Szenarien
+- [x] Real-time Neuberechnung ohne gespeicherte Daten zu verändern
+- [x] Delta-Badges an jedem Balken (↑+12 / ↓−8)
+- [x] Original- vs. Simulations-Score-Vergleich mit Diff-Anzeige
+- [x] Ghost-Bars: originale Werte bleiben als Referenz sichtbar
+
+---
+
+## ✅ Phase 6: Portfolio-Filter
+
+- [x] **Freitextsuche** über Titel, Region, Zielgruppe
+- [x] **Regions-Filter** (Dropdown, dynamisch aus gespeicherten Ideen)
+- [x] **Mindest-Score-Filter** (≥ 25 / 50 / 70 / 85)
+- [x] **Sortierung** nach Datum, Score, Titel, Region (auf-/absteigend)
+- [x] Zähler "X / Y" zeigt gefilterte vs. Gesamt-Ideen
+- [x] Score-Badges und Mini-Balken direkt in der Ideen-Karte
+
+---
+
+## 🔭 Mögliche nächste Schritte
+
+### Features
+
+- [ ] **JSON/CSV Export + Import** — Datenportabilität zwischen Geräten, Backup/Restore
+- [ ] **Financial Feasibility** — CAC/LTV-Schätzung, Break-Even, Business-Model-Canvas
+- [ ] **PDF-Export** — Teilbarer Report für Investoren/Mentoren
+- [ ] **Dark Mode** — CSS Custom Properties machen das straightforward
+- [ ] **Component Tests** — bisher nur `lib/` getestet, keine React-Komponenten-Tests
+
+### Infrastruktur
+
+- [ ] **Backend-Proxy** für API-Key (für öffentliches Deployment)
+- [ ] **PWA** — Service Worker + Manifest für Installation
+- [ ] **i18n** — Englische Übersetzung (Strings aktuell nur Deutsch)
+
+---
+
+## Tech Stack
+
+| Schicht | Technologie |
+|---|---|
+| Framework | React 19 |
+| Sprache | TypeScript 6 |
+| Build | Vite 8 |
+| Tests | Vitest 4 (21 Tests) |
+| Styling | Vanilla CSS mit Custom Properties |
+| Daten | localStorage (offline-first) |
+| API | Serper.dev (optional, Google Maps + Suche) |
