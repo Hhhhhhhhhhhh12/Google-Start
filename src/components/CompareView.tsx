@@ -17,9 +17,9 @@ export default function CompareView({ ideas, onOpenIdea }: CompareViewProps) {
     <div className="dashboard-grid single-col">
       <section className="panel results-panel fade-in">
         <div className="panel-header">
-          <h2>Ideen-Vergleich</h2>
+          <h2>Idea Comparison</h2>
           {validatedIdeas.length >= 2 && (
-            <span className="compare-count">{validatedIdeas.length} validierte Ideen</span>
+            <span className="compare-count">{validatedIdeas.length} validated ideas</span>
           )}
         </div>
 
@@ -27,10 +27,10 @@ export default function CompareView({ ideas, onOpenIdea }: CompareViewProps) {
           <div className="compare-empty">
             <p>
               {ideas.length === 0
-                ? '📝 Keine Ideen gespeichert. Starte mit der Validierung!'
+                ? '📝 No ideas saved. Start with validation!'
                 : ideas.length === 1
-                ? '➕ Nur 1 Idee vorhanden. Validiere eine weitere zum Vergleichen.'
-                : `🔍 ${ideas.length} Ideen gespeichert, aber nur ${ideas.filter(i => i.marketAnalysis).length} validiert. Validiere mindestens 2 zum Vergleichen.`}
+                ? '➕ Only 1 idea found. Validate another one to compare.'
+                : `🔍 ${ideas.length} ideas saved, but only ${ideas.filter(i => i.marketAnalysis).length} validated. Validate at least 2 to compare.`}
             </p>
           </div>
         ) : (
@@ -57,15 +57,15 @@ export default function CompareView({ ideas, onOpenIdea }: CompareViewProps) {
                       />
                     </div>
                     <h4 className="compare-idea-title">{idea.title}</h4>
-                    <p className="compare-idea-region">{idea.region || 'Keine Region'}</p>
+                    <p className="compare-idea-region">{idea.region || 'No Region'}</p>
                     {isWinner && (
-                      <span className="compare-winner-badge">Beste Idee</span>
+                      <span className="compare-winner-badge">Best Idea</span>
                     )}
                     <button
                       className="btn-outline small compare-open-btn"
                       onClick={() => onOpenIdea(idea)}
                     >
-                      Öffnen
+                      Open
                     </button>
                   </div>
                 )
@@ -76,7 +76,7 @@ export default function CompareView({ ideas, onOpenIdea }: CompareViewProps) {
               <table className="compare-table">
                 <thead>
                   <tr>
-                    <th className="compare-metric-col">Metrik</th>
+                    <th className="compare-metric-col">Metric</th>
                     {validatedIdeas.map((idea, idx) => (
                       <th
                         key={idea.id}
@@ -92,7 +92,7 @@ export default function CompareView({ ideas, onOpenIdea }: CompareViewProps) {
                 </thead>
                 <tbody>
                   <tr>
-                    <td className="compare-metric-col">Gesamt-Score</td>
+                    <td className="compare-metric-col">Total Score</td>
                     {validatedIdeas.map(idea => {
                       const score = idea.marketAnalysis!.scoreAtGeneration
                       return (
@@ -103,13 +103,13 @@ export default function CompareView({ ideas, onOpenIdea }: CompareViewProps) {
                     })}
                   </tr>
                   <tr>
-                    <td className="compare-metric-col">Suchvolumen</td>
+                    <td className="compare-metric-col">Search Volume</td>
                     {validatedIdeas.map(idea => (
                       <td key={idea.id}>{idea.marketAnalysis!.metrics.searchVolume}</td>
                     ))}
                   </tr>
                   <tr>
-                    <td className="compare-metric-col">Konkurrenz</td>
+                    <td className="compare-metric-col">Competition</td>
                     {validatedIdeas.map(idea => (
                       <td key={idea.id}>{idea.marketAnalysis!.metrics.competition}</td>
                     ))}
@@ -127,7 +127,7 @@ export default function CompareView({ ideas, onOpenIdea }: CompareViewProps) {
                     ))}
                   </tr>
                   <tr>
-                    <td className="compare-metric-col">Daten-Qualität</td>
+                    <td className="compare-metric-col">Data Quality</td>
                     {validatedIdeas.map(idea => (
                       <td key={idea.id}>
                         <span className={`quality-badge ${idea.marketAnalysis!.evidenceQuality ?? 'incomplete'}`}>
@@ -137,7 +137,7 @@ export default function CompareView({ ideas, onOpenIdea }: CompareViewProps) {
                     ))}
                   </tr>
                   <tr>
-                    <td className="compare-metric-col">Fazit</td>
+                    <td className="compare-metric-col">Summary</td>
                     {validatedIdeas.map(idea => (
                       <td key={idea.id} className="compare-verdict-cell">
                         {idea.marketAnalysis!.verdict}
@@ -152,7 +152,7 @@ export default function CompareView({ ideas, onOpenIdea }: CompareViewProps) {
                           className="btn-outline small"
                           onClick={() => onOpenIdea(idea)}
                         >
-                          Öffnen
+                          Open
                         </button>
                       </td>
                     ))}

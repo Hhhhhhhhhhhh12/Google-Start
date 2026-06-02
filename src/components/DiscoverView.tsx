@@ -30,32 +30,32 @@ export default function DiscoverView({
       <section className="panel form-panel">
         <div className="form-row">
           <div className="form-group">
-            <label htmlFor="searchTerms">Suchtrends / Keywords</label>
+            <label htmlFor="searchTerms">Search Trends / Keywords</label>
             <input
               id="searchTerms"
               value={deriveSearchTerms}
               onChange={e => setDeriveSearchTerms(e.target.value)}
-              placeholder="z.B. Photovoltaik Reinigung"
+              placeholder="e.g. Solar Panel Cleaning"
             />
           </div>
           <div className="form-group">
-            <label htmlFor="deriveRegion">Ziel-Region</label>
+            <label htmlFor="deriveRegion">Target Region</label>
             <input
               id="deriveRegion"
               value={deriveRegion}
               onChange={e => setDeriveRegion(e.target.value)}
-              placeholder="z.B. Hamburg"
+              placeholder="e.g. New York"
             />
           </div>
         </div>
         <div className="form-group">
-          <label htmlFor="interests">Interessen / Branchen</label>
+          <label htmlFor="interests">Interests / Industries</label>
           <textarea
             id="interests"
             rows={2}
             value={deriveInterests}
             onChange={e => setDeriveInterests(e.target.value)}
-            placeholder="z.B. Handwerk, Nachhaltigkeit, Senioren..."
+            placeholder="e.g. Crafts, Sustainability, Seniors..."
           />
         </div>
         <button
@@ -63,15 +63,15 @@ export default function DiscoverView({
           onClick={onDerive}
           disabled={isDeriving || (!deriveSearchTerms && !deriveInterests)}
         >
-          {isDeriving ? 'Generiere Ideen...' : 'Ideen ableiten'}
+          {isDeriving ? 'Generating Ideas...' : 'Derive Ideas'}
         </button>
       </section>
 
       {derivedIdeas && (
         <section className="panel results-panel fade-in">
           <div className="panel-header">
-            <h2>Abgeleitete Geschäftsideen</h2>
-            <span className="badge-hypothesis">Hypothesen-Modus</span>
+            <h2>Derived Business Ideas</h2>
+            <span className="badge-hypothesis">Hypothesis Mode</span>
           </div>
           <div className="ideas-list">
             {derivedIdeas.map((idea, idx) => (
@@ -82,14 +82,14 @@ export default function DiscoverView({
                     className="btn-outline small"
                     onClick={() => onAutoPopulate(idea)}
                   >
-                    Validieren
+                    Validate
                   </button>
                 </div>
                 <p>
-                  <strong>Warum:</strong> {idea.reason}
+                  <strong>Why:</strong> {idea.reason}
                 </p>
                 <p>
-                  <strong>Potenzial:</strong> {idea.potential}
+                  <strong>Potential:</strong> {idea.potential}
                 </p>
               </div>
             ))}

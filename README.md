@@ -2,6 +2,8 @@
 
 **Lokaler Business-Ideen-Validator** — datenbasierte Marktanalyse ohne Cloud, ohne Abo.
 
+[🇬🇧 English](./README.en.md)
+
 ![React](https://img.shields.io/badge/React-19-61dafb?logo=react&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-6-3178c6?logo=typescript&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-8-646cff?logo=vite&logoColor=white)

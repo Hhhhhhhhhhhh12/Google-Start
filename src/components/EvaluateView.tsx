@@ -63,17 +63,17 @@ export default function EvaluateView({
           <div className="error-banner" role="alert">
             <span>⚠</span>
             <span>{evaluationError}</span>
-            <button className="btn-icon" onClick={onClearError} aria-label="Fehler schließen">✕</button>
+            <button className="btn-icon" onClick={onClearError} aria-label="Close error">✕</button>
           </div>
         )}
 
         <div className="form-group">
-          <label htmlFor="title">Deine Geschäftsidee</label>
+          <label htmlFor="title">Your Business Idea</label>
           <input
             id="title"
             value={ideaTitle}
             onChange={e => setIdeaTitle(e.target.value)}
-            placeholder="z.B. Mobiler Fahrrad-Reparaturservice"
+            placeholder="e.g. Mobile Bicycle Repair Service"
           />
         </div>
 
@@ -84,24 +84,24 @@ export default function EvaluateView({
               id="region"
               value={ideaRegion}
               onChange={e => setIdeaRegion(e.target.value)}
-              placeholder="z.B. Berlin Kreuzberg"
+              placeholder="e.g. Berlin Kreuzberg"
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="targetAudience">Zielgruppe (optional)</label>
+            <label htmlFor="targetAudience">Target Audience (optional)</label>
             <input
               id="targetAudience"
               value={targetAudience}
               onChange={e => setTargetAudience(e.target.value)}
-              placeholder="z.B. Senioren, Pendler..."
+              placeholder="e.g. Seniors, Commuters..."
             />
           </div>
         </div>
 
         <div className="advanced-toggle">
           <button className="btn-text" onClick={() => setShowAdvanced(!showAdvanced)}>
-            {showAdvanced ? '− Weniger Einstellungen' : '+ Erweiterte Gewichtung'}
+            {showAdvanced ? '− Less Settings' : '+ Advanced Weighting'}
           </button>
         </div>
 
@@ -110,10 +110,10 @@ export default function EvaluateView({
             <div className="weight-group">
               {(
                 [
-                  ['demand', 'Markt-Nachfrage'],
-                  ['competition', 'Wettbewerb'],
-                  ['urgency', 'Dringlichkeit'],
-                  ['profitability', 'Profitabilität'],
+                  ['demand', 'Market Demand'],
+                  ['competition', 'Competition'],
+                  ['urgency', 'Urgency'],
+                  ['profitability', 'Profitability'],
                 ] as const
               ).map(([key, label]) => (
                 <div className="weight-row" key={key}>
@@ -129,7 +129,7 @@ export default function EvaluateView({
                 </div>
               ))}
               <p className="helper-text">
-                Passe an, welche Faktoren für deine Entscheidung am wichtigsten sind.
+                Adjust which factors matter most to your decision.
               </p>
             </div>
           </div>
@@ -140,7 +140,7 @@ export default function EvaluateView({
           onClick={onEvaluate}
           disabled={isEvaluating || !ideaTitle}
         >
-          {isEvaluating ? 'Analysiere Daten...' : 'Zahlen & Fakten abrufen'}
+          {isEvaluating ? 'Analyzing data...' : 'Fetch Data & Facts'}
         </button>
       </section>
 
@@ -153,20 +153,20 @@ export default function EvaluateView({
             </div>
             <div className="report-intro">
               <div className="flex-row">
-                <h2>Analyse-Ergebnis</h2>
-                {serperApiKey && <span className="badge-live">LIVE-DATEN SCAN</span>}
+                <h2>Analysis Result</h2>
+                {serperApiKey && <span className="badge-live">LIVE DATA SCAN</span>}
               </div>
               <p className="summary-text">{report.verdict}</p>
 
               {report.evidencePercent !== undefined && (
                 <div className="evidence-progress-container">
                   <div className="evidence-progress-header">
-                    <span className="evidence-label">DATEN-QUALITÄT</span>
+                    <span className="evidence-label">DATA QUALITY</span>
                     <span className={`quality-badge ${report.evidenceQuality}`}>
-                      {report.evidenceQuality === 'strong' ? 'Stark'
-                        : report.evidenceQuality === 'usable' ? 'Verwendbar'
-                        : report.evidenceQuality === 'weak' ? 'Schwach'
-                        : 'Unvollständig'}
+                      {report.evidenceQuality === 'strong' ? 'Strong'
+                        : report.evidenceQuality === 'usable' ? 'Usable'
+                        : report.evidenceQuality === 'weak' ? 'Weak'
+                        : 'Incomplete'}
                     </span>
                   </div>
                   <div className="progress-bar-bg">
@@ -176,7 +176,7 @@ export default function EvaluateView({
                     />
                   </div>
                   <p className="helper-text">
-                    {report.evidencePercent}% der Validierungsschritte abgeschlossen.
+                    {report.evidencePercent}% of validation steps completed.
                   </p>
                 </div>
               )}
@@ -184,13 +184,13 @@ export default function EvaluateView({
           </div>
 
           <div className="evidence-details">
-            <h4>Validierungs-Status</h4>
+            <h4>Validation Status</h4>
             <div className="evidence-grid">
               {[
-                ['keywordPlannerChecked', 'Keyword Volumen'],
-                ['googleMapsChecked', 'Lokale Konkurrenz'],
-                ['googleTrendsChecked', 'Trend Stabilität'],
-                ['reviewsChecked', 'Kunden-Feedback'],
+                ['keywordPlannerChecked', 'Keyword Volume'],
+                ['googleMapsChecked', 'Local Competition'],
+                ['googleTrendsChecked', 'Trend Stability'],
+                ['reviewsChecked', 'Customer Feedback'],
               ].map(([key, label]) => {
                 const checked = report.checklist?.[key as keyof typeof report.checklist]
                 return (
@@ -205,11 +205,11 @@ export default function EvaluateView({
 
           <div className="metrics-grid">
             <div className="metric-card">
-              <span className="metric-label">Konkurrenz</span>
+              <span className="metric-label">Competition</span>
               <span className="metric-value">{report.metrics.competition}</span>
             </div>
             <div className="metric-card">
-              <span className="metric-label">Suchvolumen</span>
+              <span className="metric-label">Search Volume</span>
               <span className="metric-value">{report.metrics.searchVolume}</span>
             </div>
             <div className="metric-card">
@@ -217,10 +217,10 @@ export default function EvaluateView({
               <span className="metric-value">{report.metrics.trend}</span>
             </div>
             <div className="metric-card highlight">
-              <span className="metric-label">Google Treffer</span>
+              <span className="metric-label">Google Results</span>
               <span className="metric-value">
                 {report.metrics.totalResults
-                  ? report.metrics.totalResults.toLocaleString('de-DE')
+                  ? report.metrics.totalResults.toLocaleString('en-US')
                   : '---'}
               </span>
             </div>
@@ -235,14 +235,14 @@ export default function EvaluateView({
 
           <div className="report-grid">
             <div className="report-column">
-              <h3>SWOT Analyse</h3>
+              <h3>SWOT Analysis</h3>
               <div className="swot-grid">
                 {(
                   [
-                    ['strengths', 'Stärken', 'strengths'],
-                    ['weaknesses', 'Schwächen', 'weaknesses'],
-                    ['opportunities', 'Chancen', 'opportunities'],
-                    ['threats', 'Risiken', 'threats'],
+                    ['strengths', 'Strengths', 'strengths'],
+                    ['weaknesses', 'Weaknesses', 'weaknesses'],
+                    ['opportunities', 'Opportunities', 'opportunities'],
+                    ['threats', 'Threats', 'threats'],
                   ] as const
                 ).map(([key, label, cls]) => (
                   <div key={key} className={`swot-item ${cls}`}>
@@ -262,10 +262,10 @@ export default function EvaluateView({
               <div className="persona-card">
                 <h4>{report.persona.name}</h4>
                 <p><strong>Pains:</strong> {report.persona.painPoints.join(', ')}</p>
-                <p><strong>Zahlungsbereitschaft:</strong> {report.persona.willingnessToPay}</p>
+                <p><strong>Willingness to Pay:</strong> {report.persona.willingnessToPay}</p>
               </div>
 
-              <h3>Erlös-Modelle</h3>
+              <h3>Revenue Models</h3>
               <ul className="revenue-list">
                 {report.revenueModels.map((m, i) => (
                   <li key={i}>{m}</li>
@@ -275,12 +275,12 @@ export default function EvaluateView({
           </div>
 
           <div className="strategy-box">
-            <h3>Go-to-Market Strategie</h3>
+            <h3>Go-to-Market Strategy</h3>
             <p>{report.strategyRecommendation}</p>
           </div>
 
           <div className="next-steps-container">
-            <h3>Nächste Schritte</h3>
+            <h3>Next Steps</h3>
             <div className="steps-list">
               {report.nextSteps.map((step, idx) => (
                 <div key={idx} className="step-item">
@@ -293,7 +293,7 @@ export default function EvaluateView({
 
           {report.organicEvidence && report.organicEvidence.length > 0 && (
             <div className="evidence-section">
-              <h3>Market Evidence (Google Ergebnisse)</h3>
+              <h3>Market Evidence (Google Results)</h3>
               <div className="organic-list">
                 {report.organicEvidence.map((item, i) => (
                   <div key={i} className="organic-item">
@@ -312,7 +312,7 @@ export default function EvaluateView({
             <div className="insights-grid">
               {report.peopleAlsoAsk && report.peopleAlsoAsk.length > 0 && (
                 <div className="insight-column">
-                  <h3>Kunden-Fragen (People Also Ask)</h3>
+                  <h3>Customer Questions (People Also Ask)</h3>
                   <ul className="insight-list">
                     {report.peopleAlsoAsk.map((q, i) => (
                       <li key={i} className="insight-item question">{q}</li>
@@ -322,7 +322,7 @@ export default function EvaluateView({
               )}
               {report.relatedSearches && report.relatedSearches.length > 0 && (
                 <div className="insight-column">
-                  <h3>Verwandte Segmente</h3>
+                  <h3>Related Segments</h3>
                   <div className="insight-chips">
                     {report.relatedSearches.map((r, i) => (
                       <span key={i} className="insight-chip">{r}</span>
@@ -334,7 +334,7 @@ export default function EvaluateView({
           )}
 
           <div className="sources-section">
-            <h4>Daten-Herkunft</h4>
+            <h4>Data Sources</h4>
             <ul>
               {report.sources.map((source, idx) => (
                 <li key={idx}>✓ {source}</li>
@@ -344,23 +344,23 @@ export default function EvaluateView({
 
           {improvements.length > 0 && (
             <div className="improvements-section">
-              <h3>Verbesserungsvorschläge</h3>
+              <h3>Improvement Suggestions</h3>
               <div className="suggestions-list">
                 {improvements.map((s) => (
                   <div key={s.id} className={`suggestion-card ${s.impact}`}>
                     <div className="suggestion-header">
                       <span className={`suggestion-type-badge type-${s.type}`}>
-                        {s.type === 'pivot' ? 'Pivot' : s.type === 'niche' ? 'Nische'
-                          : s.type === 'premium' ? 'Premium' : 'Strategie'}
+                        {s.type === 'pivot' ? 'Pivot' : s.type === 'niche' ? 'Niche'
+                          : s.type === 'premium' ? 'Premium' : 'Strategy'}
                       </span>
                       <span className={`suggestion-impact-badge impact-${s.impact}`}>
-                        {s.impact === 'high' ? 'Hohe Wirkung'
-                          : s.impact === 'medium' ? 'Mittlere Wirkung' : 'Geringe Wirkung'}
+                        {s.impact === 'high' ? 'High Impact'
+                          : s.impact === 'medium' ? 'Medium Impact' : 'Low Impact'}
                       </span>
                     </div>
                     <h4>{s.title}</h4>
                     <p className="suggestion-desc">{s.description}</p>
-                    <div className="suggestion-reason"><strong>Warum: </strong>{s.reason}</div>
+                    <div className="suggestion-reason"><strong>Why: </strong>{s.reason}</div>
                   </div>
                 ))}
               </div>
@@ -377,7 +377,7 @@ export default function EvaluateView({
                   rel="noopener noreferrer"
                   className="trends-link-chip"
                 >
-                  Spezifisch: "{ideaTitle}"
+                  Specific: "{ideaTitle}"
                 </a>
                 <a
                   href={`https://trends.google.com/trends/explore?q=${encodeURIComponent(ideaTitle.split(' ').slice(0, 2).join(' '))}&geo=DE`}
@@ -385,7 +385,7 @@ export default function EvaluateView({
                   rel="noopener noreferrer"
                   className="trends-link-chip secondary"
                 >
-                  Allgemeiner: "{ideaTitle.split(' ').slice(0, 2).join(' ')}"
+                  General: "{ideaTitle.split(' ').slice(0, 2).join(' ')}"
                 </a>
               </div>
             </div>
@@ -396,7 +396,7 @@ export default function EvaluateView({
                   <polyline points="7 10 12 15 17 10" />
                   <line x1="12" y1="15" x2="12" y2="3" />
                 </svg>
-                <span>Bericht speichern</span>
+                <span>Save Report</span>
               </button>
             </div>
           </div>

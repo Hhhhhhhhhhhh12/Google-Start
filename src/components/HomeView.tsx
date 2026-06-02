@@ -61,10 +61,10 @@ export default function HomeView({ ideas, activeIdeaId: _activeIdeaId, onOpenIde
           cmp = (a.marketAnalysis?.scoreAtGeneration ?? -1) - (b.marketAnalysis?.scoreAtGeneration ?? -1)
           break
         case 'title':
-          cmp = a.title.localeCompare(b.title, 'de')
+          cmp = a.title.localeCompare(b.title, 'en')
           break
         case 'region':
-          cmp = (a.region || '').localeCompare(b.region || '', 'de')
+          cmp = (a.region || '').localeCompare(b.region || '', 'en')
           break
         case 'date':
         default:
@@ -97,14 +97,14 @@ export default function HomeView({ ideas, activeIdeaId: _activeIdeaId, onOpenIde
     <div className="dashboard-grid single-col">
       <section className="panel form-panel">
         <div className="home-header">
-          <h2>Gespeicherte Ideen</h2>
+          <h2>Saved Ideas</h2>
           {ideas.length > 0 && (
             <span className="home-count">{filtered.length} / {ideas.length}</span>
           )}
         </div>
 
         {ideas.length === 0 ? (
-          <p className="empty-state-text">Noch keine Ideen gespeichert. Starte mit der Validierung oder Ableitung!</p>
+          <p className="empty-state-text">No ideas saved yet. Start with validation or derivation!</p>
         ) : (
           <>
             {/* Filter & Sort Controls */}
@@ -112,7 +112,7 @@ export default function HomeView({ ideas, activeIdeaId: _activeIdeaId, onOpenIde
               <input
                 className="filter-search"
                 type="text"
-                placeholder="Suchen…"
+                placeholder="Search…"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
               />
@@ -122,7 +122,7 @@ export default function HomeView({ ideas, activeIdeaId: _activeIdeaId, onOpenIde
                 value={filterRegion}
                 onChange={e => setFilterRegion(e.target.value)}
               >
-                <option value="">Alle Regionen</option>
+                <option value="">All Regions</option>
                 {regions.map(r => (
                   <option key={r} value={r}>{r}</option>
                 ))}
@@ -133,7 +133,7 @@ export default function HomeView({ ideas, activeIdeaId: _activeIdeaId, onOpenIde
                 value={filterMinScore}
                 onChange={e => setFilterMinScore(Number(e.target.value))}
               >
-                <option value={0}>Alle Scores</option>
+                <option value={0}>All Scores</option>
                 <option value={25}>Score ≥ 25</option>
                 <option value={50}>Score ≥ 50</option>
                 <option value={70}>Score ≥ 70</option>
@@ -142,21 +142,21 @@ export default function HomeView({ ideas, activeIdeaId: _activeIdeaId, onOpenIde
 
               {hasFilters && (
                 <button className="btn-ghost filter-clear" onClick={clearFilters}>
-                  Filter leeren
+                  Clear Filters
                 </button>
               )}
             </div>
 
             {/* Sort Controls */}
             <div className="home-sort-row">
-              <span className="sort-label">Sortieren:</span>
+              <span className="sort-label">Sort:</span>
               {(['date', 'score', 'title', 'region'] as SortKey[]).map(key => (
                 <button
                   key={key}
                   className={`sort-btn${sortKey === key ? ' active' : ''}`}
                   onClick={() => handleSort(key)}
                 >
-                  {key === 'date' ? 'Datum' : key === 'score' ? 'Score' : key === 'title' ? 'Titel' : 'Region'}
+                  {key === 'date' ? 'Date' : key === 'score' ? 'Score' : key === 'title' ? 'Title' : 'Region'}
                   {sortKey === key && (
                     <span className="sort-arrow">{sortDir === 'desc' ? '↓' : '↑'}</span>
                   )}
@@ -165,7 +165,7 @@ export default function HomeView({ ideas, activeIdeaId: _activeIdeaId, onOpenIde
             </div>
 
             {filtered.length === 0 ? (
-              <p className="empty-state-text">Keine Ideen entsprechen den Filtern.</p>
+              <p className="empty-state-text">No ideas match the filters.</p>
             ) : (
               <div className="ideas-list">
                 {filtered.map((idea) => {
@@ -176,21 +176,21 @@ export default function HomeView({ ideas, activeIdeaId: _activeIdeaId, onOpenIde
                       <div className="idea-card-header">
                         <div className="idea-card-meta">
                           <h3>{idea.title}</h3>
-                          <span className="idea-region-tag">{idea.region || 'Keine Region'}</span>
+                          <span className="idea-region-tag">{idea.region || 'No Region'}</span>
                         </div>
                         <div className="flex-row">
                           <button
                             className="btn-outline small"
                             onClick={() => onOpenIdea(idea)}
                           >
-                            Öffnen
+                            Open
                           </button>
                           <button
                             className="btn-outline small danger"
                             onClick={() => onDeleteIdea(idea.id)}
-                            aria-label={`${idea.title} löschen`}
+                            aria-label={`Delete ${idea.title}`}
                           >
-                            Löschen
+                            Delete
                           </button>
                         </div>
                       </div>
@@ -208,10 +208,10 @@ export default function HomeView({ ideas, activeIdeaId: _activeIdeaId, onOpenIde
                             </div>
                           </div>
                         ) : (
-                          <span className="idea-no-score">Noch nicht analysiert</span>
+                          <span className="idea-no-score">Not yet analyzed</span>
                         )}
                         <div className="idea-card-details">
-                          {idea.targetAudience && idea.targetAudience !== 'Zielgruppe offen' && (
+                          {idea.targetAudience && idea.targetAudience !== 'Open target audience' && (
                             <span className="idea-detail-tag">👥 {idea.targetAudience}</span>
                           )}
                           {idea.trendDirection && (
@@ -221,7 +221,7 @@ export default function HomeView({ ideas, activeIdeaId: _activeIdeaId, onOpenIde
                           )}
                           {idea.createdAt && (
                             <span className="idea-detail-date">
-                              {new Date(idea.createdAt).toLocaleDateString('de-DE', { day: '2-digit', month: 'short', year: '2-digit' })}
+                              {new Date(idea.createdAt).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: '2-digit' })}
                             </span>
                           )}
                         </div>

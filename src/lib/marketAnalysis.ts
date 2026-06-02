@@ -9,33 +9,33 @@ export function generateMarketAnalysis(idea: BusinessIdea): MarketAnalysis {
   // 1. Verdict logic
   let verdict = '';
   if (scores.finalScore >= 80) {
-    verdict = 'Exzellentes Potenzial: Alle Signale stehen auf Grün. Hohe Nachfrage trifft auf überwindbare Konkurrenz.';
+    verdict = 'Excellent potential: All signals are green. High demand meets surmountable competition.';
   } else if (scores.finalScore >= 60) {
-    verdict = 'Gutes Nischen-Potenzial: Die Idee ist solide, erfordert aber eine präzise Positionierung oder Spezialisierung.';
+    verdict = 'Good niche potential: The idea is solid but requires precise positioning or specialization.';
   } else if (scores.finalScore >= 40) {
-    verdict = 'Herausfordernd: Es gibt Marktsignale, aber entweder ist der Wettbewerb stark oder die Zahlungsbereitschaft gering.';
+    verdict = 'Challenging: There are market signals, but either competition is strong or willingness to pay is low.';
   } else {
-    verdict = 'Hohes Risiko: Aktuelle Daten zeigen geringe Erfolgsaussichten. Ein Pivot oder tiefergehende Recherche wird empfohlen.';
+    verdict = 'High risk: Current data shows low chances of success. A pivot or deeper research is recommended.';
   }
 
   // 2. Demand Analysis
   let demandAnalysis = '';
   if (totalVolume > 1000) {
-    demandAnalysis = `Starke Marktnachfrage mit ca. ${totalVolume} Suchanfragen pro Monat. `;
+    demandAnalysis = `Strong market demand with approx. ${totalVolume} searches per month. `;
   } else if (totalVolume > 0) {
-    demandAnalysis = `Moderate Nachfrage (${totalVolume}/Monat). Fokus auf Long-tail Keywords empfohlen. `;
+    demandAnalysis = `Moderate demand (${totalVolume}/month). Focus on long-tail keywords recommended. `;
   } else {
-    demandAnalysis = 'Nachfrage-Daten fehlen noch. ';
+    demandAnalysis = 'Demand data not yet available. ';
   }
 
   if (idea.trendDirection === 'rising') {
-    demandAnalysis += 'Der Trend ist wachsend, was auf ein steigendes Interesse in der Zukunft hindeutet.';
+    demandAnalysis += 'The trend is growing, indicating increasing interest in the future.';
   } else if (idea.trendDirection === 'seasonal') {
-    demandAnalysis += 'Vorsicht: Das Geschäft ist saisonabhängig. Cashflow-Planung ist kritisch.';
+    demandAnalysis += 'Caution: The business is seasonal. Cash flow planning is critical.';
   } else if (idea.trendDirection === 'declining') {
-    demandAnalysis += 'Der Markt scheint zu schrumpfen. Ein Einstieg sollte kritisch hinterfragt werden.';
+    demandAnalysis += 'The market appears to be shrinking. Entry should be critically questioned.';
   } else {
-    demandAnalysis += 'Das Marktinteresse ist stabil.';
+    demandAnalysis += 'Market interest is stable.';
   }
 
   // 3. Competition Analysis
@@ -43,9 +43,9 @@ export function generateMarketAnalysis(idea: BusinessIdea): MarketAnalysis {
   if (idea.competitors.length > 0) {
     const avgRating = idea.competitors.reduce((s, c) => s + c.rating, 0) / idea.competitors.length;
     if (avgRating < 3.5) {
-      competitionAnalysis += `Die bestehende Konkurrenz hat schwache Bewertungen (Schnitt: ${avgRating.toFixed(1)}). Dies ist eine massive Chance für einen Qualitäts-Markteintritt.`;
+      competitionAnalysis += `Existing competition has weak ratings (avg: ${avgRating.toFixed(1)}). This is a massive opportunity for a quality market entry.`;
     } else if (avgRating > 4.5) {
-      competitionAnalysis += 'Die Konkurrenz ist qualitativ sehr stark aufgestellt. Ein reiner Qualitäts-Wettbewerb wird schwierig.';
+      competitionAnalysis += 'The competition is very strong in quality. Competing on quality alone will be difficult.';
     }
   }
 
@@ -54,54 +54,54 @@ export function generateMarketAnalysis(idea: BusinessIdea): MarketAnalysis {
   const hasServicePains = idea.painPointEntries.some(p => p.category === 'service' || p.category === 'availability');
   
   if (hasServicePains && idea.willingnessToPay >= 7) {
-    strategyRecommendation = 'Premium-Service-Strategie: Positioniere dich als die zuverlässige, hochpreisige Alternative zu den überlasteten Anbietern vor Ort.';
+    strategyRecommendation = 'Premium Service Strategy: Position yourself as the reliable, high-priced alternative to the overloaded local providers.';
   } else if (idea.professionalCompetitorCount > 5) {
-    strategyRecommendation = `Hyper-Nischen-Fokus: Spezialisiere dich auf ${idea.targetAudience || 'eine extrem spitze Zielgruppe'}, um den etablierten Profis auszuweichen.`;
+    strategyRecommendation = `Hyper-Niche Focus: Specialize in ${idea.targetAudience || 'a very narrow target group'} to avoid the established professionals.`;
   } else if (idea.urgency >= 8) {
-    strategyRecommendation = 'Speed-to-Market: Da das Problem für Kunden akut ist, gewinnst du durch schnelle Reaktionszeit und sofortige Verfügbarkeit.';
+    strategyRecommendation = 'Speed-to-Market: Since the problem is acute for customers, you win through fast response time and immediate availability.';
   } else {
-    strategyRecommendation = 'Standard-Eintritt: Konzentriere dich auf SEO und lokale Sichtbarkeit, um organisch mit dem Markt zu wachsen.';
+    strategyRecommendation = 'Standard Entry: Focus on SEO and local visibility to grow organically with the market.';
   }
 
   // 5. Next Steps
   const nextSteps: string[] = [];
-  if (!idea.checklist.keywordPlannerChecked) nextSteps.push('Keyword-Volumen im Google Keyword Planner validieren.');
-  if (idea.competitors.length < 3) nextSteps.push('Mindestens 3-5 lokale Konkurrenten im Detail analysieren.');
-  if (idea.painPointEntries.length < 3) nextSteps.push('Mehr Rezensionen lesen, um spezifische Probleme der Kunden zu finden.');
+  if (!idea.checklist.keywordPlannerChecked) nextSteps.push('Validate keyword volume in Google Keyword Planner.');
+  if (idea.competitors.length < 3) nextSteps.push('Analyze at least 3–5 local competitors in detail.');
+  if (idea.painPointEntries.length < 3) nextSteps.push('Read more reviews to find specific customer pain points.');
   if (nextSteps.length === 0) {
-    nextSteps.push('Business-Plan Entwurf starten.');
-    nextSteps.push('Erste Landingpage für Test-Anzeigen (MVP) erstellen.');
+    nextSteps.push('Start drafting a business plan.');
+    nextSteps.push('Create a first landing page for test ads (MVP).');
   }
 
   // 6. SWOT Analysis (Logic-driven)
   const swot = {
     strengths: [
-      'Geringe Fixkosten im lokalen Setup',
-      idea.professionalCompetitorCount < 3 ? 'Wenig professionelle Konkurrenz' : 'Hohe Markttiefe',
-      'Direkter Kundenkontakt'
+      'Low fixed costs in a local setup',
+      idea.professionalCompetitorCount < 3 ? 'Little professional competition' : 'High market depth',
+      'Direct customer contact'
     ],
     weaknesses: [
-      'Abhängigkeit von lokaler Präsenz',
-      idea.trendDirection === 'seasonal' ? 'Saisonale Umsatzschwankungen' : 'Skalierung erfordert Personal',
+      'Dependency on local presence',
+      idea.trendDirection === 'seasonal' ? 'Seasonal revenue fluctuations' : 'Scaling requires staff',
     ],
     opportunities: [
-      'Expansion in Nachbarregionen',
-      'Digitalisierung des Buchungsprozesses',
-      'Abo-Modelle für Bestandskunden'
+      'Expansion into neighboring regions',
+      'Digitalization of the booking process',
+      'Subscription models for existing customers'
     ],
     threats: [
-      'Preiskampf durch Online-Plattformen',
-      'Fachkräftemangel bei Expansion',
+      'Price war from online platforms',
+      'Skilled labor shortage during expansion',
     ]
   };
 
   // 7. Persona Analysis
   const persona = {
-    name: idea.willingnessToPay > 7 ? 'Der qualitätsbewusste Premium-Kunde' : 'Der preisbewusste Pragmatiker',
-    painPoints: idea.painPointEntries.length > 0 
+    name: idea.willingnessToPay > 7 ? 'The quality-conscious premium customer' : 'The price-conscious pragmatist',
+    painPoints: idea.painPointEntries.length > 0
       ? idea.painPointEntries.slice(0, 3).map(p => p.text)
-      : ['Lange Wartezeiten', 'Unzuverlässige Dienstleister', 'Mangelnde Transparenz'],
-    willingnessToPay: idea.willingnessToPay > 7 ? 'Hoch' : 'Mittel bis Gering'
+      : ['Long waiting times', 'Unreliable service providers', 'Lack of transparency'],
+    willingnessToPay: idea.willingnessToPay > 7 ? 'High' : 'Medium to Low'
   };
 
   return {
@@ -111,25 +111,25 @@ export function generateMarketAnalysis(idea: BusinessIdea): MarketAnalysis {
     strategyRecommendation,
     nextSteps,
     metrics: {
-      competition: compVerdict.label === 'Unbekannt' ? 'Daten fehlen' : compVerdict.label,
-      searchVolume: totalVolume > 0 ? `${totalVolume.toLocaleString()} / Monat` : idea.checklist.keywordPlannerChecked ? 'Simuliert (Demo)' : 'API Key benötigt',
-      trend: idea.trendDirection === 'rising' ? 'Steigend' : idea.trendDirection === 'seasonal' ? 'Saisonal' : idea.trendDirection === 'declining' ? 'Sinkend' : 'Stabil',
-      cpc: idea.checklist.cpcChecked ? 'Daten vorhanden' : '---',
+      competition: compVerdict.label === 'Unknown' ? 'Data missing' : compVerdict.label,
+      searchVolume: totalVolume > 0 ? `${totalVolume.toLocaleString()} / month` : idea.checklist.keywordPlannerChecked ? 'Simulated (Demo)' : 'API Key required',
+      trend: idea.trendDirection === 'rising' ? 'Rising' : idea.trendDirection === 'seasonal' ? 'Seasonal' : idea.trendDirection === 'declining' ? 'Declining' : 'Stable',
+      cpc: idea.checklist.cpcChecked ? 'Data available' : '---',
       totalResults: idea.organicResults?.[0] ? undefined : 0
     },
     sources: [
       'Google Search (Live)',
       'Google Maps (Live)',
-      'Wettbewerbs-Scan',
+      'Competition Scan',
     ],
     organicEvidence: idea.organicResults,
     peopleAlsoAsk: idea.peopleAlsoAsk,
     relatedSearches: idea.relatedSearches,
     swot,
     persona,
-    revenueModels: idea.willingnessToPay > 7 
-      ? ['Premium-Einmalzahlung', 'Exklusiv-Wartung (Abo)', 'Service-Level-Agreements'] 
-      : ['Einmaliger Service-Fee', 'Material-Marge', 'Vermittlungsprovision'],
+    revenueModels: idea.willingnessToPay > 7
+      ? ['Premium One-Time Payment', 'Exclusive Maintenance (Subscription)', 'Service Level Agreements']
+      : ['One-Time Service Fee', 'Material Margin', 'Referral Commission'],
     generatedAt: Date.now(),
     scoreAtGeneration: scores.finalScore
   };

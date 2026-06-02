@@ -34,7 +34,7 @@ export async function evaluateIdeaMock(ideaTitle: string, region: string): Promi
     id: crypto.randomUUID(),
     title: ideaTitle,
     region: region,
-    targetAudience: 'Zielgruppe offen',
+    targetAudience: 'Open target audience',
     keywords: [ideaTitle],
     keywordData: [],
     competitorCount: 5, // Default assumptions for scout mode
@@ -67,20 +67,20 @@ export async function evaluateIdeaMock(ideaTitle: string, region: string): Promi
       resolve({
         demandScore: analysis.scoreAtGeneration,
         sources: [
-          'Google Keyword Planner (Heuristik)',
-          'Google Maps API (Heuristik)',
+          'Google Keyword Planner (Heuristic)',
+          'Google Maps API (Heuristic)',
           'Local Demand Engine',
         ],
         metrics: {
           competition: analysis.competitionAnalysis,
           searchVolume: analysis.demandAnalysis,
-          trend: 'Stabil bis Wachsend',
+          trend: 'Stable to Growing',
           cpc: '0.85€ - 2.40€',
         },
         summary: analysis.verdict,
         swot: analysis.swot,
         persona: analysis.persona,
-        revenueModels: ['Einmaliger Service-Fee', 'Wartungsvertrag (monatlich)', 'Ersatzteil-Marge'],
+        revenueModels: ['One-Time Service Fee', 'Maintenance Contract (monthly)', 'Parts Margin'],
         strategy: analysis.strategyRecommendation,
         nextSteps: analysis.nextSteps,
       });
@@ -100,15 +100,15 @@ export async function deriveIdeasMock(searchTerms: string): Promise<DerivedIdea[
       const terms = searchTerms.split(/[,\n]/).map(t => t.trim()).filter(t => t.length > 0);
       
       const results = generateHypothesisIdeas({
-        region: 'Lokal',
+        region: 'Local',
         interests: terms.slice(0, 3),
-        serviceCategories: ['Service', 'Dienstleistung', 'Mobil']
+        serviceCategories: ['Service', 'Mobile', 'On-Demand']
       });
 
       resolve(results.map(r => ({
-        title: r.title || 'Neue Idee',
-        reason: `Basierend auf Suchtrends für ${terms[0] || 'lokale Bedarfe'}.`,
-        potential: 'Hoch (Marktlücke vermutet)',
+        title: r.title || 'New Idea',
+        reason: `Based on search trends for ${terms[0] || 'local demand'}.`,
+        potential: 'High (market gap suspected)',
       })));
     }, 1500);
   });

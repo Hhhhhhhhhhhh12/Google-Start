@@ -184,37 +184,37 @@ export function getCompetitionVerdict(idea: BusinessIdea): { label: string; colo
     const profCount = idea.professionalCompetitorCount;
     const totalCount = idea.competitorCount;
     
-    if (totalCount === 0) return { label: 'Unbekannt', color: 'gray', description: 'Trage die Anzahl der lokalen Anbieter ein.' };
-    
+    if (totalCount === 0) return { label: 'Unknown', color: 'gray', description: 'Enter the number of local providers.' };
+
     const profShare = totalCount > 0 ? profCount / totalCount : 0;
-    
+
     if (profCount > 8 || profShare > 0.6) {
-        return { 
-            label: 'Viele starke Profis', 
-            color: '#ef4444', 
-            description: 'Der Markt ist fest in der Hand von etablierten Profis. Ein direkter Einstieg ist schwer.' 
+        return {
+            label: 'Many Strong Pros',
+            color: '#ef4444',
+            description: 'The market is firmly in the hands of established professionals. Direct entry is difficult.'
         };
     }
-    
+
     if (profCount > 3 || profShare > 0.3) {
-        return { 
-            label: 'Moderate Konkurrenz', 
-            color: '#f59e0b', 
-            description: 'Es gibt einige starke Anbieter. Du brauchst ein klares Alleinstellungsmerkmal.' 
+        return {
+            label: 'Moderate Competition',
+            color: '#f59e0b',
+            description: 'There are some strong providers. You need a clear unique selling proposition.'
         };
     }
-    
+
     if (totalCount > 10) {
-        return { 
-            label: 'Überfüllter Markt (Hobbyisten)', 
-            color: '#f59e0b', 
-            description: 'Viele Anbieter, aber kaum Profis. Qualität und Zuverlässigkeit könnten deine Lücke sein.' 
+        return {
+            label: 'Crowded Market (Hobbyists)',
+            color: '#f59e0b',
+            description: 'Many providers, but few professionals. Quality and reliability could be your gap.'
         };
     }
-    
-    return { 
-        label: 'Wenig Profis', 
-        color: '#10b981', 
-        description: 'Kaum professionelle Konkurrenz. Gute Chancen für einen qualitativen Markteintritt.' 
+
+    return {
+        label: 'Few Pros',
+        color: '#10b981',
+        description: 'Barely any professional competition. Good chances for a quality market entry.'
     };
 }

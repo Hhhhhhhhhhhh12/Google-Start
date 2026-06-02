@@ -71,7 +71,7 @@ function App() {
     id: crypto.randomUUID(),
     title: ideaTitle,
     region: ideaRegion,
-    targetAudience: targetAudience || 'Zielgruppe offen',
+    targetAudience: targetAudience || 'Open target audience',
     keywords: [ideaTitle],
     keywordData: [],
     competitorCount: serperApiKey ? 0 : 5,
@@ -184,7 +184,7 @@ function App() {
       }
     } catch (err) {
       console.error(err)
-      setEvaluationError('Es gab ein Problem beim Abrufen der Daten. Bitte API-Key prüfen.')
+      setEvaluationError('There was a problem fetching data. Please check your API key.')
     } finally {
       setIsEvaluating(false)
     }
@@ -205,7 +205,7 @@ function App() {
 
   const handleAutoPopulate = (idea: DerivedIdea) => {
     setIdeaTitle(idea.title)
-    setIdeaRegion(deriveRegion || 'Lokal')
+    setIdeaRegion(deriveRegion || 'Local')
     setMode('evaluate')
     setReport(null)
   }
@@ -217,7 +217,7 @@ function App() {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `Analyse_${ideaTitle.replace(/\s+/g, '_')}.md`
+    a.download = `Analysis_${ideaTitle.replace(/\s+/g, '_')}.md`
     a.click()
     URL.revokeObjectURL(url)
   }
@@ -258,43 +258,43 @@ function App() {
               <line x1="12" y1="8" x2="12.01" y2="8" />
             </svg>
             <span>
-              <strong>Simulations-Modus:</strong> Trage oben einen Serper API
-              Key ein für echte Live-Daten aus Google Maps &amp; Suche.
+              <strong>Simulation Mode:</strong> Enter a Serper API key above
+              for real live data from Google Maps &amp; Search.
             </span>
           </div>
         )}
 
         <section className="hero-card">
           <p className="eyebrow">AI Business Validator</p>
-          <h1>Ideen Scout</h1>
+          <h1>Idea Scout</h1>
           <p className="intro">
-            Gib deine Geschäftsidee ein und erhalte datenbasierte Fakten, oder
-            finde neue Ideen aus aktuellen Suchanfragen.
+            Enter your business idea and get data-driven facts, or
+            discover new ideas from current search trends.
           </p>
           <div className="tab-navigation">
             <button
               className={`tab-button ${mode === 'home' ? 'active' : ''}`}
               onClick={() => setMode('home')}
             >
-              Übersicht
+              Overview
             </button>
             <button
               className={`tab-button ${mode === 'evaluate' ? 'active' : ''}`}
               onClick={() => setMode('evaluate')}
             >
-              1. Idee validieren
+              1. Validate Idea
             </button>
             <button
               className={`tab-button ${mode === 'discover' ? 'active' : ''}`}
               onClick={() => setMode('discover')}
             >
-              2. Ideen ableiten
+              2. Derive Ideas
             </button>
             <button
               className={`tab-button ${mode === 'compare' ? 'active' : ''}`}
               onClick={() => setMode('compare')}
             >
-              Vergleich
+              Compare
             </button>
           </div>
         </section>

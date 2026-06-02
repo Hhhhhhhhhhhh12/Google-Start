@@ -35,12 +35,12 @@ function buildSimInputs(idea: BusinessIdea): SimInputs {
 type ScoreComponentKey = 'competitionGap' | 'painScore' | 'commercialScore' | 'urgencyScore' | 'keywordBreadthScore' | 'trendScore'
 
 const BAR_COMPONENTS: { label: string; key: ScoreComponentKey }[] = [
-  { label: 'Wettbewerbs-Lücke',      key: 'competitionGap' },
-  { label: 'Problem-Stärke',          key: 'painScore' },
-  { label: 'Kommerzielles Potenzial', key: 'commercialScore' },
-  { label: 'Dringlichkeit',           key: 'urgencyScore' },
-  { label: 'Keyword-Breite',          key: 'keywordBreadthScore' },
-  { label: 'Trend-Signal',            key: 'trendScore' },
+  { label: 'Competition Gap',      key: 'competitionGap' },
+  { label: 'Problem Strength',     key: 'painScore' },
+  { label: 'Commercial Potential', key: 'commercialScore' },
+  { label: 'Urgency',              key: 'urgencyScore' },
+  { label: 'Keyword Breadth',      key: 'keywordBreadthScore' },
+  { label: 'Trend Signal',         key: 'trendScore' },
 ]
 
 interface ScoreBreakdownProps {
@@ -105,7 +105,7 @@ export default function ScoreBreakdown({ evaluatedIdea }: ScoreBreakdownProps) {
 
   return (
     <div className="score-breakdown">
-      <h3>Score-Aufschlüsselung</h3>
+      <h3>Score Breakdown</h3>
       <div className="score-bars">
         {BAR_COMPONENTS.map(({ label, key }) => {
           const realVal = Math.max(0, Math.min(100, scoreBreakdown[key] as number))
@@ -121,7 +121,7 @@ export default function ScoreBreakdown({ evaluatedIdea }: ScoreBreakdownProps) {
               aria-valuenow={displayVal}
               aria-valuemin={0}
               aria-valuemax={100}
-              aria-label={`${label}: ${displayVal} von 100`}
+              aria-label={`${label}: ${displayVal} out of 100`}
             >
               <span className="score-bar-label">{label}</span>
               <div className="score-bar-track">
@@ -151,28 +151,28 @@ export default function ScoreBreakdown({ evaluatedIdea }: ScoreBreakdownProps) {
         className={`what-if-toggle${simActive ? ' active' : ''}`}
         onClick={handleToggleSim}
       >
-        {simActive ? '✕ Simulator schließen' : '🎚 What-If Simulator öffnen'}
+        {simActive ? '✕ Close Simulator' : '🎚 Open What-If Simulator'}
       </button>
 
       {simActive && simInputs && (
         <div className="what-if-panel">
           <div className="what-if-panel-header">
-            <h4>Was wäre wenn…</h4>
+            <h4>What if…</h4>
             <button className="what-if-reset" onClick={handleResetSim}>
-              Zurücksetzen
+              Reset
             </button>
           </div>
 
           <div className="what-if-sliders">
             {([
-              { key: 'competitorCount',             label: 'Konkurrenten gesamt',    min: 0,    max: 30,   step: 1   },
-              { key: 'professionalCompetitorCount', label: 'Davon Profis',           min: 0,    max: 20,   step: 1   },
-              { key: 'complaintDensity',            label: 'Beschwerde-Dichte',      min: 0,    max: 10,   step: 0.5 },
-              { key: 'urgency',                     label: 'Dringlichkeit',          min: 0,    max: 10,   step: 0.5 },
-              { key: 'willingnessToPay',            label: 'Zahlungsbereitschaft',   min: 0,    max: 10,   step: 0.5 },
-              { key: 'commercialCompetition',       label: 'Kommerzieller Druck',    min: 0,    max: 10,   step: 0.5 },
-              { key: 'totalSearchVolume',           label: 'Suchvolumen / Monat',    min: 0,    max: 5000, step: 50  },
-              { key: 'averageCompetitorRating',     label: 'Ø Konkurrenz-Bewertung', min: 0,    max: 5,    step: 0.1 },
+              { key: 'competitorCount',             label: 'Total Competitors',        min: 0,    max: 30,   step: 1   },
+              { key: 'professionalCompetitorCount', label: 'Of Which Professionals',   min: 0,    max: 20,   step: 1   },
+              { key: 'complaintDensity',            label: 'Complaint Density',        min: 0,    max: 10,   step: 0.5 },
+              { key: 'urgency',                     label: 'Urgency',                  min: 0,    max: 10,   step: 0.5 },
+              { key: 'willingnessToPay',            label: 'Willingness to Pay',       min: 0,    max: 10,   step: 0.5 },
+              { key: 'commercialCompetition',       label: 'Commercial Pressure',      min: 0,    max: 10,   step: 0.5 },
+              { key: 'totalSearchVolume',           label: 'Search Volume / Month',    min: 0,    max: 5000, step: 50  },
+              { key: 'averageCompetitorRating',     label: 'Avg. Competitor Rating',   min: 0,    max: 5,    step: 0.1 },
             ] as const).map(({ key, label, min, max, step }) => (
               <div key={key} className="what-if-slider-row">
                 <label>
@@ -191,22 +191,22 @@ export default function ScoreBreakdown({ evaluatedIdea }: ScoreBreakdownProps) {
             ))}
 
             <div className="what-if-slider-row">
-              <label>Trend-Richtung</label>
+              <label>Trend Direction</label>
               <select
                 value={simInputs.trendDirection}
                 onChange={e => updateSim('trendDirection', e.target.value as TrendDirection)}
               >
-                <option value="rising">↑ Steigend (+100 Pkt.)</option>
-                <option value="stable">→ Stabil (+70 Pkt.)</option>
-                <option value="seasonal">◇ Saisonal (+50 Pkt.)</option>
-                <option value="declining">↓ Sinkend (+20 Pkt.)</option>
+                <option value="rising">↑ Rising (+100 pts.)</option>
+                <option value="stable">→ Stable (+70 pts.)</option>
+                <option value="seasonal">◇ Seasonal (+50 pts.)</option>
+                <option value="declining">↓ Declining (+20 pts.)</option>
               </select>
             </div>
           </div>
 
           {simulatedScores && (
             <div className="what-if-result">
-              <span className="what-if-result-label">Simulierter Gesamt-Score</span>
+              <span className="what-if-result-label">Simulated Total Score</span>
               <div className="what-if-result-scores">
                 <span className="what-if-original-score">{scoreBreakdown.finalScore}</span>
                 <span className="what-if-arrow">→</span>
