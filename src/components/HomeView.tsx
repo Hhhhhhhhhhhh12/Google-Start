@@ -1,5 +1,6 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useRef, useState, useMemo, useEffect } from 'react'
 import type { BusinessIdea } from '../types'
+import { exportIdeasAsJson, parseImportedJson } from '../lib/storage'
 
 type SortKey = 'date' | 'score' | 'title' | 'region'
 type SortDir = 'asc' | 'desc'
@@ -9,15 +10,32 @@ interface HomeViewProps {
   activeIdeaId: string | null
   onOpenIdea: (idea: BusinessIdea) => void
   onDeleteIdea: (id: string) => void
+  onImportJson: (imported: BusinessIdea[]) => void
 }
 
-export default function HomeView({ ideas, activeIdeaId: _activeIdeaId, onOpenIdea, onDeleteIdea }: HomeViewProps) {
+export default function HomeView({ ideas, activeIdeaId: _activeIdeaId, onOpenIdea, onDeleteIdea, onImportJson }: HomeViewProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [importError, setImportError] = useState<string | null>(null)
   const [search, setSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [sortKey, setSortKey] = useState<SortKey>('date')
   const [sortDir, setSortDir] = useState<SortDir>('desc')
   const [filterRegion, setFilterRegion] = useState('')
   const [filterMinScore, setFilterMinScore] = useState(0)
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    try {
+      const parsed = await parseImportedJson(file)
+      onImportJson(parsed)
+      setImportError(null)
+    } catch {
+      setImportError('Invalid file — please select a valid Idea Scout JSON backup.')
+    } finally {
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+  }
 
   // Debounce search input (300ms)
   useEffect(() => {
@@ -96,12 +114,44 @@ export default function HomeView({ ideas, activeIdeaId: _activeIdeaId, onOpenIde
   return (
     <div className="dashboard-grid single-col">
       <section className="panel form-panel">
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".json"
+          style={{ display: 'none' }}
+          onChange={handleFileChange}
+        />
         <div className="home-header">
           <h2>Saved Ideas</h2>
-          {ideas.length > 0 && (
-            <span className="home-count">{filtered.length} / {ideas.length}</span>
-          )}
+          <div className="flex-row">
+            {ideas.length > 0 && (
+              <span className="home-count">{filtered.length} / {ideas.length}</span>
+            )}
+            <button
+              className="btn-ghost small"
+              onClick={() => fileInputRef.current?.click()}
+              title="Import ideas from a JSON backup"
+            >
+              ↑ Import
+            </button>
+            {ideas.length > 0 && (
+              <button
+                className="btn-ghost small"
+                onClick={() => exportIdeasAsJson(ideas)}
+                title="Export all ideas as JSON backup"
+              >
+                ↓ Export
+              </button>
+            )}
+          </div>
         </div>
+        {importError && (
+          <div className="error-banner" role="alert">
+            <span>⚠</span>
+            <span>{importError}</span>
+            <button className="btn-icon" onClick={() => setImportError(null)} aria-label="Close error">✕</button>
+          </div>
+        )}
 
         {ideas.length === 0 ? (
           <p className="empty-state-text">No ideas saved yet. Start with validation or derivation!</p>

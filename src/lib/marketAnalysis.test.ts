@@ -40,7 +40,7 @@ describe('generateMarketAnalysis', () => {
   it('should generate a high potential verdict for a good idea', () => {
     const analysis = generateMarketAnalysis(mockIdea);
     expect(analysis.scoreAtGeneration).toBeGreaterThan(70);
-    expect(analysis.verdict).toContain('Potenzial');
+    expect(analysis.verdict).toContain('potential');
   });
 
   it('should include next steps if data is missing', () => {
@@ -50,12 +50,12 @@ describe('generateMarketAnalysis', () => {
         keywordData: []
     };
     const analysis = generateMarketAnalysis(incompleteIdea);
-    expect(analysis.nextSteps).toContain('Keyword-Volumen im Google Keyword Planner validieren.');
+    expect(analysis.nextSteps).toContain('Validate keyword volume in Google Keyword Planner.');
   });
 
   it('should reflect trend in demand analysis', () => {
     const seasonalIdea = { ...mockIdea, trendDirection: 'seasonal' as const };
     const analysis = generateMarketAnalysis(seasonalIdea);
-    expect(analysis.demandAnalysis).toContain('saisonabhängig');
+    expect(analysis.demandAnalysis).toContain('seasonal');
   });
 });

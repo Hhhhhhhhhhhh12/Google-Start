@@ -19,3 +19,31 @@ export function loadIdeas(): BusinessIdea[] {
     return [];
   }
 }
+
+export function exportIdeasAsJson(ideas: BusinessIdea[]): void {
+  const json = JSON.stringify(ideas, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `idea-scout-backup-${new Date().toISOString().slice(0, 10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+export async function parseImportedJson(file: File): Promise<BusinessIdea[]> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const parsed = JSON.parse(e.target?.result as string);
+        if (!Array.isArray(parsed)) throw new Error('Invalid format: expected an array');
+        resolve(parsed as BusinessIdea[]);
+      } catch (err) {
+        reject(err);
+      }
+    };
+    reader.onerror = () => reject(new Error('Failed to read file'));
+    reader.readAsText(file);
+  });
+}

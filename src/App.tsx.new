@@ -1,9 +1,0 @@
-import { useState, useMemo, useEffect, type ChangeEvent } from 'react'
-import './App.css'
-import { calculateIdeaScore } from './lib/scoring'
-import { buildResearchQueries } from './lib/queryBuilder'
-import { getImprovementSuggestions } from './lib/improvementEngine'
-import { loadIdeas, saveIdeas } from './lib/storage'
-import type { BusinessIdea } from './types'
-
-// ...

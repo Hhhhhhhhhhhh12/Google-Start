@@ -12,8 +12,9 @@ import HomeView from './components/HomeView'
 import EvaluateView from './components/EvaluateView'
 import DiscoverView from './components/DiscoverView'
 import CompareView from './components/CompareView'
+import FinancialView from './components/FinancialView'
 
-type AppMode = 'home' | 'evaluate' | 'discover' | 'compare'
+type AppMode = 'home' | 'evaluate' | 'discover' | 'compare' | 'financial'
 type ReportType = (MarketAnalysis & { evidencePercent?: number; evidenceQuality?: string }) | null
 
 function App() {
@@ -236,6 +237,16 @@ function App() {
     if (activeIdeaId === id) setActiveIdeaId(null)
   }
 
+  const handleImportJson = (imported: BusinessIdea[]) => {
+    setIdeas(prev => {
+      const existingIds = new Set(prev.map(i => i.id))
+      const newIdeas = imported.filter(i => !existingIds.has(i.id))
+      const merged = [...newIdeas, ...prev]
+      saveIdeas(merged)
+      return merged
+    })
+  }
+
   return (
     <div className="app-container">
       <header className="app-header">
@@ -296,6 +307,12 @@ function App() {
             >
               Compare
             </button>
+            <button
+              className={`tab-button ${mode === 'financial' ? 'active' : ''}`}
+              onClick={() => setMode('financial')}
+            >
+              Financials
+            </button>
           </div>
         </section>
 
@@ -305,6 +322,7 @@ function App() {
             activeIdeaId={activeIdeaId}
             onOpenIdea={handleOpenIdea}
             onDeleteIdea={handleDeleteIdea}
+            onImportJson={handleImportJson}
           />
         )}
 
@@ -352,6 +370,8 @@ function App() {
             onOpenIdea={handleOpenIdea}
           />
         )}
+
+        {mode === 'financial' && <FinancialView />}
       </main>
     </div>
   )
