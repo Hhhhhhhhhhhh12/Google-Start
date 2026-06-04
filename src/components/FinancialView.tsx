@@ -74,8 +74,9 @@ export default function FinancialView() {
 
         <div className="form-row">
           <div className="form-group">
-            <label>Price per Service (€)</label>
+            <label htmlFor="pricePerService">Price per Service (€)</label>
             <input
+              id="pricePerService"
               type="number"
               min="0"
               step="1"
@@ -84,8 +85,9 @@ export default function FinancialView() {
             />
           </div>
           <div className="form-group">
-            <label>Monthly New Customers</label>
+            <label htmlFor="monthlyNewCustomers">Monthly New Customers</label>
             <input
+              id="monthlyNewCustomers"
               type="number"
               min="0"
               step="1"
@@ -97,8 +99,9 @@ export default function FinancialView() {
 
         <div className="form-row">
           <div className="form-group">
-            <label>Variable Cost per Service (€)</label>
+            <label htmlFor="variableCostPerService">Variable Cost per Service (€)</label>
             <input
+              id="variableCostPerService"
               type="number"
               min="0"
               step="1"
@@ -107,8 +110,9 @@ export default function FinancialView() {
             />
           </div>
           <div className="form-group">
-            <label>Monthly Fixed Costs (€)</label>
+            <label htmlFor="monthlyFixedCosts">Monthly Fixed Costs (€)</label>
             <input
+              id="monthlyFixedCosts"
               type="number"
               min="0"
               step="10"
@@ -120,8 +124,9 @@ export default function FinancialView() {
 
         <div className="form-row">
           <div className="form-group">
-            <label>Customer Acquisition Cost — CAC (€)</label>
+            <label htmlFor="customerAcquisitionCost">Customer Acquisition Cost — CAC (€)</label>
             <input
+              id="customerAcquisitionCost"
               type="number"
               min="0"
               step="1"
@@ -130,8 +135,9 @@ export default function FinancialView() {
             />
           </div>
           <div className="form-group">
-            <label>Avg. Customer Lifetime (months)</label>
+            <label htmlFor="customerLifetimeMonths">Avg. Customer Lifetime (months)</label>
             <input
+              id="customerLifetimeMonths"
               type="number"
               min="1"
               step="1"

@@ -13,6 +13,7 @@ import EvaluateView from './components/EvaluateView'
 import DiscoverView from './components/DiscoverView'
 import CompareView from './components/CompareView'
 import FinancialView from './components/FinancialView'
+import ErrorBoundary from './components/ErrorBoundary'
 
 type AppMode = 'home' | 'evaluate' | 'discover' | 'compare' | 'financial'
 type ReportType = (MarketAnalysis & { evidencePercent?: number; evidenceQuality?: string }) | null
@@ -261,6 +262,7 @@ function App() {
       </header>
 
       <main className="main-content">
+        <ErrorBoundary>
         {!serperApiKey && (
           <div className="simulation-banner">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -372,6 +374,7 @@ function App() {
         )}
 
         {mode === 'financial' && <FinancialView />}
+        </ErrorBoundary>
       </main>
     </div>
   )
