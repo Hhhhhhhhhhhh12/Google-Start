@@ -4,7 +4,7 @@ Stand: 27.10.2026. Umsetzung auf `codex/local-demand-data-provenance`, aufbauend
 
 ## Umgesetzt
 
-- Neue Berichte unterscheiden Annahmen, externe Recherche mit Annahmen und ausdrücklich als manuell erfasste Angaben. Der manuelle Rechercheablauf selbst ist noch offen.
+- Neue Berichte unterscheiden Annahmen, externe Recherche mit Annahmen und ausdrücklich als manuell erfasste Angaben. Der anschließende manuelle Rechercheablauf ist in `WORKFLOW_IMPROVEMENTS.md` dokumentiert.
 - Fehlende Herkunft in älteren Berichten wird bei Anzeige, Vergleich und Markdown-Export als ungeklärt behandelt. Die gespeicherten Originalberichte werden dabei nicht verändert.
 - Trefferzahlen und Anzeigen werden nicht mehr in monatliches Keyword-Suchvolumen umgerechnet. Anzeigen belegen keine CPC-Prüfung; Serper ersetzt weder Keyword Planner noch Trends.
 - Neue reine Annahmenberichte erhalten keinen Recherchefortschritt. Der Fortschritt bezeichnet Vollständigkeit, keine verifizierte Datenqualität.
@@ -16,5 +16,5 @@ Stand: 27.10.2026. Umsetzung auf `codex/local-demand-data-provenance`, aufbauend
 - Ausdrücklich freigegeben und bestanden: `npm run test` (25 Tests) und `npm run build`.
 - Quellen-, Diff- und Statusprüfung durchgeführt. Keine externen Suchabfragen ausgeführt.
 - Browserprüfung, visuelle Abnahme, Integration und Veröffentlichung stehen aus.
-- Herkunft gilt bisher für einen Bericht insgesamt. Einzelbelege mit Quelle, Region, Abrufdatum und Unsicherheit sowie sichtbare Abruffehler bleiben ein eigenes Ticket.
-- Die vorhandene optionale Serper-Anbindung und Schlüsselablage sind durch dieses Ticket nicht sicherheitstechnisch überarbeitet.
+- Berichtsweite Herkunft wurde inzwischen um Einzelbeobachtungen mit Quelle, Region, Datum und Unsicherheit sowie sichtbare Abruffehler ergänzt; siehe `WORKFLOW_IMPROVEMENTS.md`.
+- Die anschließende Überarbeitung von Serper-Fehlern und Schlüsselablage ist ebenfalls in `WORKFLOW_IMPROVEMENTS.md` beschrieben.
