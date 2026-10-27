@@ -8,6 +8,8 @@ export function describeDataBasis(report: MarketAnalysis): string {
       return 'Externe Recherche mit Annahmen'
     case 'manual':
       return 'Manuell erfasste Angaben – nicht unabhängig geprüft'
+    case 'researched':
+      return 'Erfasste Beobachtungen mit Annahmen'
     default:
       return 'Herkunft ungeklärt – älterer Bericht'
   }
@@ -15,7 +17,7 @@ export function describeDataBasis(report: MarketAnalysis): string {
 
 // Old reports remain stored unchanged; their former Live labels are not evidence.
 export function prepareReportForDisplay(report: MarketAnalysis): MarketAnalysis {
-  if (report.dataBasis && report.dataBasis !== 'unverified') return report
+  if (['assumptions', 'external-mixed', 'manual', 'researched'].includes(report.dataBasis ?? '')) return report
 
   return {
     ...report,

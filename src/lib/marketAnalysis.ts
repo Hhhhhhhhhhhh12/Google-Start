@@ -1,17 +1,27 @@
 import type { BusinessIdea, MarketAnalysis } from '../types';
 import { calculateIdeaScore, getCompetitionVerdict } from './scoring';
+import { currentExternalResearch, latestResearch, projectResearch } from './research';
 
-export function generateMarketAnalysis(idea: BusinessIdea): MarketAnalysis {
+export function generateMarketAnalysis(input: BusinessIdea): MarketAnalysis {
+  const idea = projectResearch(input);
+  const observations = idea.researchEntries ?? [];
+  const hasObservedVolume = observations.some(entry => entry.kind === 'keyword-volume');
+  const observedTrend = latestResearch(observations, 'trend');
+  const observedCompetition = latestResearch(observations, 'competition');
+  const external = currentExternalResearch(idea) ? idea.externalResearch : undefined;
   const scores = calculateIdeaScore(idea);
   const compVerdict = getCompetitionVerdict(idea);
   const totalVolume = (idea.keywordData || []).reduce((sum, kd) => sum + (kd.monthlyVolume || 0), 0);
   const dataBasis = idea.dataBasis || 'unverified';
   const hasManualData = dataBasis === 'manual';
   const sources: string[] = [];
-  if (dataBasis === 'external-mixed') {
+  if (dataBasis === 'external-mixed' || external) {
     if (idea.organicResults?.length) sources.push('Suchergebnisse über Serper');
     if (idea.competitors.length) sources.push('Maps-Einträge über Serper');
+    if (external?.mapsSucceeded) sources.push(`Maps-Abfrage: ${new Date(external.mapsQueriedAt ?? external.queriedAt).toLocaleString('de-DE')} · ${external.region || 'Region nicht angegeben'}`);
+    if (external?.searchSucceeded) sources.push(`Suchabfrage: ${new Date(external.searchQueriedAt ?? external.queriedAt).toLocaleString('de-DE')} · ${external.region || 'Region nicht angegeben'}`);
   }
+  observations.forEach(entry => sources.push(`${entry.source} · ${entry.observedOn} · ${entry.region}${entry.sourceUrl ? ` · ${entry.sourceUrl}` : ''}`));
   if (hasManualData) sources.push('Manuell erfasste Angaben; nicht unabhängig geprüft');
   sources.push('Regelbasierte Auswertung mit Annahmen und Vorlagen');
   
@@ -28,13 +38,15 @@ export function generateMarketAnalysis(idea: BusinessIdea): MarketAnalysis {
   }
   if (!hasManualData) {
     verdict = 'Potenzial noch offen: Der Score beruht auf Annahmen' +
-      (dataBasis === 'external-mixed' ? ' und einzelnen Such- oder Maps-Ergebnissen.' : '.') +
+      (dataBasis === 'external-mixed' || dataBasis === 'researched' ? ' und einzelnen erfassten Beobachtungen.' : '.') +
       ' Regionale Nachfrage und Zahlungsbereitschaft müssen erst belegt werden.';
   }
 
   // 2. Demand Analysis
   let demandAnalysis = '';
-  if (!hasManualData) {
+  if (hasObservedVolume) {
+    demandAnalysis = `Die erfassten Quellen nennen insgesamt ${totalVolume.toLocaleString('de-DE')} Suchanfragen pro Monat. Die manuell übertragenen Angaben sind nicht unabhängig geprüft. `;
+  } else if (!hasManualData) {
     demandAnalysis = 'Kein belegtes monatliches Suchvolumen vorhanden. ';
   } else if (totalVolume > 1000) {
     demandAnalysis = `Starke Marktnachfrage mit ca. ${totalVolume} Suchanfragen pro Monat. `;
@@ -44,7 +56,9 @@ export function generateMarketAnalysis(idea: BusinessIdea): MarketAnalysis {
     demandAnalysis = 'Nachfrage-Daten fehlen noch. ';
   }
 
-  if (!hasManualData || !idea.checklist.googleTrendsChecked) {
+  if (observedTrend) {
+    demandAnalysis += `Trend laut erfasster Quelle: ${{ rising: 'steigend', stable: 'stabil', declining: 'sinkend', seasonal: 'saisonabhängig' }[observedTrend.trend!]}.`;
+  } else if (!hasManualData || !idea.checklist.googleTrendsChecked) {
     demandAnalysis += 'Der Trend wurde nicht geprüft.';
   } else if (idea.trendDirection === 'rising') {
     demandAnalysis += 'Der Trend ist wachsend, was auf ein steigendes Interesse in der Zukunft hindeutet.';
@@ -57,13 +71,16 @@ export function generateMarketAnalysis(idea: BusinessIdea): MarketAnalysis {
   }
 
   // 3. Competition Analysis
-  let competitionAnalysis = hasManualData
+  let competitionAnalysis = observedCompetition
+    ? `Laut erfasster Quelle wurden ${observedCompetition.value} lokale Anbieter gezählt; Abdeckung und Zeitraum der Quelle beachten. `
+    : hasManualData
     ? `${compVerdict.label}. ${compVerdict.description} `
     : dataBasis === 'external-mixed' && idea.competitors.length
       ? `${idea.competitors.length} Maps-Einträge erfasst; keine vollständige regionale Konkurrenzübersicht. `
       : 'Konkurrenz noch nicht erhoben. Vorbelegte Werte sind Annahmen. ';
-  if (idea.competitors.length > 0) {
-    const avgRating = idea.competitors.reduce((s, c) => s + c.rating, 0) / idea.competitors.length;
+  const ratedCompetitors = idea.competitors.filter(competitor => competitor.rating > 0);
+  if (ratedCompetitors.length > 0) {
+    const avgRating = ratedCompetitors.reduce((s, c) => s + c.rating, 0) / ratedCompetitors.length;
     if (avgRating < 3.5) {
       competitionAnalysis += `Die bestehende Konkurrenz hat schwache Bewertungen (Schnitt: ${avgRating.toFixed(1)}). Dies ist eine massive Chance für einen Qualitäts-Markteintritt.`;
     } else if (avgRating > 4.5) {
@@ -128,15 +145,17 @@ export function generateMarketAnalysis(idea: BusinessIdea): MarketAnalysis {
 
   return {
     dataBasis,
+    researchEntries: observations,
+    researchWarnings: external?.warnings ?? (input.externalResearch ? ['Frühere externe Ergebnisse gehören zu einer anderen Idee oder Region und wurden ausgeschlossen.'] : []),
     verdict,
     demandAnalysis,
     competitionAnalysis,
     strategyRecommendation,
     nextSteps,
     metrics: {
-      competition: hasManualData ? compVerdict.label : dataBasis === 'external-mixed' && idea.competitors.length ? `${idea.competitors.length} Maps-Einträge (Ausschnitt)` : 'Nicht erhoben',
-      searchVolume: hasManualData && totalVolume > 0 ? `${totalVolume.toLocaleString('de-DE')} / Monat (manuell angegeben)` : 'Nicht belegt',
-      trend: hasManualData && idea.checklist.googleTrendsChecked ? `${idea.trendDirection === 'rising' ? 'Steigend' : idea.trendDirection === 'seasonal' ? 'Saisonal' : idea.trendDirection === 'declining' ? 'Sinkend' : 'Stabil'} (manuell angegeben)` : 'Nicht geprüft',
+      competition: observedCompetition ? `${observedCompetition.value} Anbieter (manuell erfasst)` : hasManualData ? compVerdict.label : (dataBasis === 'external-mixed' || external?.mapsSucceeded) && (idea.competitors.length || external?.mapsSucceeded) ? `${idea.competitors.length} Maps-Einträge (Ausschnitt)` : 'Nicht erhoben',
+      searchVolume: hasObservedVolume || (hasManualData && totalVolume > 0) ? `${totalVolume.toLocaleString('de-DE')} / Monat (manuell angegeben)` : 'Nicht belegt',
+      trend: observedTrend || (hasManualData && idea.checklist.googleTrendsChecked) ? `${idea.trendDirection === 'rising' ? 'Steigend' : idea.trendDirection === 'seasonal' ? 'Saisonal' : idea.trendDirection === 'declining' ? 'Sinkend' : 'Stabil'} (manuell angegeben)` : 'Nicht geprüft',
       cpc: hasManualData && idea.checklist.cpcChecked ? 'Manuell als geprüft markiert; kein Betrag erfasst' : 'Nicht erhoben',
     },
     sources,
