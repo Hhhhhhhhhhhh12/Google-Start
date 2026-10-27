@@ -5,6 +5,15 @@ export function generateMarketAnalysis(idea: BusinessIdea): MarketAnalysis {
   const scores = calculateIdeaScore(idea);
   const compVerdict = getCompetitionVerdict(idea);
   const totalVolume = (idea.keywordData || []).reduce((sum, kd) => sum + (kd.monthlyVolume || 0), 0);
+  const dataBasis = idea.dataBasis || 'unverified';
+  const hasManualData = dataBasis === 'manual';
+  const sources: string[] = [];
+  if (dataBasis === 'external-mixed') {
+    if (idea.organicResults?.length) sources.push('Suchergebnisse über Serper');
+    if (idea.competitors.length) sources.push('Maps-Einträge über Serper');
+  }
+  if (hasManualData) sources.push('Manuell erfasste Angaben; nicht unabhängig geprüft');
+  sources.push('Regelbasierte Auswertung mit Annahmen und Vorlagen');
   
   // 1. Verdict logic
   let verdict = '';
@@ -17,10 +26,17 @@ export function generateMarketAnalysis(idea: BusinessIdea): MarketAnalysis {
   } else {
     verdict = 'Hohes Risiko: Aktuelle Daten zeigen geringe Erfolgsaussichten. Ein Pivot oder tiefergehende Recherche wird empfohlen.';
   }
+  if (!hasManualData) {
+    verdict = 'Potenzial noch offen: Der Score beruht auf Annahmen' +
+      (dataBasis === 'external-mixed' ? ' und einzelnen Such- oder Maps-Ergebnissen.' : '.') +
+      ' Regionale Nachfrage und Zahlungsbereitschaft müssen erst belegt werden.';
+  }
 
   // 2. Demand Analysis
   let demandAnalysis = '';
-  if (totalVolume > 1000) {
+  if (!hasManualData) {
+    demandAnalysis = 'Kein belegtes monatliches Suchvolumen vorhanden. ';
+  } else if (totalVolume > 1000) {
     demandAnalysis = `Starke Marktnachfrage mit ca. ${totalVolume} Suchanfragen pro Monat. `;
   } else if (totalVolume > 0) {
     demandAnalysis = `Moderate Nachfrage (${totalVolume}/Monat). Fokus auf Long-tail Keywords empfohlen. `;
@@ -28,7 +44,9 @@ export function generateMarketAnalysis(idea: BusinessIdea): MarketAnalysis {
     demandAnalysis = 'Nachfrage-Daten fehlen noch. ';
   }
 
-  if (idea.trendDirection === 'rising') {
+  if (!hasManualData || !idea.checklist.googleTrendsChecked) {
+    demandAnalysis += 'Der Trend wurde nicht geprüft.';
+  } else if (idea.trendDirection === 'rising') {
     demandAnalysis += 'Der Trend ist wachsend, was auf ein steigendes Interesse in der Zukunft hindeutet.';
   } else if (idea.trendDirection === 'seasonal') {
     demandAnalysis += 'Vorsicht: Das Geschäft ist saisonabhängig. Cashflow-Planung ist kritisch.';
@@ -39,7 +57,11 @@ export function generateMarketAnalysis(idea: BusinessIdea): MarketAnalysis {
   }
 
   // 3. Competition Analysis
-  let competitionAnalysis = `${compVerdict.label}. ${compVerdict.description} `;
+  let competitionAnalysis = hasManualData
+    ? `${compVerdict.label}. ${compVerdict.description} `
+    : dataBasis === 'external-mixed' && idea.competitors.length
+      ? `${idea.competitors.length} Maps-Einträge erfasst; keine vollständige regionale Konkurrenzübersicht. `
+      : 'Konkurrenz noch nicht erhoben. Vorbelegte Werte sind Annahmen. ';
   if (idea.competitors.length > 0) {
     const avgRating = idea.competitors.reduce((s, c) => s + c.rating, 0) / idea.competitors.length;
     if (avgRating < 3.5) {
@@ -105,23 +127,22 @@ export function generateMarketAnalysis(idea: BusinessIdea): MarketAnalysis {
   };
 
   return {
+    dataBasis,
     verdict,
     demandAnalysis,
     competitionAnalysis,
     strategyRecommendation,
     nextSteps,
     metrics: {
-      competition: compVerdict.label === 'Unbekannt' ? 'Daten fehlen' : compVerdict.label,
-      searchVolume: totalVolume > 0 ? `${totalVolume.toLocaleString()} / Monat` : idea.checklist.keywordPlannerChecked ? 'Simuliert (Demo)' : 'API Key benötigt',
-      trend: idea.trendDirection === 'rising' ? 'Steigend' : idea.trendDirection === 'seasonal' ? 'Saisonal' : idea.trendDirection === 'declining' ? 'Sinkend' : 'Stabil',
-      cpc: idea.checklist.cpcChecked ? 'Daten vorhanden' : '---',
-      totalResults: idea.organicResults?.[0] ? undefined : 0
+      competition: hasManualData ? compVerdict.label : dataBasis === 'external-mixed' && idea.competitors.length ? `${idea.competitors.length} Maps-Einträge (Ausschnitt)` : 'Nicht erhoben',
+      searchVolume: hasManualData && totalVolume > 0 ? `${totalVolume.toLocaleString('de-DE')} / Monat (manuell angegeben)` : 'Nicht belegt',
+      trend: hasManualData && idea.checklist.googleTrendsChecked ? `${idea.trendDirection === 'rising' ? 'Steigend' : idea.trendDirection === 'seasonal' ? 'Saisonal' : idea.trendDirection === 'declining' ? 'Sinkend' : 'Stabil'} (manuell angegeben)` : 'Nicht geprüft',
+      cpc: hasManualData && idea.checklist.cpcChecked ? 'Manuell als geprüft markiert; kein Betrag erfasst' : 'Nicht erhoben',
     },
-    sources: [
-      'Google Search (Live)',
-      'Google Maps (Live)',
-      'Wettbewerbs-Scan',
-    ],
+    sources,
+    checklist: { ...idea.checklist },
+    evidencePercent: dataBasis === 'assumptions' ? 0 : dataBasis === 'unverified' ? undefined : scores.evidencePercent,
+    evidenceQuality: dataBasis === 'assumptions' ? 'incomplete' : dataBasis === 'unverified' ? undefined : scores.evidenceQuality,
     organicEvidence: idea.organicResults,
     peopleAlsoAsk: idea.peopleAlsoAsk,
     relatedSearches: idea.relatedSearches,

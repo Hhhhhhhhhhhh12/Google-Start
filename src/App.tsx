@@ -4,7 +4,7 @@ import { generateMarketAnalysis } from './lib/marketAnalysis'
 import { deriveIdeasMock, type DerivedIdea } from './lib/aiMock'
 import { scrapeGoogleMaps, scrapeSearchMetadata } from './lib/scraper'
 import { generateReportMarkdown } from './lib/exportUtils'
-import { calculateEvidencePercent, calculateEvidenceQuality } from './lib/scoring'
+import { describeDataBasis, prepareReportForDisplay } from './lib/reportProvenance'
 import type { BusinessIdea, MarketAnalysis } from './types'
 
 import { loadIdeas, saveIdeas } from './lib/storage'
@@ -15,6 +15,10 @@ function App() {
   const [mode, setMode] = useState<AppMode>('home')
   const [ideas, setIdeas] = useState<BusinessIdea[]>([])
   const [activeIdeaId, setActiveIdeaId] = useState<string | null>(null)
+  const comparableIdeas = ideas.filter(idea => idea.marketAnalysis).map(idea => ({
+    ...idea,
+    marketAnalysis: prepareReportForDisplay(idea.marketAnalysis!),
+  }))
   
   // Load ideas on mount
   useEffect(() => {
@@ -43,10 +47,7 @@ function App() {
   const [ideaRegion, setIdeaRegion] = useState('')
   const [targetAudience, setTargetAudience] = useState('')
   const [isEvaluating, setIsEvaluating] = useState(false)
-  const [report, setReport] = useState<(MarketAnalysis & {
-    evidencePercent?: number
-    evidenceQuality?: string
-  }) | null>(null)
+  const [report, setReport] = useState<MarketAnalysis | null>(null)
 
   // Derive State
   const [deriveSearchTerms, setDeriveSearchTerms] = useState('')
@@ -91,13 +92,14 @@ function App() {
     trendDirection: 'stable',
     trendNotes: '',
     checklist: {
-      keywordPlannerChecked: !serperApiKey,
+      keywordPlannerChecked: false,
       googleTrendsChecked: false,
-      googleMapsChecked: !serperApiKey,
+      googleMapsChecked: false,
       reviewsChecked: false,
       cpcChecked: false,
     },
     weights,
+    dataBasis: 'assumptions',
     createdAt: Date.now(),
     updatedAt: Date.now(),
   })
@@ -123,14 +125,9 @@ function App() {
           }),
         ])
 
-        const estimatedVolume = Math.min(
-          1500,
-          Math.floor(searchMeta.resultCount / 10000)
-        )
-        const adBonus = searchMeta.adCount > 0 ? 500 : 0
-
         idea = {
           ...idea,
+          dataBasis: mapsResults.length || searchMeta.organic.length ? 'external-mixed' : 'assumptions',
           competitors: mapsResults.slice(0, 10),
           competitorCount: mapsResults.length,
           professionalCompetitorCount: Math.round(mapsResults.length * 0.4),
@@ -138,23 +135,19 @@ function App() {
             10,
             Math.max(1, searchMeta.adCount * 2)
           ),
-          keywordData: [
-            { term: ideaTitle, monthlyVolume: estimatedVolume + adBonus },
-          ],
+          keywordData: [],
           organicResults: searchMeta.organic,
           peopleAlsoAsk: searchMeta.peopleAlsoAsk,
           relatedSearches: searchMeta.relatedSearches,
           checklist: {
             ...idea.checklist,
             googleMapsChecked: mapsResults.length > 0,
-            cpcChecked: searchMeta.adCount > 0,
-            keywordPlannerChecked: searchMeta.resultCount > 0,
+            cpcChecked: false,
+            keywordPlannerChecked: false,
           },
         }
 
         const analysis = generateMarketAnalysis(idea)
-        const evidencePercent = calculateEvidencePercent(idea)
-        const evidenceQuality = calculateEvidenceQuality(idea)
 
         const finalReport = {
           ...analysis,
@@ -162,8 +155,6 @@ function App() {
             ...analysis.metrics,
             totalResults: searchMeta.resultCount,
           },
-          evidencePercent,
-          evidenceQuality,
         };
         
         setReport(finalReport);
@@ -231,6 +222,7 @@ function App() {
         <div className="api-config">
           <input
             type="password"
+            aria-label="Optionaler Serper-Schlüssel für externe Suchabfragen"
             placeholder="Serper API Key..."
             value={serperApiKey}
             onChange={e => handleSaveApiKey(e.target.value)}
@@ -239,7 +231,6 @@ function App() {
       </header>
 
       <main className="main-content">
-        {!serperApiKey && (
           <div className="simulation-banner">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="12" cy="12" r="10" />
@@ -247,18 +238,17 @@ function App() {
               <line x1="12" y1="8" x2="12.01" y2="8" />
             </svg>
             <span>
-              <strong>Simulations-Modus:</strong> Trage oben einen Serper API
-              Key ein für echte Live-Daten aus Google Maps &amp; Suche.
+              <strong>Recherchehilfe:</strong> Bewertungen und Vorschläge entstehen aus Regeln und Annahmen.
+              {' '}{serperApiKey ? 'Ein Serper-Schlüssel ermöglicht ergänzende Such- und Maps-Abfragen. Er liefert kein monatliches Suchvolumen und keinen geprüften Trend.' : 'Ohne externe Abfrage werden keine aktuellen Marktdaten erhoben.'}
             </span>
           </div>
-        )}
 
         <section className="hero-card">
-          <p className="eyebrow">AI Business Validator</p>
+          <p className="eyebrow">Regionale Geschäftsideen recherchieren</p>
           <h1>Ideen Scout</h1>
           <p className="intro">
-            Gib deine Geschäftsidee ein und erhalte datenbasierte Fakten, oder
-            finde neue Ideen aus aktuellen Suchanfragen.
+            Prüfe deine Geschäftsidee oder entwickle neue Vorschläge aus deinen
+            Eingaben. Nachfrage und Marktpotenzial bleiben bis zur Recherche offen.
           </p>
           <div className="tab-navigation">
             <button
@@ -309,7 +299,7 @@ function App() {
                               setIdeaRegion(idea.region);
                               setTargetAudience(idea.targetAudience);
                               if (idea.marketAnalysis) {
-                                setReport(idea.marketAnalysis);
+                                setReport(prepareReportForDisplay(idea.marketAnalysis));
                               } else {
                                 setReport(null);
                               }
@@ -331,9 +321,10 @@ function App() {
                         </div>
                       </div>
                       <p>
-                        <strong>Score:</strong> {idea.marketAnalysis?.scoreAtGeneration || idea.weights?.demand || '---'} |{' '}
+                        <strong>Orientierungs-Score:</strong> {idea.marketAnalysis?.scoreAtGeneration ?? '---'} |{' '}
                         <strong>Region:</strong> {idea.region || 'Keine'}
                       </p>
+                      {idea.marketAnalysis && <p className="helper-text">{describeDataBasis(idea.marketAnalysis)}</p>}
                     </div>
                   ))}
                 </div>
@@ -429,7 +420,7 @@ function App() {
                 onClick={handleEvaluate}
                 disabled={isEvaluating || !ideaTitle}
               >
-                {isEvaluating ? 'Analysiere Daten...' : 'Zahlen & Fakten abrufen'}
+                {isEvaluating ? 'Bereite Einschätzung vor...' : serperApiKey ? 'Mit externer Recherche einschätzen' : 'Vorläufig einschätzen'}
               </button>
             </section>
 
@@ -438,28 +429,27 @@ function App() {
                 <div className="report-header">
                   <div className="score-badge">
                     <strong>{report.scoreAtGeneration}</strong>
-                    <span>Score</span>
+                    <span>Orientierung</span>
                   </div>
                   <div className="report-intro">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <h2>Analyse-Ergebnis</h2>
-                      {serperApiKey && (
-                        <span className="badge-live">LIVE-DATEN SCAN</span>
-                      )}
+                      <span className="badge-hypothesis">{describeDataBasis(report)}</span>
                     </div>
                     <p className="summary-text">{report.verdict}</p>
+                    <p className="helper-text">Score, SWOT, Zielgruppe und Strategie sind regelbasierte Arbeitshypothesen. Sie belegen weder regionale Nachfrage noch Zahlungsbereitschaft.</p>
 
                     {report.evidencePercent !== undefined && (
                       <div className="evidence-progress-container">
                         <div className="evidence-progress-header">
-                          <span className="evidence-label">DATEN-QUALITÄT</span>
+                          <span className="evidence-label">RECHERCHE-FORTSCHRITT</span>
                           <span className={`quality-badge ${report.evidenceQuality}`}>
                             {report.evidenceQuality === 'strong'
-                              ? 'Stark'
+                              ? 'Weitgehend erfasst'
                               : report.evidenceQuality === 'usable'
-                                ? 'Verwendbar'
+                                ? 'Teilweise erfasst'
                                 : report.evidenceQuality === 'weak'
-                                  ? 'Schwach'
+                                  ? 'Wenige Angaben'
                                   : 'Unvollständig'}
                           </span>
                         </div>
@@ -470,8 +460,8 @@ function App() {
                           />
                         </div>
                         <p className="helper-text">
-                          {report.evidencePercent}% der Validierungsschritte
-                          abgeschlossen.
+                          {report.evidencePercent}% der erfassten Recherchemerkmale vorhanden.
+                          Die Vollständigkeit bestätigt nicht die Verlässlichkeit der Angaben.
                         </p>
                       </div>
                     )}
@@ -596,7 +586,7 @@ function App() {
 
                 {report.organicEvidence && report.organicEvidence.length > 0 && (
                   <div className="evidence-section">
-                    <h3>Market Evidence (Google Ergebnisse)</h3>
+                    <h3>{report.dataBasis === 'unverified' ? 'Gespeicherte Suchergebnisse (Herkunft ungeklärt)' : 'Erfasste Suchergebnisse'}</h3>
                     <div className="organic-list">
                       {report.organicEvidence.map((item, i) => (
                         <div key={i} className="organic-item">
@@ -645,14 +635,14 @@ function App() {
                   <h4>Daten-Herkunft</h4>
                   <ul>
                     {report.sources.map((source, idx) => (
-                      <li key={idx}>✓ {source}</li>
+                      <li key={idx}>{source}</li>
                     ))}
                   </ul>
                 </div>
 
                 <div className="action-footer">
                   <div className="trends-group">
-                    <p className="trends-label">Google Trends Explorer:</p>
+                    <p className="trends-label">Google Trends manuell öffnen:</p>
                     <div className="trends-links">
                       <a
                         href={`https://trends.google.com/trends/explore?q=${encodeURIComponent(ideaTitle)}&geo=DE`}
@@ -695,9 +685,10 @@ function App() {
         {mode === 'discover' && (
           <div className="dashboard-grid single-col">
             <section className="panel form-panel">
+              <p className="helper-text">Vorschläge entstehen aus deinen Begriffen und festen Vorlagen. Regionale Suchsignale werden hier noch nicht abgerufen.</p>
               <div className="form-row">
                 <div className="form-group">
-                  <label htmlFor="searchTerms">Suchtrends / Keywords</label>
+                  <label htmlFor="searchTerms">Deine Suchbegriffe / Keywords</label>
                   <input
                     id="searchTerms"
                     value={deriveSearchTerms}
@@ -738,7 +729,7 @@ function App() {
               <section className="panel results-panel fade-in">
                 <div className="panel-header">
                   <h2>Abgeleitete Geschäftsideen</h2>
-                  <span className="badge-hypothesis">Hypothesen-Modus</span>
+                  <span className="badge-hypothesis">Vorschläge aus Vorlagen</span>
                 </div>
                 <div className="ideas-list">
                   {derivedIdeas.map((idea, idx) => (
@@ -771,23 +762,29 @@ function App() {
               <div className="panel-header">
                 <h2>Ideen-Vergleich</h2>
               </div>
-              {ideas.filter(i => i.marketAnalysis).length < 2 ? (
-                <p>Du benötigst mindestens 2 validierte Ideen für einen Vergleich.</p>
+              {comparableIdeas.length < 2 ? (
+                <p>Du benötigst mindestens 2 gespeicherte Berichte für einen Vergleich.</p>
               ) : (
                 <div className="compare-table-container" style={{overflowX: 'auto'}}>
                   <table className="compare-table" style={{width: '100%', textAlign: 'left', borderCollapse: 'collapse'}}>
                     <thead>
                       <tr>
                         <th style={{padding: '12px', borderBottom: '2px solid #e2e8f0'}}>Metrik</th>
-                        {ideas.filter(i => i.marketAnalysis).map(idea => (
+                        {comparableIdeas.map(idea => (
                           <th key={idea.id} style={{padding: '12px', borderBottom: '2px solid #e2e8f0'}}>{idea.title} <br/><small>{idea.region}</small></th>
                         ))}
                       </tr>
                     </thead>
                     <tbody>
                       <tr>
-                        <td style={{padding: '12px', borderBottom: '1px solid #e2e8f0', fontWeight: 'bold'}}>Score</td>
-                        {ideas.filter(i => i.marketAnalysis).map(idea => (
+                        <td style={{padding: '12px', borderBottom: '1px solid #e2e8f0'}}>Datenbasis</td>
+                        {comparableIdeas.map(idea => (
+                          <td key={idea.id} style={{padding: '12px', borderBottom: '1px solid #e2e8f0'}}>{describeDataBasis(idea.marketAnalysis)}</td>
+                        ))}
+                      </tr>
+                      <tr>
+                        <td style={{padding: '12px', borderBottom: '1px solid #e2e8f0', fontWeight: 'bold'}}>Orientierungs-Score</td>
+                        {comparableIdeas.map(idea => (
                           <td key={idea.id} style={{padding: '12px', borderBottom: '1px solid #e2e8f0'}}>
                             <strong style={{color: '#1d4ed8'}}>{idea.marketAnalysis?.scoreAtGeneration}</strong>
                           </td>
@@ -795,27 +792,27 @@ function App() {
                       </tr>
                       <tr>
                         <td style={{padding: '12px', borderBottom: '1px solid #e2e8f0'}}>Suchvolumen</td>
-                        {ideas.filter(i => i.marketAnalysis).map(idea => (
+                        {comparableIdeas.map(idea => (
                           <td key={idea.id} style={{padding: '12px', borderBottom: '1px solid #e2e8f0'}}>{idea.marketAnalysis?.metrics.searchVolume}</td>
                         ))}
                       </tr>
                       <tr>
                         <td style={{padding: '12px', borderBottom: '1px solid #e2e8f0'}}>Konkurrenz</td>
-                        {ideas.filter(i => i.marketAnalysis).map(idea => (
+                        {comparableIdeas.map(idea => (
                           <td key={idea.id} style={{padding: '12px', borderBottom: '1px solid #e2e8f0'}}>{idea.marketAnalysis?.metrics.competition}</td>
                         ))}
                       </tr>
                       <tr>
-                        <td style={{padding: '12px', borderBottom: '1px solid #e2e8f0'}}>Daten-Qualität</td>
-                        {ideas.filter(i => i.marketAnalysis).map(idea => (
+                        <td style={{padding: '12px', borderBottom: '1px solid #e2e8f0'}}>Recherche-Fortschritt</td>
+                        {comparableIdeas.map(idea => (
                           <td key={idea.id} style={{padding: '12px', borderBottom: '1px solid #e2e8f0'}}>
-                            {idea.marketAnalysis?.evidencePercent}% ({idea.marketAnalysis?.evidenceQuality})
+                            {idea.marketAnalysis.evidencePercent === undefined ? 'Nicht dokumentiert' : `${idea.marketAnalysis.evidencePercent}% der Recherchemerkmale vorhanden`}
                           </td>
                         ))}
                       </tr>
                       <tr>
                         <td style={{padding: '12px', borderBottom: '1px solid #e2e8f0'}}>Fazit</td>
-                        {ideas.filter(i => i.marketAnalysis).map(idea => (
+                        {comparableIdeas.map(idea => (
                           <td key={idea.id} style={{padding: '12px', borderBottom: '1px solid #e2e8f0', fontSize: '0.9rem'}}>{idea.marketAnalysis?.verdict}</td>
                         ))}
                       </tr>

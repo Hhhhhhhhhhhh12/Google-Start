@@ -36,6 +36,7 @@ export interface BusinessIdea {
   targetAudience: string
   keywords: string[]
   weights?: ScoringWeights
+  dataBasis?: 'assumptions' | 'external-mixed' | 'manual'
 
   keywordData: KeywordData[]
 
@@ -100,6 +101,7 @@ export interface ScoreInput {
 }
 
 export interface MarketAnalysis {
+  dataBasis?: BusinessIdea['dataBasis'] | 'unverified'
   verdict: string
   demandAnalysis: string
   competitionAnalysis: string

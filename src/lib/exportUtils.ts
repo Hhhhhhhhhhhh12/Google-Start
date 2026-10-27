@@ -1,4 +1,5 @@
 import type { MarketAnalysis } from '../types'
+import { describeDataBasis, prepareReportForDisplay } from './reportProvenance'
 
 export function generateReportMarkdown(
   title: string,
@@ -6,11 +7,18 @@ export function generateReportMarkdown(
   report: MarketAnalysis
 ): string {
   const date = new Date().toLocaleDateString('de-DE')
+  report = prepareReportForDisplay(report)
 
   return `# Marktanalyse: ${title}
 **Region:** ${region || 'Lokal/Nicht angegeben'}
 **Datum:** ${date}
-**Score:** ${report.scoreAtGeneration}/100
+**Orientierungs-Score:** ${report.scoreAtGeneration}/100
+**Datenbasis:** ${describeDataBasis(report)}
+
+Score, SWOT, Zielgruppe und Strategie sind regelbasierte Arbeitshypothesen. Sie belegen weder regionale Nachfrage noch Zahlungsbereitschaft.
+
+## Datenherkunft
+${report.sources.map(source => `- ${source}`).join('\n')}
 
 ## Zusammenfassung
 ${report.verdict}
