@@ -1,69 +1,55 @@
-# Roadmap - Local Demand Scanner
+# Roadmap — Ideen Scout
 
-## 🎯 Project Vision
-A local-first, API-free tool to filter and validate business ideas based on demand signals and competitor analysis.
+Stand: 27.10.2026. Grundlage: Quellprüfung des übernommenen Hauptzweigs `97b332d`, ohne Ausführung der App oder technischer Prüfungen.
 
-## ✅ Phase 1: MVP (Abgeschlossen)
-- [x] **Core Stack**: React + Vite + TypeScript + Vanilla CSS setup.
-- [x] **Idea Management**: Multi-idea sidebar for switching between concepts.
-- [x] **Active Editing**: Form for Title, Region, Audience, and Notes.
-- [x] **Data Persistence**: `localStorage` integration for offline-first usage.
-- [x] **Scoring Engine**: Preliminary Demand Score calculation (0-100).
-- [x] **Keyword Integration**: Scoring contribution based on search term relevance.
-- [x] **Query Builder**: Automated generation of deep-link research queries.
-- [x] **UI Feedback**: Score explanation cards and visual indicators.
-- [x] **Testing**: Vitest suite for scoring logic and query generation.
-- [x] **Evidence Quality Badge**: Checklist-driven quality indicator (incomplete → strong).
-- [x] **Grouped Research Links**: Categorized deep-links (Search, Maps, Trends, Pain Points).
+## Ziel und Statusregeln
 
-## ✅ Phase 2: Research Workflow (Abgeschlossen)
-Transition from preliminary scoring to manual validation with a guided workflow.
+Bestätigtes Ziel: **Recherchehilfe mit belegbaren Daten; Automatik unterstützt.** Serper bleibt optional. Die frühere pauschale Aussage „alle Phasen abgeschlossen“ wird durch die folgenden Einzelstände ersetzt. Vorhandener Code, technische Prüfung, visuelle Abnahme und Veröffentlichung sind verschiedene Zustände.
 
-### 2.1 Keyword Planner Validation
-- [x] **Volume Input Fields**: Per-keyword field for manually entered monthly search volume.
-- [x] **Volume-Weighted Scoring**: Incorporate search volume data into score calculation.
-- [x] **Volume Summary**: Dashboard card showing total estimated monthly searches.
+## Übernommener Stand
 
-### 2.2 Google Trends Validation
-- [x] **Trend Stability Notes**: Text field per idea for seasonality observations.
-- [x] **Trend Direction Tag**: Dropdown (rising / stable / declining / seasonal).
-- [x] **Trend Score Factor**: Adjust score based on trend direction.
+| Bereich | Im Quellcode vorhanden | Grenze / nächster Bedarf |
+| --- | --- | --- |
+| Ideensammlung | Speichern, Öffnen und Löschen; lokale Speicherung | Speichern und insbesondere Löschen der letzten Idee später gezielt prüfen; kein vollständiger Datenimport/-export |
+| Bewertung und Bericht | Gewichteter Score, Bericht, SWOT, Strategie | Vorbelegte Annahmen werden zu weitreichend interpretiert; keine belastbare Validierung bestätigt |
+| Externe Recherche | Optionaler Serper-Aufruf für Maps und Suche | Herkunft, Abruffehler, Abdeckung und Kosten sichtbar machen; kein Nachweis von Keyword-Planner- oder Trends-Abfragen |
+| Manuelle Recherche | Datenfelder, Typen und Hilfslogik teilweise vorhanden | Der vollständige manuelle Arbeitsablauf ist in der aktuellen Oberfläche nicht vorhanden |
+| Ideen ableiten | Regelbasierte Kombination von Eingaben, Kennzeichnung als Hypothese | Hinweise auf aktuelle Suchtrends und hohes Potenzial sind so nicht belegt |
+| Vergleich | Tabelle gespeicherter Berichte | Übernimmt deren Datenlücken; Anzeige unvollständiger Daten später prüfen |
+| Export | Bericht als Markdown | Keine vollständige Sicherung der Ideensammlung und kein Import |
+| Prüfungen | Drei Testdateien für Bewertungs-, Anfrage- und Berichtslogik | Bei dieser Migration nicht ausgeführt; alte grüne Zähler sind keine aktuelle Freigabe |
 
-### 2.3 Google Maps Competitor Deep-Dive
-- [x] **Competitor Detail Fields**: Structured fields for top competitors (name, rating, review count).
-- [x] **Competitor Quality Assessment**: Auto-derived signal from average rating + review count.
-- [x] **Market Gap Indicator**: Visual indicator showing opportunity vs. saturation.
+## Priorität 1 — Daten ehrlich einordnen
 
-### 2.4 Review & Pain Point Collection
-- [x] **Pain Point Textarea**: Free-text field for pasting review snippets.
-- [x] **Pain Point Tags**: Categorize pain points (Service, Preis, Erreichbarkeit, Qualität).
-- [x] **Pain Point Count**: Contribute tagged pain points to scoring.
+Noch umzusetzen, keine technische Umsetzung durch diese Dokumentänderung:
 
-### 2.5 Evidence Quality Enhancement (Abgeschlossen)
-- [x] **Granular Progress**: Show completion percentage per checklist category.
-- [x] **Confidence Score**: Weighted confidence based on data completeness.
-- [x] **Visual Progress Bar**: Replace simple badge with detailed progress visualization.
+- [ ] Gemessene Werte, abgeleitete Schätzungen, manuelle Angaben und Demo-Annahmen getrennt kennzeichnen.
+- [ ] Aus Google-Treffern abgeleitete Werte nicht als gemessenes monatliches Suchvolumen ausgeben.
+- [ ] Fehlende Trend-, Zahlungsbereitschafts- und Kundendaten als fehlend behandeln; neutrale Vorgaben nicht als Untersuchungsergebnis darstellen.
+- [ ] Quellen und Recherche-Checkliste aus tatsächlich vorhandenen Belegen ableiten; Serper-Suche ersetzt keine Keyword-Planner-, CPC- oder Trends-Prüfung.
+- [ ] Quellenbezeichnungen, „Live“-Badge, UI-Versprechen und Berichtsexport an die tatsächliche Datenbasis anpassen.
+- [ ] Ideen aus Vorlagen als Hypothesen beschreiben; unbewiesene Trend- und Potenzialaussagen entfernen oder begründen.
 
-### 2.6 Shortened Market Analysis (Verkürzte Marktanalyse) (Abgeschlossen)
-- [x] **Logic Engine**: Local evaluation of demand, competition, and strategy.
-- [x] **Interactive UI**: One-click analysis generation with loading states.
-- [x] **Professional Report**: Structured textual summary with actionable next steps.
+## Priorität 2 — Belegbare Recherche unterstützen
 
-## ✅ Phase 3: Business Idea Generator (Abgeschlossen)
-Suggest possible local business ideas based on user-provided research signals.
+- [ ] Einen überschaubaren manuellen Rechercheablauf ausarbeiten: Beobachtung, Quelle, Region, Abrufdatum, Kennzahl und Unsicherheit.
+- [ ] Vorhandene Recherchefelder und Hilfsfunktionen nach Eignung wiederverwenden; keine automatische Wiederherstellung der alten Oberfläche.
+- [ ] Serper als freiwillige Ergänzung mit nachvollziehbaren Abruffehlern und Quellen behandeln.
+- [ ] Aufbewahrung und Löschung des Serper-Schlüssels sowie Einsatzgrenzen vor breiterer Nutzung klären.
+- [ ] Abdeckung/Verlässlichkeit der Belege getrennt vom Attraktivitäts-Score erklären.
 
-- [x] **Idea Derivation Logic**: Local algorithm to generate improvement suggestions and pivots (B2B, Subscriptions, Nicheing) based on weaknesses.
-- [x] **Generator Input Form**: Region, interest areas, keyword lists, service categories.
-- [x] **Hypothesis Marking**: All generated ideas clearly labeled as unvalidated hypotheses.
-- [x] **Auto-Population**: Generated ideas pre-fill the scanner form for immediate validation.
-- [x] **Constraints**: No scraping, no paid APIs, all suggestions must be explainable. (Serper.dev integration initiated via UI).
+## Priorität 3 — Daten und Bedienung absichern
 
-## ✅ Phase 4: Future Considerations (Abgeschlossen)
-- [x] **Data Export**: Export validated idea reports as Markdown (implemented).
-- [x] **Advanced Aesthetics**: Premium design system with cards, grids, and animations.
-- [x] **AI-Driven Scout**: Simplified, tabbed interface for rapid validation and derivation.
-- [x] **Comparison Mode**: Side-by-side comparison of multiple validated ideas (implemented in Scout UI).
-- [x] **Custom Weighting**: Allow users to adjust the scoring algorithm parameters (implemented).
+- [ ] Vollständigen Datenexport und Import als gesonderten Umfang planen.
+- [ ] Persistenz beim letzten Löschvorgang und beim Bearbeiten vorhandener Ideen prüfen.
+- [ ] Vergleich und Export auch bei fehlenden Belegen verständlich gestalten.
+- [ ] Die bestehenden unveröffentlichten Korrekturen auf `codex/local-demand-build-fix` getrennt prüfen; nicht als Teil dieser Migration übernehmen.
 
-## 🏁 Project Summary
-The Local Demand Scanner has successfully evolved into **Ideen Scout**—a premium, local-first AI business validator. It combines deep heuristic scoring with a streamlined user experience to provide professional-grade market insights in seconds.
+## Spätere Freigaben
+
+- [ ] Begrenzten technischen Prüfumfang ausdrücklich freigeben lassen und durchführen.
+- [ ] Oberfläche im freigegebenen Umfang ansehen und visuell abnehmen.
+- [ ] Funktionsänderungen separat zur Integration freigeben.
+- [ ] Hosting, öffentliche App-Veröffentlichung oder echte kostenpflichtige Abfragen separat beauftragen.
+
+Die bestätigten Richtungsentscheidungen und die Auflösung der alten Widersprüche stehen in [docs/DECISIONS.md](docs/DECISIONS.md). Die alte Roadmap bleibt in der Git-Historie des Übernahmestands erhalten.
