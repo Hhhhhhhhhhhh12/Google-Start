@@ -1,11 +1,11 @@
 export type AppMode = 'home' | 'evaluate' | 'discover' | 'compare' | 'settings'
 
 const paths = {
-  evaluate: <><circle cx="10.5" cy="10.5" r="6.5" /><path d="m16 16 5 5" /></>,
-  discover: <><path d="M9 18h6M10 21h4M8 14a7 7 0 1 1 8 0c-1 1-1 2-1 3H9c0-1 0-2-1-3Z" /></>,
-  compare: <><rect x="3" y="4" width="7" height="16" rx="1" /><rect x="14" y="4" width="7" height="16" rx="1" /></>,
+  evaluate: <><path d="m16 3 5 5M3 21l5-1L21 7a2 2 0 0 0-5-5L3 15Z" /><path d="m3 15 5 5" /></>,
+  discover: <><circle cx="12" cy="12" r="9" /><path d="m16 8-2 6-6 2 2-6Z" /></>,
+  compare: <><path d="M4 7h16m-4-4 4 4-4 4M20 17H4m4-4-4 4 4 4" /></>,
   home: <path d="M3 7V5a1 1 0 0 1 1-1h5l2 3h9a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7Z" />,
-  settings: <><path d="M3 6h6m4 0h8M3 12h12m4 0h2M3 18h2m4 0h12" /><circle cx="11" cy="6" r="2" /><circle cx="17" cy="12" r="2" /><circle cx="7" cy="18" r="2" /></>,
+  settings: <><path d="m9 3-.6 2.4-2 .9L4.2 6 2 10l1.8 1.6v1L2 14l2.2 4 2.2-.3 2 .9L9 21h6l.6-2.4 2-.9 2.2.3 2.2-4-1.8-1.4v-1L22 10l-2.2-4-2.2.3-2-.9L15 3Z" /><circle cx="12" cy="12" r="3" /></>,
 }
 
 export function NavigationIcon({ name }: { name: AppMode }) {
@@ -21,12 +21,12 @@ export function AppNavigation({ mode, count, onNavigate }: Props) {
     </button>
   }
   return <aside className="app-sidebar" aria-label="Seitenleiste">
+    <div className="app-wordmark" aria-label="Ideen Scout">Ideen<br />{' '}Scout<span aria-hidden="true">.</span></div>
     <nav className="primary-navigation" aria-label="Hauptwege">
       {item('evaluate', 'Idee prüfen')}
       {item('discover', 'Ideen finden')}
       {item('compare', 'Ideen vergleichen')}
     </nav>
     <nav className="collection-navigation" aria-label="Gespeicherte Ideen">{item('home', 'Sammlung')}</nav>
-    <nav className="settings-navigation" aria-label="Konfiguration">{item('settings', 'Einstellungen')}</nav>
   </aside>
 }

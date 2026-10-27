@@ -9,7 +9,7 @@ Lokale Recherchehilfe für regionale Geschäftsideen mit React, Vite und TypeScr
 - **Ideen finden:** Eine Region wählen, passende Beobachtungen aus gespeicherten Ideen auswählen oder neue vormerken. Vorschläge tragen ihre verwendeten Quellen und ihr Datum mit. Neue Beobachtungen werden beim Übernehmen eines Vorschlags Teil des Entwurfs und mit dessen Speicherung gesichert. Ein anderer Regionsname allein erzeugt keine erfundenen Nachfragesignale.
 - **Ideen vergleichen:** Gespeicherte Berichte mit Orientierungs-Score, Datenbasis, passenden Beobachtungen und fehlenden Kennzahlen nebeneinander ansehen.
 
-„Sammlung“ und „Einstellungen“ sind getrennte Bereiche in der Seitenleiste. Entwürfe und noch nicht vorgemerkte Recherche-Eingaben bleiben beim Wechsel zwischen diesen Bereichen während der Sitzung erhalten.
+„Sammlung“ ist in der Seitenleiste erreichbar; das Zahnrad oben rechts öffnet die Einstellungen. Das Recherchejournal verwendet einen Papierhintergrund, redaktionelle Schriftgestaltung und eine Illustration neben der Überschrift. Entwürfe und noch nicht vorgemerkte Recherche-Eingaben bleiben beim Wechsel zwischen den Bereichen während der Sitzung erhalten.
 
 Die Sammlung liegt im Browserspeicher. Ungespeicherte Änderungen sind gekennzeichnet. Löschen wird auch für die letzte Idee gespeichert; in der laufenden Seite kann es rückgängig gemacht werden. Nicht lesbare Daten werden nicht automatisch überschrieben. Der Berichtsexport enthält die Quellen und Beobachtungen; er ersetzt keine vollständige Sicherung mit Wiederimport.
 

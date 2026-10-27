@@ -6,7 +6,7 @@ Stand: 27.10.2026. Technische Umsetzung, technische Prüfung, visuelle Nutzerabn
 
 - Speichern und Bearbeiten anhand fester IDs; Notizen, Recherche und Gewichte bleiben erhalten. Geänderte Eingaben machen den angezeigten Bericht ungültig. Löschen der letzten Idee, Rückgängig-Funktion und verständliche Speicherfehler.
 - Manueller Rechercheablauf mit Thema, Art, Region, Quelle, Datum, optionalem Link und Unsicherheit; vorhandener Query Builder als manuell geöffnete Recherchehilfe.
-- Freigegebener Layoutentwurf umgesetzt: reduzierte Seitenleiste mit drei Hauptwegen, Sammlung und Einstellungen; drei Prüfschritte; aufklappbare Ergebnisdetails.
+- Abgenommene Journalgestaltung umgesetzt: reduzierte Symbolnavigation, Sammlung, Einstellungen oben rechts, drei Prüfschritte, Papier-/Serifengestaltung und lokale Illustration; aufklappbare Ergebnisdetails. Nachweis in [docs/GUIDED_LAYOUT.md](docs/GUIDED_LAYOUT.md).
 - Regionale Ideenableitung aus ausgewählten Beobachtungen mit Quellenübernahme; fehlende Signale werden nicht erfunden.
 - Sichtbare Abfragefehler, sichere Fehlermeldungen, begrenzte Anfragezeit, Teilresultate und Abbruch. Serper-Schlüssel standardmäßig in der Sitzung, Geräteablage nur ausdrücklich; Löschen beider Ablagen.
 - Kennzeichnung von Annahmen und ungeklärter Herkunft in Bericht, Vergleich und Markdown-Export. Kein erfundenes monatliches Suchvolumen aus Trefferzahlen.
@@ -15,8 +15,8 @@ Die Nachweise stehen in [docs/WORKFLOW_IMPROVEMENTS.md](docs/WORKFLOW_IMPROVEMEN
 
 ## Nächste eigenständige Aufgaben
 
-- Visuelle Nutzerabnahme der tatsächlichen App nach dem freigegebenen Layoutentwurf; Details siehe [Layoutnachweis](docs/GUIDED_LAYOUT.md).
-- Integration und GitHub-Übertragung der fünf neuen Verbesserungen separat freigeben.
+- Visuelle Nutzerabnahme der tatsächlichen App mit dem technisch geprüften Journal-Einbau; Details siehe [Layoutnachweis](docs/GUIDED_LAYOUT.md).
+- Integration und GitHub-Übertragung der Workflow-Verbesserungen samt Journal-Einbau separat freigeben.
 - Vollständiger Datenexport, Wiederimport und nachvollziehbare Datenübernahme bei einem Wechsel der lokalen Adresse.
 - Spätere Quellenabdeckung: Messzeiträume, Aktualität und unterschiedliche geografische Granularität fachlich präzisieren.
 - Umfang und Aussagekraft des Orientierungs-Scores separat beurteilen; fehlende Zahlungsbereitschaft oder Nachfrage bleiben offene Belege.
