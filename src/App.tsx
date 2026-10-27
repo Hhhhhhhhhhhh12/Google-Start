@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import './App.css'
 import { generateMarketAnalysis } from './lib/marketAnalysis'
 import { deriveIdeasMock, type DerivedIdea } from './lib/aiMock'
@@ -7,9 +7,6 @@ import { generateReportMarkdown } from './lib/exportUtils'
 import { calculateEvidencePercent, calculateEvidenceQuality } from './lib/scoring'
 import type { BusinessIdea, MarketAnalysis } from './types'
 
-import { useMemo, useEffect } from 'react'
-import { calculateIdeaScore } from './lib/scoring'
-import { buildResearchQueries } from './lib/queryBuilder'
 import { loadIdeas, saveIdeas } from './lib/storage'
 
 type AppMode = 'home' | 'evaluate' | 'discover' | 'compare'
@@ -18,7 +15,6 @@ function App() {
   const [mode, setMode] = useState<AppMode>('home')
   const [ideas, setIdeas] = useState<BusinessIdea[]>([])
   const [activeIdeaId, setActiveIdeaId] = useState<string | null>(null)
-  const [isPreparingResearch, setIsPreparingResearch] = useState(false)
   
   // Load ideas on mount
   useEffect(() => {
@@ -123,7 +119,7 @@ function App() {
           }),
           scrapeSearchMetadata(ideaTitle, serperApiKey).catch(e => {
             console.error('Search Error:', e)
-            return { adCount: 0, resultCount: 0, organic: [] }
+            return { adCount: 0, resultCount: 0, organic: [], peopleAlsoAsk: [], relatedSearches: [] }
           }),
         ])
 
