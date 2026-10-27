@@ -23,3 +23,16 @@
 ## Grenzen und noch offene Umsetzung
 
 Die Entscheidungen betreffen Ziel und Dokumentation. Die App wurde dadurch fachlich noch nicht umgebaut. Technische Tests, Builds, Laufzeitprüfungen, visuelle Abnahme und öffentliche App-Veröffentlichung sind im Migrationsauftrag nicht ausdrücklich freigegeben. Die beauftragte GitHub-Sicherung ist davon getrennt.
+
+
+## Ergänzung: Variantenabgleich vom 27.10.2026
+
+In diesem Chat ausdrücklich bestätigt; Umfang ist Planung, keine Funktionsimplementierung:
+
+| Gegenstand | Entscheidung | Status |
+| --- | --- | --- |
+| Vollständige Datensicherung | JSON-Export aller Ideen samt Quellen und Berichten ohne API-Schlüssel; geprüfter Import, gleiche ID nur nach Nutzerauswahl ersetzen | Vom User bestätigt; Umsetzung offen |
+| Gesamt-Score | Nachrangige Orientierung behalten; Zusammensetzung, Annahmen und fehlende Belege erklären; Formel vorerst erhalten | Vom User bestätigt; Erklärung noch zu ergänzen |
+| Was-wäre-wenn und Finanzrechner | Beide als spätere eigenständige Funktionen vormerken | Vom User bestätigt; fachliche Prüfung und Umsetzung offen |
+
+Die bereits im Chat „Local Demand Scanner fortführen“ ausgewählte geführte Oberfläche bleibt berücksichtigt. `codex/local-demand-core-workflows` bei `ac4bb33` ist die empfohlene neueste Arbeitsgrundlage, noch keine hier integrierte oder visuell abgenommene Fassung. Vollständiger Quellenvergleich, Wiederverwendung und Grenzen: [Variantenabgleich](VARIANTENABGLEICH-2026-10-27.txt).

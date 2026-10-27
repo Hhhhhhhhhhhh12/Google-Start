@@ -20,3 +20,8 @@ Ideen und API-Schlüssel liegen im Browserprofil unter der bisherigen lokalen Ad
 ## Prüfstatus dieser Übernahme
 
 Durchgeführt: Quellen-, Git-Status- und Diff-Prüfung sowie Sichtung potenziell vertraulicher Dateien. Nicht durchgeführt: Installation, Testausführung, Lint, Build, Laufzeitprüfung, externe Suchabfragen oder visuelle Abnahme. Vorhandene Testdateien sind kein Beleg für einen aktuellen erfolgreichen Lauf.
+
+
+## Fortschreibung nach Variantenabgleich
+
+Die Aussagen oben dokumentieren den damaligen Migrationszeitpunkt. Die dort genannten unveröffentlichten Korrekturen wurden inzwischen in einem anderen Chat weiterbearbeitet. `main` steht im Abgleich auf `aaace1e`; der neueste gesichtete Workflow- und Layoutstand auf `ac4bb33` liegt unter `/private/tmp/local-demand-build-fix`. Er wurde hier nicht integriert oder veröffentlicht. Aktuelle Wiederverwendung und Entscheidungen stehen im [Variantenabgleich](VARIANTENABGLEICH-2026-10-27.txt) und in [DECISIONS.md](DECISIONS.md). Die alten Quellen bleiben erhalten; insbesondere keine alte Gesamtvariante mit Job Radar über die aktuelle App übernehmen.

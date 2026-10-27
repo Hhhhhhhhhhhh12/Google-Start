@@ -2,6 +2,17 @@
 
 Stand: 27.10.2026. Grundlage: Quellprüfung des übernommenen Hauptzweigs `97b332d`, ohne Ausführung der App oder technischer Prüfungen.
 
+**Historischer Übernahmestand:** Die folgenden Tabellen dokumentieren `97b332d`. Sie sind keine aktuelle Fehlstellenliste für den inzwischen weiterentwickelten Workflow-Zweig. Der [Variantenabgleich vom 27.10.2026](docs/VARIANTENABGLEICH-2026-10-27.txt) ergänzt den neuesten gelesenen Stand `ac4bb33` und die bestätigten Folgeentscheidungen.
+
+## Aktualisierte Einordnung nach Variantenabgleich
+
+- Im neueren Arbeitsstand bereits vorhanden: manueller Rechercheablauf, Speicherkorrekturen, regionale Vorschläge, nachvollziehbare Abfragefehler, Sitzungsschlüssel als Standard und geführtes Layout. Keine doppelte Umsetzung aus alten Plänen.
+- Bestätigt eingeplant: vollständiger JSON-Export und geprüfter Import mit expliziter Konfliktentscheidung, ohne API-Schlüssel; danach Score-Zusammensetzung und fehlende Belege erklären, Formel vorerst erhalten.
+- Als spätere eigenständige Funktionen bestätigt vorgemerkt: Was-wäre-wenn und Finanzrechner.
+- Offene Abnahmestufen des neuen Arbeitsstands sowie Integration nach `main` und GitHub-Übertragung getrennt behandeln. Die Migrationsentscheidungen dieses Zweigs bei einer späteren Zusammenführung erhalten.
+
+## Historische Migrationsbewertung ab `97b332d`
+
 ## Ziel und Statusregeln
 
 Bestätigtes Ziel: **Recherchehilfe mit belegbaren Daten; Automatik unterstützt.** Serper bleibt optional. Die frühere pauschale Aussage „alle Phasen abgeschlossen“ wird durch die folgenden Einzelstände ersetzt. Vorhandener Code, technische Prüfung, visuelle Abnahme und Veröffentlichung sind verschiedene Zustände.
