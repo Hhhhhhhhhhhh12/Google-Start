@@ -11,7 +11,17 @@ Lokale Recherchehilfe für regionale Geschäftsideen mit React, Vite und TypeScr
 
 „Sammlung“ und „Einstellungen“ sind getrennte Bereiche in der Seitenleiste. Entwürfe und noch nicht vorgemerkte Recherche-Eingaben bleiben beim Wechsel zwischen diesen Bereichen während der Sitzung erhalten.
 
-Die Sammlung liegt im Browserspeicher. Ungespeicherte Änderungen sind gekennzeichnet. Löschen wird auch für die letzte Idee gespeichert; in der laufenden Seite kann es rückgängig gemacht werden. Nicht lesbare Daten werden nicht automatisch überschrieben. Der Berichtsexport enthält die Quellen und Beobachtungen; er ersetzt keine vollständige Sicherung mit Wiederimport.
+Die Sammlung liegt im Browserspeicher. Ungespeicherte Änderungen sind gekennzeichnet. Löschen wird auch für die letzte Idee gespeichert; in der laufenden Seite kann es rückgängig gemacht werden. Nicht lesbare Daten werden nicht automatisch überschrieben. Der Berichtsexport enthält die Quellen und Beobachtungen. Unter „Sammlung → Sammlung sichern oder importieren“ gibt es zusätzlich eine vollständige JSON-Sicherung mit geprüftem Wiederimport.
+
+## Vollständige JSON-Sicherung
+
+- „JSON-Sicherung herunterladen“ exportiert die gespeicherte Sammlung mit allen Modellfeldern, einschließlich Quellen, Berichten, Gewichten, IDs und Zeitangaben. API-Schlüssel, Browsereinstellungen und ungespeicherte Eingaben gehören nicht zur Sicherung.
+- Eine JSON-Datei auswählen, die Vorschau prüfen und für jede vorhandene Ideen-ID ausdrücklich „behalten“ oder „ersetzen“ wählen. Erst „Import jetzt speichern“ schreibt die Daten. Neue IDs werden hinzugefügt; andere vorhandene Ideen bleiben erhalten.
+- Fehlerhafte Daten, doppelte Ideen-/Beobachtungs-IDs, unbekannte Felder/Versionen und Dateien über 10 MiB werden abgewiesen. Maximal 10.000 Ideen pro Sammlung. Ältere JSON-Arrays ohne Formatversion werden unterstützt, sofern sie die vollständige Modellprüfung bestehen.
+- Ungespeicherte Ideenentwürfe und laufende externe Abfragen sperren den Import. Bei nicht lesbarem Originalspeicher bleiben Import und Export gesperrt. Speicherfehler und Änderungen aus anderen Tabs verhindern ein Überschreiben aus einer veralteten Vorschau.
+- Für einen Umzug: an der bisherigen App-Adresse exportieren, die Datei an der neuen Adresse auswählen, Vorschau prüfen und ausdrücklich importieren. Die bisherige Sammlung wird dadurch nicht gelöscht. Quellenrichtigkeit und eine tatsächliche Übertragung deiner persönlichen Browserdaten werden nicht automatisch bestätigt.
+
+Technischer Stand und Prüfnachweise: [JSON-Sicherung](docs/JSON_BACKUP.md).
 
 ## Optionale externe Recherche
 

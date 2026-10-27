@@ -17,7 +17,7 @@ Die Nachweise stehen in [docs/WORKFLOW_IMPROVEMENTS.md](docs/WORKFLOW_IMPROVEMEN
 
 - Visuelle Nutzerabnahme der tatsächlichen App nach dem freigegebenen Layoutentwurf; Details siehe [Layoutnachweis](docs/GUIDED_LAYOUT.md).
 - Integration und GitHub-Übertragung der fünf neuen Verbesserungen separat freigeben.
-- Vollständiger Datenexport, Wiederimport und nachvollziehbare Datenübernahme bei einem Wechsel der lokalen Adresse.
+- Vollständiger JSON-Export und geprüfter Wiederimport sind im Arbeitszweig umgesetzt; die tatsächliche Übertragung persönlicher Browserdaten sowie Integration und visuelle Nutzerabnahme stehen separat aus. Siehe [JSON-Sicherung](docs/JSON_BACKUP.md).
 - Spätere Quellenabdeckung: Messzeiträume, Aktualität und unterschiedliche geografische Granularität fachlich präzisieren.
 - Umfang und Aussagekraft des Orientierungs-Scores separat beurteilen; fehlende Zahlungsbereitschaft oder Nachfrage bleiben offene Belege.
 - Geräteübergreifende Bedienprüfung und echte externe Abfragen benötigen jeweils einen eigenen freigegebenen Umfang. Öffentliche App-Veröffentlichung ist ein eigener Schritt.

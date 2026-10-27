@@ -1,0 +1,106 @@
+SCOUT — VARIANTENABGLEICH UND ENTSCHEIDUNGEN
+Stand: 27.10.2026. Reine Quellen-, Diff- und Statusprüfung in diesem Auftrag.
+
+GEGENSTAND UND FESTE QUELLSTÄNDE
+main: aaace1e8392646b8397519782791f5b71b8a097b
+Neuester gesichteter Arbeitsstand: codex/local-demand-core-workflows,
+ac4bb336d848b8df54552397bb3cc96eb40f9f23, /private/tmp/local-demand-build-fix.
+Migrationsdokumentation: 6015bb52f2b2acb3cd65923c60cb941676b69992,
+/Users/Heineken/Code/ideen-scout-codex-migration.
+Ältere deutsche Komponentenvariante: claude/hopeful-proskuriakova-1a20ea,
+38391f4860824f87c41423350d5fdc50001fead1.
+Ältere englische Zusatzvariante: origin/claude/english-readme-google-start-ufQvY,
+9e606405e90b34362c994bfdfe79320ea5e8dc9e.
+Historischer Plan: privates Archiv Cursor-Devin-Projektmaterial-2026-10-27,
+Cursor/Wiederhergestellte-Plaene/lass-uns-an-dieser-sprightly-popcorn.md.
+Die Zweige werden parallel weiterentwickelt; Aussagen gelten für diese Commits.
+
+GRUNDLAGE FÜR DIE WEITERARBEIT
+Empfohlen ist ac4bb33 mit den neuesten Quellen-/Speicherkorrekturen und dem vom
+Nutzer im Chat „Local Demand Scanner fortführen“ ausgewählten und zur Umsetzung
+freigegebenen geführten Layout. Dieses Layout wird durch den Abgleich nicht erneut
+zur Auswahl gestellt. Sein Code ist lokal vorhanden; visuelle Nutzerabnahme,
+Integration nach main und Übertragung dieses Arbeitszweigs zu GitHub sind laut
+seiner Dokumentation noch getrennt offen. Die Wahl der Arbeitsgrundlage ist in
+diesem Abgleich eine Empfehlung, keine ausgeführte Integration.
+main enthält die Datenherkunftskorrekturen, aber nicht alle neueren Workflows.
+Der Migrationszweig enthält die bestätigten Projektentscheidungen und AGENTS.md;
+diese fehlen in main/core-workflows durch die getrennte Entwicklung. Das ist kein
+Nachweis einer absichtlichen Rücknahme. Dokumentation später gezielt zusammenführen.
+
+ABGLEICH MIT DEM ALTEN PLAN
+1. Recherche, Speichern, Quellen und Schlüssel
+   Im neuen Arbeitsstand vorhanden: manuelle Beobachtungen mit Quelle, Datum,
+   Region, Wert und Unsicherheit; regionale Vorschläge; feste Ideen-IDs; Erhalt
+   von Bearbeitungen; Speichern leerer Sammlungen; Fehler-/Überschreibschutz;
+   Serper nur auf eigene Aktion; Sitzungsablage als Standard, Geräteablage optional.
+   Diese alten Aufgaben sind nicht nochmals als vollständige Neuentwicklung offen.
+   Genauere Messzeiträume, Aktualität und Stadt/Stadtteil/Umland bleiben offen.
+
+2. Komponenten und Gestaltung
+   Alte Home/Evaluate/Discover/Compare-Komponenten, CSS-Regeln und Barrierefreiheits-
+   Anpassungen sind erhalten. Der neuere Stand hat bereits eigene Navigation,
+   ResearchPanel, AnalysisReport und eine reduzierte Gestaltung. Keine komplette
+   alte Oberfläche und keine alte CSS-Datei über den neuen Stand kopieren.
+   Filter nach Region/Text und Sortierung fehlen in der heutigen einfachen Sammlung;
+   als kleine spätere Bedienergänzung geeignet, keine erneute Hauptnavigation nötig.
+   Alte Score-Filter und Risiko-/Qualitäts-Matrix erst nach sauberer Dateneinordnung.
+
+3. Datenexport und Import
+   Historische Funktionen in 9e60640: src/lib/storage.ts und HomeView.tsx.
+   Export serialisiert die Ideensammlung; Import prüft nur, ob JSON ein Array ist,
+   und behauptet danach den Typ BusinessIdea[]. Keine ausreichende Feld-, Quellen-,
+   Versions- oder Konfliktprüfung. Neuere researchEntries/externalResearch dürfen
+   nicht durch die alte Speicherlogik verloren gehen.
+   Empfehlung: vorhandenen Export-/Dateiauswahlansatz verwenden, Import am heutigen
+   Datenmodell neu absichern; Formatversion, vollständige Feldübernahme, Vorschau,
+   doppelte IDs und explizite Konfliktentscheidung planen. API-Schlüssel ausschließen.
+   Kein Browserprofil ausgelesen oder umgezogen.
+
+4. Score-Aufschlüsselung
+   Historisches ScoreBreakdown.tsx in 38391f4 liefert sechs Teilbalken und Regler.
+   Die aktuelle Formel verwendet außerdem Volumen, Bewertungsdurchschnitt und
+   gruppierte Gewichte. Alte Teilbalken sind deshalb keine vollständige Erklärung
+   des Beitrags zum Gesamtwert. Fehlende Angaben/Annahmen je Eingabe kennzeichnen,
+   aktuelle Gewichtung und tatsächliche Beiträge zeigen; Formel vorerst erhalten.
+   Die aktuelle App stellt den Score bereits nachrangig in aufklappbaren Details dar.
+
+5. Spätere Erweiterungen
+   Was-wäre-wenn: ScoreBreakdown.tsx erhalten. Szenario vom gespeicherten Ist-Stand
+   trennen; angenommene Reglerwerte nicht als neue Recherche speichern.
+   Finanzrechner: FinancialView.tsx in 9e60640 vorhanden; eigene Annahmen und
+   Rechenlogik fachlich prüfen, keine Tragfähigkeit aus dem Recherche-Score ableiten.
+   Beide sind vom Nutzer ausdrücklich als spätere eigenständige Funktionen vorgemerkt.
+   PDF/Sharing, CSV, Cloud-Synchronisierung und ein Backend sind keine neuen Aufträge.
+   ErrorBoundary aus 9e60640 ist als späterer Schutz gegen Darstellungsfehler nutzbar;
+   alte englische Rohfehlermeldungen nicht ungeprüft übernehmen. Schützt allein
+   weder Speicherzugriffe noch Netzwerkabläufe.
+
+6. Repository und Faro
+   Alte englische Variante enthält job-radar erneut und stammt aus der Zeit vor
+   seiner Auslagerung. Faro bleibt eigenständig. Ganze Zweige nicht pauschal mergen.
+   Sprachumstellung, alte README-Fertigmeldungen und historische Sicherheitsratings
+   werden nicht als neue Produktentscheidung übernommen. Aktuelle deutsche Bedienung
+   und bestätigtes Recherche-Ziel erhalten. Paket-/Lizenzänderungen separat prüfen.
+
+BESTÄTIGTE ENTSCHEIDUNGEN IN DIESEM CHAT
+D-01: Vollständiger JSON-Export und geprüfter Import werden eingeplant. Alle Ideen,
+Quellen, Berichte und Zeitangaben erhalten; keine API-Schlüssel. Gleiche Ideen-ID
+nur nach Nutzerauswahl ersetzen. Ziel: Sicherung und nachvollziehbare Datenübernahme.
+D-02: Gesamt-Score als nachrangige Orientierung erhalten, Zusammensetzung und
+fehlende Belege erklären; aktuelle Bewertungsformel vorerst erhalten.
+D-03: Was-wäre-wenn und Finanzrechner als spätere eigenständige Funktionen vormerken.
+Diese Auswahl ist Planung; die Funktionen wurden hier nicht implementiert.
+
+REIHENFOLGE UND GRENZEN
+1. Neuesten geführten Arbeitsstand als Zielkandidat verwenden; getrennte Abnahme/
+   Integration dieses Stands berücksichtigen und Migrationsentscheidungen erhalten.
+2. Vollständige Datensicherung/Import, danach nachvollziehbare Score-Erklärung.
+3. Sammlungsfilter und Darstellungsfehler-Schutz als begrenzte optionale Ergänzungen.
+4. Was-wäre-wenn und Finanzrechner als getrennte spätere Tickets.
+Für zusammenhängende Umsetzung: GPT-6.1 Sol, Thinking medium.
+Dieser Auftrag führte keine technischen Tests, Builds, Browser-/Laufzeitprüfungen,
+externen Anfragen, Integration oder Veröffentlichung aus. Vorhandene Prüfnachweise
+in docs/WORKFLOW_IMPROVEMENTS.md und docs/GUIDED_LAYOUT.md gehören zum anderen
+Arbeitsstand und dessen dortiger Freigabe; hier nicht wiederholt oder erweitert.
+Die Originalquellen und Benutzeränderungen bleiben erhalten.
