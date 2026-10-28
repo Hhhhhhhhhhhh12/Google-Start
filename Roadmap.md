@@ -16,7 +16,7 @@ Die Nachweise stehen in [docs/WORKFLOW_IMPROVEMENTS.md](docs/WORKFLOW_IMPROVEMEN
 ## Nächste eigenständige Aufgaben
 
 - Visuelle Nutzerabnahme der tatsächlichen App mit dem technisch geprüften Journal-Einbau; Details siehe [Layoutnachweis](docs/GUIDED_LAYOUT.md).
-- Integration und GitHub-Übertragung der Workflow-Verbesserungen samt Journal-Einbau separat freigeben.
+- Workflow-Verbesserungen samt Journal-Einbau am 28.10.2026 auf Nutzerauftrag nach `main` übernommen und zu GitHub übertragen; Nachweis im [Layoutnachweis](docs/GUIDED_LAYOUT.md). Getrennte Migrations- und Backup-Zweige bleiben eigenständig.
 - Vollständiger Datenexport, Wiederimport und nachvollziehbare Datenübernahme bei einem Wechsel der lokalen Adresse.
 - Spätere Quellenabdeckung: Messzeiträume, Aktualität und unterschiedliche geografische Granularität fachlich präzisieren.
 - Umfang und Aussagekraft des Orientierungs-Scores separat beurteilen; fehlende Zahlungsbereitschaft oder Nachfrage bleiben offene Belege.

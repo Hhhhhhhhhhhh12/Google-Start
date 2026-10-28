@@ -49,4 +49,15 @@ Der Nutzer hat ausdrücklich `npm run test`, `npm run build` und eine lokale Bro
 - Keine Warnungen oder Fehler im Browserprotokoll. Serverstart benötigte eine Sandbox-Ausnahme für den lokalen Port; ein Aufklappelement wurde nach einem nicht passenden Testselektor erfolgreich über seine direkte Bedienfläche geprüft. Beides war ein Werkzeug-/Umgebungsproblem, kein App-Fehler.
 - Die beiden ausschließlich für diese Prüfung erzeugten Testideen wurden über die App entfernt; nach Neuladen ist die Testsammlung wieder leer. Keine ursprünglichen Browserdaten oder Schlüssel ausgelesen, keine externe Abfrage gestartet.
 
-Status: Journalentwurf visuell abgenommen; in separatem Arbeitszweig eingebaut und technisch geprüft. Visuelle Abnahme der tatsächlichen App, Integration nach `main` und GitHub-Veröffentlichung bleiben separate Schritte.
+Status zum Einbau am 27.10.2026: Journalentwurf visuell abgenommen; in separatem Arbeitszweig eingebaut und technisch geprüft. Die folgenden Übernahmeschritte wurden danach ausdrücklich beauftragt.
+
+## Übernahme am 28.10.2026
+
+Nach Vorlage der tatsächlichen App und des Prüfstands hat der Nutzer die angekündigte Übernahme nach `main` und den GitHub-Upload mit „mach“ beauftragt.
+
+- Vorherige Quellen- und Statusprüfung: Hauptarbeitsordner sauber, lokales und frisch abgerufenes `origin/main` auf `aaace1e`. Journalzweig sauber auf `2142705`; sechs Commits voraus, keine abweichenden Commits auf `main`.
+- `main` wurde ohne Konflikte und ohne Umschreiben der Historie auf `2142705` vorgerückt. Damit sind die vorgelagerten geprüften Workflow-Korrekturen ebenfalls enthalten. Push nach `Hhhhhhhhhhhh12/Google-Start`, Branch `main`, erfolgreich.
+- Der Programmcode entspricht exakt dem bereits geprüften Journal-Stand. Für die Übernahme wurden keine erneuten Tests, Builds, Browserprüfungen oder externen Suchabfragen ausgeführt. Die oben dokumentierten 84 Tests, Build- und Browsernachweise gehören zum unveränderten Programmstand.
+- Getrennte Migrations- und JSON-Backup-Zweige wurden nicht übernommen oder verändert. Browserdaten und Schlüssel gehören nicht zum GitHub-Upload. GitHub-Quellcodeübertragung ist keine Bereitstellung einer öffentlich laufenden App.
+
+Status: Implementierung, technische Prüfung, Integration nach `main` und Quellcodeübertragung zu GitHub abgeschlossen. Weiteres Nutzerfeedback zur tatsächlichen App bleibt möglich.
