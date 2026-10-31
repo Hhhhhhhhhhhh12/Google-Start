@@ -31,3 +31,8 @@ Der Nutzer hat für `/private/tmp/scout-json-backup-20261027` ausdrücklich gezi
 ## Getrennt offen
 
 Visuelle Nutzerabnahme und Integration nach `main` sind nicht durch die technische Prüfung freigegeben. Eine tatsächliche Migration persönlicher Browserdaten ist ebenfalls nicht durchgeführt. Der Arbeitszweig enthält den neueren, bisher nicht nach `main` integrierten Workflow-/Layoutstand als Voraussetzung. Veröffentlichung einer laufenden App und geräteübergreifende Prüfung sind nicht Teil dieses Tickets.
+
+
+## Aktueller Integrationsstand am 31.10.2026
+
+Die vorherigen Nachweise gehören zum damaligen Stand `f1b7eb4`. Der Workflow-/Layoutstand bis `ac4bb33` und das neuere Recherchejournal sind inzwischen in `main` (`6bdc33c`) enthalten. Der bereinigte PR erhält dieses Journal, ergänzt ausschließlich die JSON-Funktion und baut auf der gemeinsamen Dokumentationsbasis von PR #3 auf. Aktuelle Prüfung, Grenzen und Nutzerabnahme: [JSON_ACCEPTANCE.md](JSON_ACCEPTANCE.md). Keine persönliche Datensicherung oder Veröffentlichung durchgeführt.

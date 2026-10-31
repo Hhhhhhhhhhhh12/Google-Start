@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import './App.css'
+import journalIllustration from './assets/journal-stadtlupe.webp'
 import { generateMarketAnalysis } from './lib/marketAnalysis'
 import { generateRegionalIdeas, type RegionalIdea } from './lib/generatorEngine'
 import { collectExternalResearch } from './lib/externalResearch'
@@ -13,7 +14,7 @@ import { buildResearchQueries } from './lib/queryBuilder'
 import { deleteApiKey, loadApiKey, saveApiKey } from './lib/apiKey'
 import { ResearchPanel } from './components/ResearchPanel'
 import { AnalysisReport } from './components/AnalysisReport'
-import { AppNavigation, type AppMode } from './components/AppNavigation'
+import { AppNavigation, NavigationIcon, type AppMode } from './components/AppNavigation'
 import { BackupPanel } from './components/BackupPanel'
 import { saveImportedIdeas } from './lib/backup'
 
@@ -57,6 +58,10 @@ function App() {
   const researchQueries = buildResearchQueries(projectResearch(draft))
   const displayedResearchErrors = researchErrors.length ? researchErrors : report?.researchWarnings ?? []
   const regionSignals = [...new Map(scopedResearch([...ideas.flatMap(idea => idea.researchEntries ?? []), ...discoveryEntries], deriveRegion).map(entry => [entry.id, entry])).values()]
+  const pageLabels = { home: 'Sammlung', evaluate: 'Idee prüfen', discover: 'Ideen finden', compare: 'Ideen vergleichen', settings: 'Einstellungen' }
+  const pageTitle = mode === 'evaluate'
+    ? ([['Was braucht', 'deine Stadt?'], ['Spuren aus', ideaRegion.trim() || 'deiner Region.'], ['Was trägt.', 'Was noch fehlt.']] as const)[evaluationStep]
+    : ({ home: ['Deine', 'Ideensammlung.'], discover: ['Ideen aus', 'deiner Region.'], compare: ['Ideen im', 'Vergleich.'], settings: ['Deine', 'Einstellungen.'] } as const)[mode]
 
   useEffect(() => () => { generation.current += 1; request.current?.abort() }, [])
 
@@ -243,18 +248,16 @@ function App() {
   return (
     <div className="app-container">
       <a className="skip-link" href="#workspace">Zum Inhalt</a>
-      <header className="app-header">
-        <span className="app-brand"><span className="brand-mark" aria-hidden="true">↗</span>Ideen Scout</span>
-        <span className="header-note">Regionale Geschäftsideen recherchieren</span>
-      </header>
       <div className="app-shell">
         <AppNavigation mode={mode} count={ideas.length} onNavigate={navigate} />
         <main className={`main-content ${mode === 'compare' ? 'wide-content' : ''}`} id="workspace" tabIndex={-1}>
+          <button type="button" className="settings-button" aria-label="Einstellungen" aria-current={mode === 'settings' ? 'page' : undefined} title="Einstellungen" onClick={() => navigate('settings')}><NavigationIcon name="settings" /></button>
           <div className="workspace-inner">
-            <div className="page-heading">
-              <h1 ref={heading} tabIndex={-1}>{({ home: 'Sammlung', evaluate: 'Idee prüfen', discover: 'Ideen finden', compare: 'Ideen vergleichen', settings: 'Einstellungen' })[mode]}</h1>
-              {mode === 'evaluate' && <span className="step-caption">Schritt {evaluationStep + 1} von 3</span>}
-            </div>
+            <header className={`page-heading ${mode === 'evaluate' ? 'illustrated-heading' : ''}`}>
+              <span className="page-kicker">{pageLabels[mode]}</span>
+              <h1 ref={heading} tabIndex={-1}>{pageTitle[0]}<br /><em>{pageTitle[1]}</em></h1>
+              {mode === 'evaluate' && <img className="journal-illustration" src={journalIllustration} alt="" width={1536} height={1024} />}
+            </header>
             {initialStore.error && <p role="alert" className="notice error">{initialStore.error}</p>}
             {saveError && <p role="alert" className="notice error">{saveError}</p>}
             {notice && <p role="status" className="notice">{notice}</p>}
@@ -288,19 +291,20 @@ function App() {
             </section>
 
             <section hidden={mode !== 'evaluate'} aria-label="Idee schrittweise prüfen">
-              <ol className="evaluation-steps" aria-label="Prüfschritte">{(['Idee', 'Beobachtungen', 'Einschätzung'] as const).map((label, index) => <li key={label}><button type="button" aria-current={evaluationStep === index ? 'step' : undefined} onClick={() => goToStep(index as EvaluationStep)}><span className="step-dot">{index + 1}</span>{label}</button></li>)}</ol>
-              <div className="section-heading editor-caption"><span className="helper-text">{draftDirty ? 'Ungespeicherte Änderungen' : isSaved ? 'Gespeicherte Idee' : 'Neuer Entwurf'}</span><button className="btn-text" onClick={() => startNewIdea()}>Neue Idee</button></div>
+              <ol className="evaluation-steps" aria-label="Prüfschritte">{(['Idee', 'Beobachtungen', 'Einschätzung'] as const).map((label, index) => <li key={label}><button type="button" aria-current={evaluationStep === index ? 'step' : undefined} onClick={() => goToStep(index as EvaluationStep)}><span className="step-number">0{index + 1}</span><span>{label}</span></button></li>)}</ol>
+              {(draftDirty || isSaved) && <div className="section-heading editor-caption"><span className="helper-text">{draftDirty ? 'Ungespeicherte Änderungen' : 'Gespeicherte Idee'}</span><button className="btn-text" onClick={() => startNewIdea()}>Neue Idee</button></div>}
               <fieldset disabled={isEvaluating} className="editor-fields">
                 <div hidden={evaluationStep !== 0}>
-                  <h2>Was hast du vor?</h2>
-                  <div className="form-group"><label htmlFor="title">Deine Geschäftsidee</label><input id="title" value={ideaTitle} onChange={event => setIdeaTitle(event.target.value)} placeholder="z. B. Mobiler Fahrradservice" /></div>
-                  <div className="form-group"><label htmlFor="region">In welcher Region? (optional)</label><input id="region" value={ideaRegion} onChange={event => setIdeaRegion(event.target.value)} placeholder="z. B. Freiburg" /></div>
-                  <details className="draft-details"><summary>Zielgruppe, Suchbegriffe und Notizen <span className="optional-label">optional</span></summary>
-                    <div className="form-group"><label htmlFor="targetAudience">Zielgruppe</label><input id="targetAudience" value={targetAudience} onChange={event => setTargetAudience(event.target.value)} placeholder="z. B. Pendler" /></div>
+                  <div className="form-group idea-title-field"><label htmlFor="title">Geschäftsidee</label><input id="title" value={ideaTitle} onChange={event => setIdeaTitle(event.target.value)} placeholder="z. B. Mobiler Fahrradservice" /></div>
+                  <div className="form-row idea-context-fields">
+                    <div className="form-group"><label htmlFor="region">Region <span className="optional-label">optional</span></label><input id="region" value={ideaRegion} onChange={event => setIdeaRegion(event.target.value)} placeholder="z. B. Freiburg" /></div>
+                    <div className="form-group"><label htmlFor="targetAudience">Zielgruppe <span className="optional-label">optional</span></label><input id="targetAudience" value={targetAudience} onChange={event => setTargetAudience(event.target.value)} placeholder="z. B. Pendler" /></div>
+                  </div>
+                  <details className="draft-details"><summary>Notizen &amp; Suchbegriffe</summary>
                     <div className="form-group"><label htmlFor="idea-keywords">Suchbegriffe (durch Komma getrennt)</label><textarea id="idea-keywords" rows={2} value={keywordsText} onChange={event => { setKeywordsText(event.target.value); changeDraft({ keywords: event.target.value.split(',').map(term => term.trim()).filter(Boolean) }) }} /></div>
                     <div className="form-group"><label htmlFor="idea-notes">Notizen zur Idee</label><textarea id="idea-notes" rows={3} value={draft.notes} onChange={event => changeDraft({ notes: event.target.value })} /></div>
                   </details>
-                  <div className="editor-actions"><button className="btn-text" onClick={() => persistDraft(draft)} disabled={!draft.title.trim() || !!initialStore.error}>Entwurf speichern</button><button className="btn-primary" onClick={() => goToStep(1)}>Weiter zu Beobachtungen →</button></div>
+                  <div className="editor-actions"><button className="btn-text" onClick={() => persistDraft(draft)} disabled={!draft.title.trim() || !!initialStore.error}>Entwurf speichern</button><button className="btn-primary continue-button" onClick={() => goToStep(1)}>Weiter</button></div>
                 </div>
 
                 <div hidden={evaluationStep !== 1}>
@@ -455,7 +459,6 @@ function App() {
               )}
             </section>
           </div>
-            <footer className="workspace-footer">Keine automatische Websuche · Einschätzungen enthalten Annahmen.</footer>
           </div>
         </main>
       </div>
