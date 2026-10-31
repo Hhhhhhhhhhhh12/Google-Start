@@ -1,35 +1,38 @@
 # Ideen Scout
 
-Ideen Scout ist ein Prototyp zur Recherche regionaler Geschäftsideen. Die App verwendet React, TypeScript und Vite.
+**Was braucht deine Stadt?**
 
-## Bestätigte Richtung
+Geschäftsideen für deine Region festhalten, mit Quellen prüfen und miteinander vergleichen — in einem übersichtlichen Recherchejournal.
 
-Am 27.10.2026 bestätigt: **Recherchehilfe mit belegbaren Daten; Automatik unterstützt.** Serper bleibt eine freiwillige Ergänzung. Datenherkunft, Annahmen und Schätzungen müssen erkennbar sein. Berichte und Ideen entstehen derzeit durch feste Regeln und Vorlagen; eine angebundene generative KI gibt es im aktuellen App-Einstieg nicht.
+![Ideen Scout: Recherchejournal mit Symbolnavigation, drei Prüfschritten und regionaler Illustration](docs/images/recherchejournal.png)
 
-## Im Quellcode vorhanden
+## Drei Wege zu einer fundierteren Idee
 
-- Übersicht gespeicherter Ideen, Eingabe von Idee, Region und Zielgruppe.
-- Regelbasierte Bewertung und Bericht mit Strategie, SWOT und vorgeschlagenen nächsten Schritten.
-- Optionale Abfragen an Serper für Maps- und Suchergebnisse.
-- Ideenableitung aus Eingabebegriffen nach festen Kombinationsregeln.
-- Vergleich gespeicherter Berichte und einstellbare Bewertungsgewichte.
-- Speicherung von Ideen im lokalen Browserspeicher und Export eines Berichts als Markdown.
+| | Damit hilft dir Ideen Scout |
+| --- | --- |
+| **Idee prüfen** | Angebot skizzieren, Beobachtungen sammeln und offene Fragen erkennen. |
+| **Ideen finden** | Aus ausgewählten regionalen Beobachtungen neue Angebote ableiten. |
+| **Ideen vergleichen** | Datenbasis, Einschätzungen und fehlende Belege nebeneinander betrachten. |
 
-Diese Aufzählung beschreibt den gelesenen Quellcode. Sie bestätigt keine erfolgreiche technische Prüfung oder visuelle Abnahme.
+Ideen und Quellen bleiben im lokalen Browserspeicher. Einschätzungen entstehen aus Regeln und Annahmen; sie sind keine Marktvalidierung. Die optionale Serper-Recherche startet nur auf deinen Klick und kann Credits verbrauchen.
 
-## Grenzen des übernommenen Prototyps
+## Lokal starten
 
-- Ohne Serper verwendet die Bewertung vorbelegte Annahmen. Auch mit Serper bleiben unter anderem Dringlichkeit, Zahlungsbereitschaft und Trend vorbelegt.
-- Das als monatliches Suchvolumen verwendete Signal wird aus Trefferzahlen und Anzeigen geschätzt. Es ist kein gemessenes monatliches Suchvolumen.
-- Quellenbezeichnungen und Aussagen wie „Live“, „datenbasierte Fakten“ oder „AI Business Validator“ sind im aktuellen Code nicht durchgängig durch die tatsächliche Datenherkunft gedeckt.
-- Typen und Hilfsfunktionen für manuelle Recherche existieren; die frühere vollständige Rechercheoberfläche ist im aktuellen `src/App.tsx` nicht vorhanden.
-- Serper-Schlüssel werden derzeit im lokalen Browserspeicher gespeichert. Externe Abfragen und deren Kosten sind keine Voraussetzung für die Migration.
-- Berichtsexport ist vorhanden; ein vollständiger, wieder einlesbarer Datenexport und Datenimport fehlen.
+React · TypeScript · Vite
 
-Prioritäten, Einordnung der alten Fertigmeldungen und bestätigte Entscheidungen stehen in [Roadmap.md](Roadmap.md) und [docs/DECISIONS.md](docs/DECISIONS.md). Hinweise zur Übernahme stehen in [docs/MIGRATION.md](docs/MIGRATION.md).
+```bash
+npm ci
+npm run dev
+```
 
-## Entwicklung
+Die im Terminal angezeigte lokale Adresse im Browser öffnen.
 
-Nach einer ausdrücklich freigegebenen Einrichtung: Abhängigkeiten mit `npm install` installieren; die vorhandenen Befehle sind `npm run dev`, `npm run test`, `npm run lint` und `npm run build`. Technische Tests, Builds und Laufzeitprüfungen benötigen die ausdrückliche Freigabe des Users für den konkreten Umfang.
+[Bedienung & Datenbasis](docs/BEDIENUNG.md) · [Roadmap](Roadmap.md) · [Layout & Prüfnachweise](docs/GUIDED_LAYOUT.md)
 
-Browserdaten gehören zur jeweiligen lokalen Adresse und zum Browserprofil. Eine Kopie des Quellcodes überträgt gespeicherte Ideen oder API-Schlüssel nicht automatisch.
+## Bestätigte Produktausrichtung
+
+Ideen Scout ist eine nachvollziehbare Recherchehilfe mit belegbaren Daten und optionaler Serper-Unterstützung. Die vorhandenen Regeln und Vorlagen ersetzen keine generative KI oder tatsächliche Marktvalidierung. Quellen, Annahmen, Schätzungen und fehlende Belege müssen erkennbar bleiben.
+
+Die Recherchefunktionen und das Recherchejournal sind bereits in `main` enthalten. Die vollständige JSON-Sicherung wird getrennt in PR #4 vorbereitet. Browserdaten gehören zur jeweiligen lokalen Adresse und zum Browserprofil; ein Quellcodewechsel überträgt sie nicht.
+
+[Bestätigte Entscheidungen](docs/DECISIONS.md) · [Historische Migration](docs/MIGRATION.md) · [Integrationsplan und Abnahme](docs/INTEGRATION_2026-10-31.md)

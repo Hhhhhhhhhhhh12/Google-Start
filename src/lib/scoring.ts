@@ -1,4 +1,5 @@
 import type { BusinessIdea, IdeaScores, ScoreInput, TrendDirection, ScoringWeights } from '../types';
+import { scopedResearch } from './research';
 
 export function clamp(value: number, min = 0, max = 100): number {
     if (Number.isNaN(value)) return min;
@@ -112,6 +113,7 @@ export function calculateScore(input: ScoreInput, weights?: ScoringWeights): Omi
 }
 
 export function calculateEvidencePercent(idea: BusinessIdea): number {
+    const observations = scopedResearch(idea.researchEntries ?? [], idea.region);
     let total = 0;
     let filled = 0;
 
@@ -122,7 +124,7 @@ export function calculateEvidencePercent(idea: BusinessIdea): number {
 
     // Has keyword volume data? (worth 1 point)
     total += 1;
-    if ((idea.keywordData || []).some(kd => kd.monthlyVolume !== undefined && kd.monthlyVolume > 0)) {
+    if (observations.some(entry => entry.kind === 'keyword-volume') || (idea.keywordData || []).some(kd => kd.monthlyVolume !== undefined && kd.monthlyVolume > 0)) {
         filled += 1;
     }
 
@@ -140,7 +142,7 @@ export function calculateEvidencePercent(idea: BusinessIdea): number {
 
     // Has trend direction set? (worth 1 point)
     total += 1;
-    if (idea.trendDirection && idea.trendDirection !== 'stable') {
+    if (observations.some(entry => entry.kind === 'trend') || (idea.trendDirection && idea.trendDirection !== 'stable')) {
         filled += 1;
     }
 
@@ -157,6 +159,7 @@ export function calculateEvidenceQuality(idea: BusinessIdea): 'incomplete' | 'we
 }
 
 export function calculateIdeaScore(idea: BusinessIdea): IdeaScores {
+    const ratedCompetitors = idea.competitors.filter(competitor => competitor.rating > 0);
     const scores = calculateScore({
         competitorCount: idea.competitorCount,
         professionalCompetitorCount: idea.professionalCompetitorCount,
@@ -167,8 +170,8 @@ export function calculateIdeaScore(idea: BusinessIdea): IdeaScores {
         keywordCount: idea.keywords.length,
         trendDirection: idea.trendDirection || 'stable',
         painPointEntryCount: (idea.painPointEntries || []).length,
-        averageCompetitorRating: idea.competitors?.length
-            ? idea.competitors.reduce((sum: number, c: any) => sum + c.rating, 0) / idea.competitors.length
+        averageCompetitorRating: ratedCompetitors.length
+            ? ratedCompetitors.reduce((sum, competitor) => sum + competitor.rating, 0) / ratedCompetitors.length
             : 0,
         totalSearchVolume: (idea.keywordData || []).reduce((sum: number, kd: any) => sum + (kd.monthlyVolume || 0), 0),
     }, idea.weights);

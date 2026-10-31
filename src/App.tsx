@@ -1,748 +1,351 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import './App.css'
+import journalIllustration from './assets/journal-stadtlupe.webp'
 import { generateMarketAnalysis } from './lib/marketAnalysis'
-import { deriveIdeasMock, type DerivedIdea } from './lib/aiMock'
-import { scrapeGoogleMaps, scrapeSearchMetadata } from './lib/scraper'
+import { generateRegionalIdeas, type RegionalIdea } from './lib/generatorEngine'
+import { collectExternalResearch } from './lib/externalResearch'
 import { generateReportMarkdown } from './lib/exportUtils'
-import { calculateEvidencePercent, calculateEvidenceQuality } from './lib/scoring'
-import type { BusinessIdea, MarketAnalysis } from './types'
-
-import { useMemo, useEffect } from 'react'
-import { calculateIdeaScore } from './lib/scoring'
+import { describeDataBasis, prepareReportForDisplay } from './lib/reportProvenance'
+import type { BusinessIdea, MarketAnalysis, ResearchEntry } from './types'
+import { loadIdeasWithStatus, saveIdeas } from './lib/storage'
+import { createIdea, DEFAULT_WEIGHTS, editIdea, upsertIdea } from './lib/ideas'
+import { currentExternalResearch, projectResearch, scopedResearch } from './lib/research'
 import { buildResearchQueries } from './lib/queryBuilder'
-import { loadIdeas, saveIdeas } from './lib/storage'
+import { deleteApiKey, loadApiKey, saveApiKey } from './lib/apiKey'
+import { ResearchPanel } from './components/ResearchPanel'
+import { AnalysisReport } from './components/AnalysisReport'
+import { AppNavigation, NavigationIcon, type AppMode } from './components/AppNavigation'
 
-type AppMode = 'home' | 'evaluate' | 'discover' | 'compare'
+type EvaluationStep = 0 | 1 | 2
 
 function App() {
-  const [mode, setMode] = useState<AppMode>('home')
-  const [ideas, setIdeas] = useState<BusinessIdea[]>([])
-  const [activeIdeaId, setActiveIdeaId] = useState<string | null>(null)
-  const [isPreparingResearch, setIsPreparingResearch] = useState(false)
-  
-  // Load ideas on mount
-  useEffect(() => {
-    const loaded = loadIdeas()
-    setIdeas(loaded)
-  }, [])
-
-  // Save ideas when they change
-  useEffect(() => {
-    if (ideas.length > 0) {
-      saveIdeas(ideas)
-    }
-  }, [ideas])
-
-  const [serperApiKey, setSerperApiKey] = useState(
-    localStorage.getItem('serper_api_key') || ''
-  )
-
-  const handleSaveApiKey = (val: string) => {
-    setSerperApiKey(val)
-    localStorage.setItem('serper_api_key', val)
-  }
-
-  // Evaluate State
-  const [ideaTitle, setIdeaTitle] = useState('')
-  const [ideaRegion, setIdeaRegion] = useState('')
-  const [targetAudience, setTargetAudience] = useState('')
+  const [initialStore] = useState(loadIdeasWithStatus)
+  const [ideas, setIdeas] = useState(initialStore.ideas)
+  const [mode, setMode] = useState<AppMode>('evaluate')
+  const [evaluationStep, setEvaluationStep] = useState<EvaluationStep>(0)
+  const [draft, setDraft] = useState(() => createIdea())
+  const [draftDirty, setDraftDirty] = useState(false)
+  const [keywordsText, setKeywordsText] = useState('')
+  const [report, setReport] = useState<MarketAnalysis | null>(null)
+  const [notice, setNotice] = useState('')
+  const [saveError, setSaveError] = useState('')
+  const [deletedIdeas, setDeletedIdeas] = useState<BusinessIdea[]>([])
+  const [researchErrors, setResearchErrors] = useState<string[]>([])
   const [isEvaluating, setIsEvaluating] = useState(false)
-  const [report, setReport] = useState<(MarketAnalysis & {
-    evidencePercent?: number
-    evidenceQuality?: string
-  }) | null>(null)
-
-  // Derive State
+  const request = useRef<AbortController | null>(null)
+  const generation = useRef(0)
+  const heading = useRef<HTMLHeadingElement>(null)
+  const [initialKey] = useState(loadApiKey)
+  const [serperApiKey, setSerperApiKey] = useState(initialKey.key)
+  const [apiKeyDraft, setApiKeyDraft] = useState(initialKey.key)
+  const [rememberKey, setRememberKey] = useState(initialKey.remembered)
+  const [keyNotice, setKeyNotice] = useState(initialKey.error ?? '')
   const [deriveSearchTerms, setDeriveSearchTerms] = useState('')
   const [deriveRegion, setDeriveRegion] = useState('')
   const [deriveInterests, setDeriveInterests] = useState('')
-  const [isDeriving, setIsDeriving] = useState(false)
-  const [derivedIdeas, setDerivedIdeas] = useState<DerivedIdea[] | null>(null)
+  const [discoveryEntries, setDiscoveryEntries] = useState<ResearchEntry[]>([])
+  const [excludedSignalIds, setExcludedSignalIds] = useState<string[]>([])
+  const [derivedIdeas, setDerivedIdeas] = useState<RegionalIdea[] | null>(null)
+  const [deriveError, setDeriveError] = useState('')
+  const ideaTitle = draft.title
+  const ideaRegion = draft.region
+  const targetAudience = draft.targetAudience
+  const weights = draft.weights ?? DEFAULT_WEIGHTS
+  const isSaved = ideas.some(idea => idea.id === draft.id)
+  const comparableIdeas = ideas.filter(idea => idea.marketAnalysis).map(idea => ({ ...idea, marketAnalysis: prepareReportForDisplay(idea.marketAnalysis!) }))
+  const researchQueries = buildResearchQueries(projectResearch(draft))
+  const displayedResearchErrors = researchErrors.length ? researchErrors : report?.researchWarnings ?? []
+  const regionSignals = [...new Map(scopedResearch([...ideas.flatMap(idea => idea.researchEntries ?? []), ...discoveryEntries], deriveRegion).map(entry => [entry.id, entry])).values()]
+  const pageLabels = { home: 'Sammlung', evaluate: 'Idee prüfen', discover: 'Ideen finden', compare: 'Ideen vergleichen', settings: 'Einstellungen' }
+  const pageTitle = mode === 'evaluate'
+    ? ([['Was braucht', 'deine Stadt?'], ['Spuren aus', ideaRegion.trim() || 'deiner Region.'], ['Was trägt.', 'Was noch fehlt.']] as const)[evaluationStep]
+    : ({ home: ['Deine', 'Ideensammlung.'], discover: ['Ideen aus', 'deiner Region.'], compare: ['Ideen im', 'Vergleich.'], settings: ['Deine', 'Einstellungen.'] } as const)[mode]
 
-  // Configuration State
-  const [showAdvanced, setShowAdvanced] = useState(false)
-  const [weights, setWeights] = useState({
-    demand: 25,
-    competition: 30,
-    urgency: 20,
-    profitability: 25,
-  })
+  useEffect(() => () => { generation.current += 1; request.current?.abort() }, [])
 
-  const handleAutoPopulate = (idea: DerivedIdea) => {
-    setIdeaTitle(idea.title)
-    setIdeaRegion(deriveRegion || 'Lokal')
-    setMode('evaluate')
-    setReport(null)
+  useEffect(() => { heading.current?.focus() }, [mode, evaluationStep])
+
+  function navigate(next: AppMode) {
+    setMode(next)
   }
 
-  const buildBaseIdea = (): BusinessIdea => ({
-    id: crypto.randomUUID(),
-    title: ideaTitle,
-    region: ideaRegion,
-    targetAudience: targetAudience || 'Zielgruppe offen',
-    keywords: [ideaTitle],
-    keywordData: [],
-    competitorCount: serperApiKey ? 0 : 5,
-    professionalCompetitorCount: serperApiKey ? 0 : 2,
-    competitors: [],
-    complaintDensity: 6,
-    urgency: 7,
-    willingnessToPay: 6,
-    commercialCompetition: 5,
-    notes: '',
-    painPoints: [],
-    painPointEntries: [],
-    trendDirection: 'stable',
-    trendNotes: '',
-    checklist: {
-      keywordPlannerChecked: !serperApiKey,
-      googleTrendsChecked: false,
-      googleMapsChecked: !serperApiKey,
-      reviewsChecked: false,
-      cpcChecked: false,
-    },
-    weights,
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
-  })
+  function goToStep(next: EvaluationStep) {
+    if (next > 0 && !draft.title.trim()) {
+      setSaveError('Bitte einen Titel für die Idee eingeben.')
+      setEvaluationStep(0)
+      requestAnimationFrame(() => document.getElementById('title')?.focus())
+      return
+    }
+    setEvaluationStep(next)
+    setSaveError('')
+  }
 
-  const handleEvaluate = async () => {
-    if (!ideaTitle) return
-    setIsEvaluating(true)
+  function cancelResearch() {
+    generation.current += 1
+    request.current?.abort()
+    request.current = null
+    setIsEvaluating(false)
+  }
+
+  function changeDraft(changes: Partial<BusinessIdea>) {
+    cancelResearch()
+    setDraft(previous => editIdea(previous, changes))
+    setDraftDirty(true)
     setReport(null)
+    setResearchErrors([])
+    setNotice('')
+    setSaveError('')
+  }
 
-    let idea = buildBaseIdea()
+  function openIdea(idea: BusinessIdea) {
+    if (draftDirty && !window.confirm('Ungespeicherte Änderungen an der aktuellen Idee verwerfen?')) return
+    cancelResearch()
+    setDraft({ ...idea, weights: { ...(idea.weights ?? DEFAULT_WEIGHTS) } })
+    setKeywordsText(idea.keywords.join(', '))
+    setReport(idea.marketAnalysis ? prepareReportForDisplay(idea.marketAnalysis) : null)
+    setResearchErrors(idea.externalResearch?.warnings ?? [])
+    setEvaluationStep(idea.marketAnalysis ? 2 : 0)
+    setDraftDirty(false); setNotice(''); setSaveError(''); navigate('evaluate')
+  }
 
+  function startNewIdea(overrides: Partial<BusinessIdea> = {}) {
+    if (draftDirty && !window.confirm('Ungespeicherte Änderungen an der aktuellen Idee verwerfen?')) return false
+    cancelResearch()
+    setEvaluationStep(0)
+    setDraft(createIdea(overrides)); setReport(null); setDraftDirty(!!overrides.title)
+    setKeywordsText(overrides.keywords?.join(', ') ?? '')
+    setResearchErrors([]); setNotice(overrides.title ? 'Vorschlag übernommen. Mit Entwurf speichern sichern.' : ''); setSaveError('')
+    navigate('evaluate')
+    return true
+  }
+
+  function persistIdeas(next: BusinessIdea[]): boolean {
+    const error = initialStore.error ?? saveIdeas(next)
+    if (error) { setSaveError(error); return false }
+    setIdeas(next); setSaveError(''); return true
+  }
+
+  function persistDraft(candidate: BusinessIdea, analysis?: MarketAnalysis): boolean {
+    if (!candidate.title.trim()) { setSaveError('Bitte einen Titel für die Idee eingeben.'); return false }
+    const next = upsertIdea(ideas, { ...candidate, marketAnalysis: analysis ?? candidate.marketAnalysis })
+    if (!persistIdeas(next)) return false
+    setDraft(next.find(idea => idea.id === candidate.id)!); setDraftDirty(false)
+    setNotice(analysis ? 'Einschätzung und Recherche gespeichert.' : 'Entwurf gespeichert.')
+    return true
+  }
+
+  function removeIdea(idea: BusinessIdea) {
+    if (!persistIdeas(ideas.filter(item => item.id !== idea.id))) return
+    setDeletedIdeas(previous => [idea, ...previous])
+    if (draft.id === idea.id) { cancelResearch(); setDraft(createIdea()); setEvaluationStep(0); setKeywordsText(''); setDraftDirty(false); setReport(null) }
+    setNotice('Idee gelöscht. Du kannst das Löschen rückgängig machen, solange diese Seite geöffnet bleibt.')
+  }
+
+  function undoDelete() {
+    const [idea, ...remaining] = deletedIdeas
+    if (idea && persistIdeas(upsertIdea(ideas, idea))) { setDeletedIdeas(remaining); setNotice('Idee wiederhergestellt.') }
+  }
+
+  const setIdeaTitle = (title: string) => changeDraft({ title })
+  const setIdeaRegion = (region: string) => changeDraft({ region })
+  const setTargetAudience = (audience: string) => changeDraft({ targetAudience: audience })
+  const setWeights = (next: typeof weights) => changeDraft({ weights: next })
+
+  function handleAutoPopulate(idea: RegionalIdea) {
+    startNewIdea({ title: idea.title, region: idea.region, targetAudience: idea.targetAudience, keywords: idea.keywords,
+      researchEntries: idea.researchEntries, notes: idea.reason })
+  }
+
+  async function handleEvaluate(useExternal = false) {
+    if (!draft.title.trim()) { setSaveError('Bitte einen Titel für die Idee eingeben.'); return }
+    if (useExternal && !serperApiKey) { setSaveError('Bitte zuerst einen Serper-Schlüssel verwenden.'); return }
+    cancelResearch()
+    const current = generation.current
+    const controller = new AbortController()
+    request.current = controller
+    setIsEvaluating(true); setResearchErrors([]); setNotice(''); setSaveError('')
+    let candidate = { ...draft, title: draft.title.trim(), region: draft.region.trim() }
+    let totalResults = currentExternalResearch(candidate) ? candidate.marketAnalysis?.metrics.totalResults : undefined
     try {
-      if (serperApiKey) {
-        const query = `${ideaTitle} ${ideaRegion}`.trim()
-        const [mapsResults, searchMeta] = await Promise.all([
-          scrapeGoogleMaps(query, serperApiKey).catch(e => {
-            console.error('Maps Error:', e)
-            return []
-          }),
-          scrapeSearchMetadata(ideaTitle, serperApiKey).catch(e => {
-            console.error('Search Error:', e)
-            return { adCount: 0, resultCount: 0, organic: [] }
-          }),
-        ])
-
-        const estimatedVolume = Math.min(
-          1500,
-          Math.floor(searchMeta.resultCount / 10000)
-        )
-        const adBonus = searchMeta.adCount > 0 ? 500 : 0
-
-        idea = {
-          ...idea,
-          competitors: mapsResults.slice(0, 10),
-          competitorCount: mapsResults.length,
-          professionalCompetitorCount: Math.round(mapsResults.length * 0.4),
-          commercialCompetition: Math.min(
-            10,
-            Math.max(1, searchMeta.adCount * 2)
-          ),
-          keywordData: [
-            { term: ideaTitle, monthlyVolume: estimatedVolume + adBonus },
-          ],
-          organicResults: searchMeta.organic,
-          peopleAlsoAsk: searchMeta.peopleAlsoAsk,
-          relatedSearches: searchMeta.relatedSearches,
-          checklist: {
-            ...idea.checklist,
-            googleMapsChecked: mapsResults.length > 0,
-            cpcChecked: searchMeta.adCount > 0,
-            keywordPlannerChecked: searchMeta.resultCount > 0,
-          },
+      if (useExternal) {
+        const result = await collectExternalResearch(candidate, serperApiKey, controller.signal)
+        if (generation.current !== current || controller.signal.aborted) return
+        setResearchErrors(result.warnings)
+        if (!result.changed) {
+          setNotice('Keine neue externe Recherche erhalten. Der bisherige Entwurf und vorhandene Berichte bleiben erhalten.')
+          return
         }
-
-        const analysis = generateMarketAnalysis(idea)
-        const evidencePercent = calculateEvidencePercent(idea)
-        const evidenceQuality = calculateEvidenceQuality(idea)
-
-        const finalReport = {
-          ...analysis,
-          metrics: {
-            ...analysis.metrics,
-            totalResults: searchMeta.resultCount,
-          },
-          evidencePercent,
-          evidenceQuality,
-        };
-        
-        setReport(finalReport);
-        
-        // Save to ideas list
-        idea.marketAnalysis = finalReport;
-        setIdeas(prev => {
-          const existing = prev.find(i => i.title === idea.title && i.region === idea.region);
-          if (existing) {
-            return prev.map(i => i.id === existing.id ? { ...idea, id: existing.id } : i);
-          }
-          return [idea, ...prev];
-        });
-      } else {
-        await new Promise(r => setTimeout(r, 1500))
-        const analysis = generateMarketAnalysis(idea)
-        setReport(analysis)
-        
-        // Save to ideas list
-        idea.marketAnalysis = analysis;
-        setIdeas(prev => {
-          const existing = prev.find(i => i.title === idea.title && i.region === idea.region);
-          if (existing) {
-            return prev.map(i => i.id === existing.id ? { ...idea, id: existing.id } : i);
-          }
-          return [idea, ...prev];
-        });
+        candidate = result.idea
+        totalResults = result.totalResults
       }
-    } catch (err) {
-      console.error(err)
-      alert('Es gab ein Problem beim Abrufen der Daten.')
+      const analysis = generateMarketAnalysis(candidate)
+      if (totalResults !== undefined && currentExternalResearch(candidate)) analysis.metrics.totalResults = totalResults
+      if (generation.current !== current) return
+      setReport(analysis)
+      setDraft({ ...candidate, marketAnalysis: analysis })
+      setDraftDirty(true)
+      persistDraft(candidate, analysis)
+      setEvaluationStep(2)
+    } catch {
+      if (generation.current !== current || controller.signal.aborted) return
+      setSaveError('Die Einschätzung konnte nicht erstellt werden. Der Entwurf bleibt erhalten.')
     } finally {
-      setIsEvaluating(false)
+      if (generation.current === current) { setIsEvaluating(false); request.current = null }
     }
   }
 
-  const handleDerive = async () => {
-    if (!deriveSearchTerms && !deriveInterests) return
-    setIsDeriving(true)
-    setDerivedIdeas(null)
-    try {
-      const combinedInput = `${deriveSearchTerms} ${deriveInterests}`.trim()
-      const results = await deriveIdeasMock(combinedInput)
-      setDerivedIdeas(results)
-    } finally {
-      setIsDeriving(false)
-    }
+  function handleDerive() {
+    if (!deriveRegion.trim()) { setDeriveError('Bitte eine Region angeben.'); return }
+    const results = generateRegionalIdeas({ region: deriveRegion,
+      terms: deriveSearchTerms.split(/[,\n]/), interests: deriveInterests.split(/[,\n]/),
+      observations: regionSignals.filter(entry => !excludedSignalIds.includes(entry.id)) })
+    setDerivedIdeas(results)
+    setDeriveError(results.length ? '' : 'Keine passenden Beobachtungen ausgewählt. Erfasse eine Beobachtung für diese Region oder ändere den Suchbegriff-Filter.')
   }
 
-  const handleExport = () => {
+  function saveKey() {
+    const error = saveApiKey(apiKeyDraft, rememberKey)
+    if (error) { setKeyNotice(error); return }
+    setSerperApiKey(apiKeyDraft.trim())
+    setKeyNotice(apiKeyDraft.trim() ? rememberKey ? 'Schlüssel auf diesem Gerät gespeichert.' : 'Schlüssel nur für diese Browsersitzung gespeichert.' : 'Schlüssel entfernt.')
+  }
+
+  function forgetKey() {
+    cancelResearch()
+    const error = deleteApiKey()
+    setSerperApiKey(''); setApiKeyDraft(''); setRememberKey(false)
+    setKeyNotice(error ?? 'Schlüssel aus Sitzung und Geräteablage gelöscht.')
+  }
+
+  function handleExport() {
     if (!report) return
-    const md = generateReportMarkdown(ideaTitle, ideaRegion, report)
-    const blob = new Blob([md], { type: 'text/markdown' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `Analyse_${ideaTitle.replace(/\s+/g, '_')}.md`
-    a.click()
+    const md = generateReportMarkdown(draft.title, draft.region, report)
+    const url = URL.createObjectURL(new Blob([md], { type: 'text/markdown' }))
+    const anchor = document.createElement('a')
+    anchor.href = url; anchor.download = `Analyse_${draft.title.replace(/\s+/g, '_')}.md`; anchor.click()
     URL.revokeObjectURL(url)
   }
 
   return (
     <div className="app-container">
-      <header className="app-header">
-        <div className="api-config">
-          <input
-            type="password"
-            placeholder="Serper API Key..."
-            value={serperApiKey}
-            onChange={e => handleSaveApiKey(e.target.value)}
-          />
-        </div>
-      </header>
+      <a className="skip-link" href="#workspace">Zum Inhalt</a>
+      <div className="app-shell">
+        <AppNavigation mode={mode} count={ideas.length} onNavigate={navigate} />
+        <main className={`main-content ${mode === 'compare' ? 'wide-content' : ''}`} id="workspace" tabIndex={-1}>
+          <button type="button" className="settings-button" aria-label="Einstellungen" aria-current={mode === 'settings' ? 'page' : undefined} title="Einstellungen" onClick={() => navigate('settings')}><NavigationIcon name="settings" /></button>
+          <div className="workspace-inner">
+            <header className={`page-heading ${mode === 'evaluate' ? 'illustrated-heading' : ''}`}>
+              <span className="page-kicker">{pageLabels[mode]}</span>
+              <h1 ref={heading} tabIndex={-1}>{pageTitle[0]}<br /><em>{pageTitle[1]}</em></h1>
+              {mode === 'evaluate' && <img className="journal-illustration" src={journalIllustration} alt="" width={1536} height={1024} />}
+            </header>
+            {initialStore.error && <p role="alert" className="notice error">{initialStore.error}</p>}
+            {saveError && <p role="alert" className="notice error">{saveError}</p>}
+            {notice && <p role="status" className="notice">{notice}</p>}
+            {deletedIdeas.length > 0 && <button className="btn-text undo-button" onClick={undoDelete}>Letztes Löschen rückgängig machen</button>}
 
-      <main className="main-content">
-        {!serperApiKey && (
-          <div className="simulation-banner">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="16" x2="12" y2="12" />
-              <line x1="12" y1="8" x2="12.01" y2="8" />
-            </svg>
-            <span>
-              <strong>Simulations-Modus:</strong> Trage oben einen Serper API
-              Key ein für echte Live-Daten aus Google Maps &amp; Suche.
-            </span>
-          </div>
-        )}
-
-        <section className="hero-card">
-          <p className="eyebrow">AI Business Validator</p>
-          <h1>Ideen Scout</h1>
-          <p className="intro">
-            Gib deine Geschäftsidee ein und erhalte datenbasierte Fakten, oder
-            finde neue Ideen aus aktuellen Suchanfragen.
-          </p>
-          <div className="tab-navigation">
-            <button
-              className={`tab-button ${mode === 'home' ? 'active' : ''}`}
-              onClick={() => setMode('home')}
-            >
-              Übersicht
-            </button>
-            <button
-              className={`tab-button ${mode === 'evaluate' ? 'active' : ''}`}
-              onClick={() => setMode('evaluate')}
-            >
-              1. Idee validieren
-            </button>
-            <button
-              className={`tab-button ${mode === 'discover' ? 'active' : ''}`}
-              onClick={() => setMode('discover')}
-            >
-              2. Ideen ableiten
-            </button>
-            <button
-              className={`tab-button ${mode === 'compare' ? 'active' : ''}`}
-              onClick={() => setMode('compare')}
-            >
-              Vergleich
-            </button>
-          </div>
-        </section>
-
-        {mode === 'home' && (
-          <div className="dashboard-grid single-col">
-            <section className="panel form-panel">
-              <h2>Gespeicherte Ideen</h2>
-              {ideas.length === 0 ? (
-                <p>Noch keine Ideen gespeichert. Starte mit der Validierung oder Ableitung!</p>
-              ) : (
-                <div className="ideas-list">
-                  {ideas.map((idea) => (
-                    <div key={idea.id} className="idea-card">
-                      <div className="idea-card-header">
-                        <h3>{idea.title}</h3>
-                        <div style={{display: 'flex', gap: '8px'}}>
-                          <button
-                            className="btn-outline small"
-                            onClick={() => {
-                              setActiveIdeaId(idea.id);
-                              setIdeaTitle(idea.title);
-                              setIdeaRegion(idea.region);
-                              setTargetAudience(idea.targetAudience);
-                              if (idea.marketAnalysis) {
-                                setReport(idea.marketAnalysis);
-                              } else {
-                                setReport(null);
-                              }
-                              setMode('evaluate');
-                            }}
-                          >
-                            Öffnen
-                          </button>
-                          <button
-                            className="btn-outline small"
-                            style={{color: '#dc2626', borderColor: '#dc2626'}}
-                            onClick={() => {
-                              setIdeas(ideas.filter(i => i.id !== idea.id));
-                              if (activeIdeaId === idea.id) setActiveIdeaId(null);
-                            }}
-                          >
-                            Löschen
-                          </button>
-                        </div>
-                      </div>
-                      <p>
-                        <strong>Score:</strong> {idea.marketAnalysis?.scoreAtGeneration || idea.weights?.demand || '---'} |{' '}
-                        <strong>Region:</strong> {idea.region || 'Keine'}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </section>
-          </div>
-        )}
-
-        {mode === 'evaluate' && (
-          <div className="dashboard-grid single-col">
-            <section className="panel form-panel">
-              <div className="form-group">
-                <label htmlFor="title">Deine Geschäftsidee</label>
-                <input
-                  id="title"
-                  value={ideaTitle}
-                  onChange={e => setIdeaTitle(e.target.value)}
-                  placeholder="z.B. Mobiler Fahrrad-Reparaturservice"
-                />
+            <section hidden={mode !== 'settings'} aria-label="Schlüsselverwaltung" className="settings-panel">
+              <h2>Externe Recherche</h2>
+              <p>Such- und Maps-Abfragen sind optional und werden nur ausdrücklich gestartet.</p>
+              <p className="context-strip">{serperApiKey ? 'Schlüssel aktiv' : 'Kein Schlüssel hinterlegt'}</p>
+              <div className="key-settings-body">
+                <p className="helper-text">Ein Schlüssel wird nur für eine gestartete Serper-Abfrage verwendet. Standardmäßig gilt er für diese Browsersitzung.</p>
+                <label htmlFor="serper-key">Serper-Schlüssel</label>
+                <input id="serper-key" type="password" autoComplete="off" value={apiKeyDraft} onChange={event => setApiKeyDraft(event.target.value)} />
+                <label className="checkbox-label"><input type="checkbox" checked={rememberKey} onChange={event => setRememberKey(event.target.checked)} />Auf diesem Gerät speichern (freiwillig)</label>
+                <p className="helper-text">Bei Geräteablage kann JavaScript unter dieser lokalen Adresse den Schlüssel lesen. Löschen entfernt auch eine frühere Geräteablage.</p>
+                <div className="button-row"><button className="btn-secondary" onClick={saveKey}>Schlüssel verwenden</button><button className="btn-outline" onClick={forgetKey}>Schlüssel löschen</button></div>
+                {keyNotice && <p role="status" className="notice">{keyNotice}</p>}
               </div>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="region">Region (optional)</label>
-                  <input
-                    id="region"
-                    value={ideaRegion}
-                    onChange={e => setIdeaRegion(e.target.value)}
-                    placeholder="z.B. Berlin Kreuzberg"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="targetAudience">Zielgruppe (optional)</label>
-                  <input
-                    id="targetAudience"
-                    value={targetAudience}
-                    onChange={e => setTargetAudience(e.target.value)}
-                    placeholder="z.B. Senioren, Pendler..."
-                  />
-                </div>
-              </div>
-
-              <div className="advanced-toggle">
-                <button
-                  className="btn-text"
-                  onClick={() => setShowAdvanced(!showAdvanced)}
-                >
-                  {showAdvanced
-                    ? '− Weniger Einstellungen'
-                    : '+ Erweiterte Gewichtung'}
-                </button>
-              </div>
-
-              {showAdvanced && (
-                <div className="advanced-panel fade-in">
-                  <div className="weight-group">
-                    {(
-                      [
-                        ['demand', 'Markt-Nachfrage'],
-                        ['competition', 'Wettbewerb'],
-                        ['urgency', 'Dringlichkeit'],
-                        ['profitability', 'Profitabilität'],
-                      ] as const
-                    ).map(([key, label]) => (
-                      <div className="weight-row" key={key}>
-                        <label>{label}</label>
-                        <input
-                          type="range"
-                          min="0"
-                          max="100"
-                          value={weights[key]}
-                          onChange={e =>
-                            setWeights({
-                              ...weights,
-                              [key]: parseInt(e.target.value),
-                            })
-                          }
-                        />
-                        <span className="weight-val">{weights[key]}%</span>
-                      </div>
-                    ))}
-                    <p className="helper-text">
-                      Passe an, welche Faktoren für deine Entscheidung am
-                      wichtigsten sind.
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              <button
-                className="btn-primary large"
-                onClick={handleEvaluate}
-                disabled={isEvaluating || !ideaTitle}
-              >
-                {isEvaluating ? 'Analysiere Daten...' : 'Zahlen & Fakten abrufen'}
-              </button>
             </section>
 
-            {report && (
-              <section className="panel results-panel fade-in">
-                <div className="report-header">
-                  <div className="score-badge">
-                    <strong>{report.scoreAtGeneration}</strong>
-                    <span>Score</span>
-                  </div>
-                  <div className="report-intro">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <h2>Analyse-Ergebnis</h2>
-                      {serperApiKey && (
-                        <span className="badge-live">LIVE-DATEN SCAN</span>
-                      )}
-                    </div>
-                    <p className="summary-text">{report.verdict}</p>
+            <section hidden={mode !== 'home'} aria-label="Gespeicherte Ideen">
+              <div className="section-heading"><h2>Deine Ideen ({ideas.length})</h2><button className="btn-text" onClick={() => startNewIdea()}>Neue Idee</button></div>
+              {ideas.length === 0 ? <div className="empty-state"><p>Noch keine Ideen gespeichert.</p><p className="helper-text">Prüfe deine erste Idee oder entwickle ein Angebot aus lokalen Beobachtungen.</p><div className="button-row"><button className="btn-primary" onClick={() => navigate('evaluate')}>Idee prüfen</button><button className="btn-secondary" onClick={() => navigate('discover')}>Ideen finden</button></div></div> :
+                <div className="ideas-list">{ideas.map(idea => <article className="idea-card" key={idea.id}>
+                  <div className="idea-card-header"><h3>{idea.title}</h3><button className="btn-secondary" onClick={() => openIdea(idea)}>Öffnen</button></div>
+                  <p className="helper-text">{idea.region || 'Region nicht angegeben'} · {idea.marketAnalysis ? `Orientierungs-Score: ${idea.marketAnalysis.scoreAtGeneration}` : 'Entwurf ohne Einschätzung'}</p>
+                  {idea.marketAnalysis && <p className="helper-text">{describeDataBasis(idea.marketAnalysis)}</p>}
+                  <details className="idea-actions"><summary>Weitere Aktionen</summary><button className="btn-text danger" onClick={() => removeIdea(idea)} disabled={!!initialStore.error}>Idee löschen</button></details>
+                </article>)}</div>}
+            </section>
 
-                    {report.evidencePercent !== undefined && (
-                      <div className="evidence-progress-container">
-                        <div className="evidence-progress-header">
-                          <span className="evidence-label">DATEN-QUALITÄT</span>
-                          <span className={`quality-badge ${report.evidenceQuality}`}>
-                            {report.evidenceQuality === 'strong'
-                              ? 'Stark'
-                              : report.evidenceQuality === 'usable'
-                                ? 'Verwendbar'
-                                : report.evidenceQuality === 'weak'
-                                  ? 'Schwach'
-                                  : 'Unvollständig'}
-                          </span>
-                        </div>
-                        <div className="progress-bar-bg">
-                          <div
-                            className={`progress-bar-fill ${report.evidenceQuality}`}
-                            style={{ width: `${report.evidencePercent}%` }}
-                          />
-                        </div>
-                        <p className="helper-text">
-                          {report.evidencePercent}% der Validierungsschritte
-                          abgeschlossen.
-                        </p>
-                      </div>
-                    )}
+            <section hidden={mode !== 'evaluate'} aria-label="Idee schrittweise prüfen">
+              <ol className="evaluation-steps" aria-label="Prüfschritte">{(['Idee', 'Beobachtungen', 'Einschätzung'] as const).map((label, index) => <li key={label}><button type="button" aria-current={evaluationStep === index ? 'step' : undefined} onClick={() => goToStep(index as EvaluationStep)}><span className="step-number">0{index + 1}</span><span>{label}</span></button></li>)}</ol>
+              {(draftDirty || isSaved) && <div className="section-heading editor-caption"><span className="helper-text">{draftDirty ? 'Ungespeicherte Änderungen' : 'Gespeicherte Idee'}</span><button className="btn-text" onClick={() => startNewIdea()}>Neue Idee</button></div>}
+              <fieldset disabled={isEvaluating} className="editor-fields">
+                <div hidden={evaluationStep !== 0}>
+                  <div className="form-group idea-title-field"><label htmlFor="title">Geschäftsidee</label><input id="title" value={ideaTitle} onChange={event => setIdeaTitle(event.target.value)} placeholder="z. B. Mobiler Fahrradservice" /></div>
+                  <div className="form-row idea-context-fields">
+                    <div className="form-group"><label htmlFor="region">Region <span className="optional-label">optional</span></label><input id="region" value={ideaRegion} onChange={event => setIdeaRegion(event.target.value)} placeholder="z. B. Freiburg" /></div>
+                    <div className="form-group"><label htmlFor="targetAudience">Zielgruppe <span className="optional-label">optional</span></label><input id="targetAudience" value={targetAudience} onChange={event => setTargetAudience(event.target.value)} placeholder="z. B. Pendler" /></div>
                   </div>
+                  <details className="draft-details"><summary>Notizen &amp; Suchbegriffe</summary>
+                    <div className="form-group"><label htmlFor="idea-keywords">Suchbegriffe (durch Komma getrennt)</label><textarea id="idea-keywords" rows={2} value={keywordsText} onChange={event => { setKeywordsText(event.target.value); changeDraft({ keywords: event.target.value.split(',').map(term => term.trim()).filter(Boolean) }) }} /></div>
+                    <div className="form-group"><label htmlFor="idea-notes">Notizen zur Idee</label><textarea id="idea-notes" rows={3} value={draft.notes} onChange={event => changeDraft({ notes: event.target.value })} /></div>
+                  </details>
+                  <div className="editor-actions"><button className="btn-text" onClick={() => persistDraft(draft)} disabled={!draft.title.trim() || !!initialStore.error}>Entwurf speichern</button><button className="btn-primary continue-button" onClick={() => goToStep(1)}>Weiter</button></div>
                 </div>
 
-                <div className="evidence-details">
-                  <h4>Validierungs-Status</h4>
-                  <div className="evidence-grid">
-                    {[
-                      ['keywordPlannerChecked', 'Keyword Volumen'],
-                      ['googleMapsChecked', 'Lokale Konkurrenz'],
-                      ['googleTrendsChecked', 'Trend Stabilität'],
-                      ['reviewsChecked', 'Kunden-Feedback'],
-                    ].map(([key, label]) => {
-                      const checked =
-                        report.checklist?.[key as keyof typeof report.checklist]
-                      return (
-                        <div
-                          key={key}
-                          className={`evidence-item ${checked ? 'valid' : 'missing'}`}
-                        >
-                          <span className="status-icon">{checked ? '✓' : '○'}</span>
-                          <span className="status-label">{label}</span>
-                        </div>
-                      )
-                    })}
-                  </div>
+                <div hidden={evaluationStep !== 1}>
+                  <h2>Was weißt du schon?</h2>
+                  <p className="helper-text">Halte Beobachtungen mit ihrer Quelle fest. Du kannst auch ohne sie weitergehen.</p>
+                  <div className="context-strip"><strong>{ideaTitle || 'Deine Idee'}</strong><span>{ideaRegion || 'Region noch offen'}</span></div>
+                  <ResearchPanel key={draft.id} region={draft.region} entries={draft.researchEntries ?? []}
+                    onAdd={entry => changeDraft({ researchEntries: [...(draft.researchEntries ?? []), entry] })}
+                    onRemove={id => changeDraft({ researchEntries: draft.researchEntries?.filter(entry => entry.id !== id) })}
+                    saveHint="Beobachtung vorgemerkt. Mit Entwurf speichern oder Prüfen und speichern sichern." />
+                  <details className="research-links"><summary>Gezielt weiter recherchieren</summary>
+                    <p className="helper-text">Links öffnen externe Seiten erst nach deinem Klick. Ergebnisse anschließend als Beobachtung mit Quelle erfassen.</p>
+                    {(['google', 'maps', 'trends', 'pain-point'] as const).map(category => <details key={category}><summary>{{ google: 'Google-Suche', maps: 'Lokale Anbieter auf Maps', trends: 'Google Trends', 'pain-point': 'Kundenprobleme recherchieren' }[category]}</summary><ul>{researchQueries.filter(query => query.category === category).map((query, index) => <li key={`${query.url}-${index}`}><a href={query.url} target="_blank" rel="noopener noreferrer">{query.label}</a></li>)}</ul></details>)}
+                  </details>
+                  <details className="external-action"><summary>Mit externer Recherche ergänzen</summary>
+                    <p>Diese freiwillige Abfrage sendet Titel und Region an Serper für Google-Suche und Maps. Dafür können Serper-Credits anfallen. Monatliches Suchvolumen wird dabei nicht ermittelt.</p>
+                    <button className="btn-outline" disabled={!serperApiKey || !draft.title.trim() || !!initialStore.error} onClick={() => handleEvaluate(true)}>Such- und Maps-Abfrage starten</button>
+                    {!serperApiKey && <p className="helper-text">Einen Schlüssel kannst du in den <button className="btn-text" onClick={() => navigate('settings')}>Einstellungen</button> hinterlegen. Dein Entwurf bleibt erhalten.</p>}
+                  </details>
+                  <div className="editor-actions"><button className="btn-text" onClick={() => goToStep(0)}>← Zurück</button><button className="btn-secondary" onClick={() => persistDraft(draft)} disabled={!draft.title.trim() || !!initialStore.error}>Entwurf speichern</button><button className="btn-primary" onClick={() => handleEvaluate()} disabled={!draft.title.trim() || !!initialStore.error}>Prüfen und speichern →</button></div>
                 </div>
 
-                <div className="metrics-grid">
-                  <div className="metric-card">
-                    <span className="metric-label">Konkurrenz</span>
-                    <span className="metric-value">{report.metrics.competition}</span>
-                  </div>
-                  <div className="metric-card">
-                    <span className="metric-label">Suchvolumen</span>
-                    <span className="metric-value">{report.metrics.searchVolume}</span>
-                  </div>
-                  <div className="metric-card">
-                    <span className="metric-label">Trend</span>
-                    <span className="metric-value">{report.metrics.trend}</span>
-                  </div>
-                  <div className="metric-card highlight">
-                    <span className="metric-label">Google Treffer</span>
-                    <span className="metric-value">
-                      {report.metrics.totalResults
-                        ? report.metrics.totalResults.toLocaleString('de-DE')
-                        : '---'}
-                    </span>
-                  </div>
-                  <div className="metric-card">
-                    <span className="metric-label">CPC (Ads)</span>
-                    <span className="metric-value">{report.metrics.cpc}</span>
-                  </div>
+                <div hidden={evaluationStep !== 2}>
+                  {!report && <div className="empty-state"><h2>Bereit für eine erste Einschätzung?</h2><p>Die vorhandenen Angaben werden lokal ausgewertet. Fehlende Daten bleiben als offen erkennbar.</p><button className="btn-primary" onClick={() => handleEvaluate()} disabled={!draft.title.trim() || !!initialStore.error}>Prüfen und speichern</button></div>}
+
                 </div>
-
-                <div className="report-grid">
-                  <div className="report-column">
-                    <h3>SWOT Analyse</h3>
-                    <div className="swot-grid">
-                      {(
-                        [
-                          ['strengths', 'Stärken', 'strengths'],
-                          ['weaknesses', 'Schwächen', 'weaknesses'],
-                          ['opportunities', 'Chancen', 'opportunities'],
-                          ['threats', 'Risiken', 'threats'],
-                        ] as const
-                      ).map(([key, label, cls]) => (
-                        <div key={key} className={`swot-item ${cls}`}>
-                          <strong>{label}</strong>
-                          <ul>
-                            {report.swot[key].map((s, i) => (
-                              <li key={i}>{s}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="report-column">
-                    <h3>Target Persona</h3>
-                    <div className="persona-card">
-                      <h4>{report.persona.name}</h4>
-                      <p>
-                        <strong>Pains:</strong>{' '}
-                        {report.persona.painPoints.join(', ')}
-                      </p>
-                      <p>
-                        <strong>Zahlungsbereitschaft:</strong>{' '}
-                        {report.persona.willingnessToPay}
-                      </p>
-                    </div>
-
-                    <h3>Erlös-Modelle</h3>
-                    <ul className="revenue-list">
-                      {report.revenueModels.map((m, i) => (
-                        <li key={i}>{m}</li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-
-                <div className="strategy-box">
-                  <h3>Go-to-Market Strategie</h3>
-                  {/* FIX: MarketAnalysis hat strategyRecommendation, nicht strategy */}
-                  <p>{report.strategyRecommendation}</p>
-                </div>
-
-                <div className="next-steps-container">
-                  <h3>Nächste Schritte</h3>
-                  <div className="steps-list">
-                    {report.nextSteps.map((step, idx) => (
-                      <div key={idx} className="step-item">
-                        <span className="step-number">{idx + 1}</span>
-                        <p>{step}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {report.organicEvidence && report.organicEvidence.length > 0 && (
-                  <div className="evidence-section">
-                    <h3>Market Evidence (Google Ergebnisse)</h3>
-                    <div className="organic-list">
-                      {report.organicEvidence.map((item, i) => (
-                        <div key={i} className="organic-item">
-                          <a
-                            href={item.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="organic-title"
-                          >
-                            {item.title}
-                          </a>
-                          <p className="organic-snippet">{item.snippet}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {((report.peopleAlsoAsk && report.peopleAlsoAsk.length > 0) || 
-                  (report.relatedSearches && report.relatedSearches.length > 0)) && (
-                  <div className="insights-grid">
-                    {report.peopleAlsoAsk && report.peopleAlsoAsk.length > 0 && (
-                      <div className="insight-column">
-                        <h3>Kunden-Fragen (People Also Ask)</h3>
-                        <ul className="insight-list">
-                          {report.peopleAlsoAsk.map((q, i) => (
-                            <li key={i} className="insight-item question">{q}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {report.relatedSearches && report.relatedSearches.length > 0 && (
-                      <div className="insight-column">
-                        <h3>Verwandte Segmente</h3>
-                        <div className="insight-chips">
-                          {report.relatedSearches.map((r, i) => (
-                            <span key={i} className="insight-chip">{r}</span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                <div className="sources-section">
-                  <h4>Daten-Herkunft</h4>
-                  <ul>
-                    {report.sources.map((source, idx) => (
-                      <li key={idx}>✓ {source}</li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div className="action-footer">
-                  <div className="trends-group">
-                    <p className="trends-label">Google Trends Explorer:</p>
-                    <div className="trends-links">
-                      <a
-                        href={`https://trends.google.com/trends/explore?q=${encodeURIComponent(ideaTitle)}&geo=DE`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="trends-link-chip"
-                      >
-                        Spezifisch: "{ideaTitle}"
-                      </a>
-                      <a
-                        href={`https://trends.google.com/trends/explore?q=${encodeURIComponent(ideaTitle.split(' ').slice(0, 2).join(' '))}&geo=DE`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="trends-link-chip secondary"
-                      >
-                        Allgemeiner: "{ideaTitle.split(' ').slice(0, 2).join(' ')}"
-                      </a>
-                    </div>
-                  </div>
-                  <div className="footer-btns">
-                    <button
-                      className="btn-secondary"
-                      onClick={handleExport}
-                      style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
-                    >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                        <polyline points="7 10 12 15 17 10" />
-                        <line x1="12" y1="15" x2="12" y2="3" />
-                      </svg>
-                      <span>Bericht speichern</span>
-                    </button>
-                  </div>
-                </div>
-              </section>
-            )}
-          </div>
-        )}
-
-        {mode === 'discover' && (
-          <div className="dashboard-grid single-col">
+              </fieldset>
+              {isEvaluating && <p className="notice" role="status">Recherche läuft… <button className="btn-text" onClick={cancelResearch}>Recherche abbrechen</button></p>}
+              {displayedResearchErrors.length > 0 && <div role="alert" className="notice error"><strong>Recherche nur teilweise oder nicht abgeschlossen</strong><ul>{displayedResearchErrors.map(error => <li key={error}>{error}</li>)}</ul><p>Manuelle Angaben und der bisherige Stand bleiben erhalten. Eine weitere Abfrage startest du selbst.</p></div>}
+              {evaluationStep === 2 && <div className="context-strip"><strong>{ideaTitle}</strong><span>{ideaRegion || 'Region noch offen'}</span></div>}
+              {report && evaluationStep === 2 && <AnalysisReport report={report} ideaTitle={ideaTitle} onExport={handleExport} />}
+              <fieldset className="editor-fields" disabled={isEvaluating} hidden={evaluationStep !== 2}>
+                  <details className="weight-settings"><summary>Gewichtung anpassen</summary><div className="weight-group">{([['demand', 'Markt-Nachfrage'], ['competition', 'Wettbewerb'], ['urgency', 'Dringlichkeit'], ['profitability', 'Profitabilität']] as const).map(([key, label]) => <div className="weight-row" key={key}><label htmlFor={`weight-${key}`}>{label}</label><input id={`weight-${key}`} type="range" min="0" max="100" value={weights[key]} onChange={event => setWeights({ ...weights, [key]: Number(event.target.value) })} /><span className="weight-val">{weights[key]}%</span></div>)}<p className="helper-text">Die Gewichte werden für die Berechnung ins Verhältnis gesetzt. Nach einer Änderung erneut prüfen und speichern.</p></div></details>
+              </fieldset>
+              {evaluationStep === 2 && <div className="editor-actions"><button className="btn-text" onClick={() => goToStep(1)}>← Beobachtungen ergänzen</button>{report && <button className="btn-secondary" onClick={() => navigate('home')}>Zur Sammlung</button>}</div>}
+            </section>
+        <div hidden={mode !== 'discover'} className="dashboard-grid single-col" aria-label="Regionale Ideenfindung">
             <section className="panel form-panel">
+              <h2>Regionale Beobachtungen auswählen</h2>
+              <p>Aus deinen Quellen entstehen prüfbare Arbeitshypothesen. Es werden hier keine aktuellen Suchsignale automatisch abgerufen.</p>
               <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="searchTerms">Suchtrends / Keywords</label>
-                  <input
-                    id="searchTerms"
-                    value={deriveSearchTerms}
-                    onChange={e => setDeriveSearchTerms(e.target.value)}
-                    placeholder="z.B. Photovoltaik Reinigung"
-                  />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="deriveRegion">Ziel-Region</label>
-                  <input
-                    id="deriveRegion"
-                    value={deriveRegion}
-                    onChange={e => setDeriveRegion(e.target.value)}
-                    placeholder="z.B. Hamburg"
-                  />
-                </div>
+                <div className="form-group"><label htmlFor="deriveRegion">Region für neue Ideen</label><input id="deriveRegion" value={deriveRegion} onChange={event => { setDeriveRegion(event.target.value); setDerivedIdeas(null); setDeriveError('') }} placeholder="z. B. Freiburg" /></div>
+                <div className="form-group"><label htmlFor="searchTerms">Suchbegriffe eingrenzen (optional)</label><input id="searchTerms" value={deriveSearchTerms} onChange={event => { setDeriveSearchTerms(event.target.value); setDerivedIdeas(null) }} placeholder="z. B. Fahrrad, Garten" /></div>
               </div>
-              <div className="form-group">
-                <label htmlFor="interests">Interessen / Branchen</label>
-                <textarea
-                  id="interests"
-                  rows={2}
-                  value={deriveInterests}
-                  onChange={e => setDeriveInterests(e.target.value)}
-                  placeholder="z.B. Handwerk, Nachhaltigkeit, Senioren..."
-                />
-              </div>
-              <button
-                className="btn-primary large"
-                onClick={handleDerive}
-                disabled={isDeriving || (!deriveSearchTerms && !deriveInterests)}
-              >
-                {isDeriving ? 'Generiere Ideen...' : 'Ideen ableiten'}
-              </button>
+              <div className="form-group"><label htmlFor="interests">Zielgruppe / Interessen (optional)</label><input id="interests" value={deriveInterests} onChange={event => { setDeriveInterests(event.target.value); setDerivedIdeas(null) }} placeholder="z. B. Pendler, Familien" /></div>
+              <ResearchPanel region={deriveRegion} entries={discoveryEntries}
+                onAdd={entry => { setDiscoveryEntries(previous => [...previous, entry]); setDerivedIdeas(null); setDeriveError('') }}
+                onRemove={id => { setDiscoveryEntries(previous => previous.filter(entry => entry.id !== id)); setDerivedIdeas(null) }}
+                saveHint="Für diese Suche vorgemerkt. Beim Übernehmen eines Vorschlags wird die Beobachtung Teil des neuen Ideenentwurfs; anschließend speichern." />
+              <h3>Passende Beobachtungen ({regionSignals.length})</h3>
+              <p className="helper-text">Es zählen nur Angaben zur gleichen Region. Vorgemerkte Angaben und Beobachtungen aus gespeicherten Ideen stehen zur Auswahl.</p>
+              {regionSignals.length === 0 ? <p>Für diese Region sind noch keine passenden Beobachtungen vorhanden. Füge oben eine Quelle hinzu.</p> : <ul className="signal-list">{regionSignals.map(entry => <li key={entry.id}><label><input type="checkbox" checked={!excludedSignalIds.includes(entry.id)} onChange={event => { setExcludedSignalIds(previous => event.target.checked ? previous.filter(id => id !== entry.id) : [...previous, entry.id]); setDerivedIdeas(null) }} /><span><strong>{entry.topic}</strong><br />{entry.region} · {entry.source} · {entry.observedOn}</span></label></li>)}</ul>}
+              {deriveError && <p role="alert" className="notice error">{deriveError}</p>}
+              <button className="btn-primary large" onClick={handleDerive} disabled={!deriveRegion.trim()}>Vorschläge aus Beobachtungen erstellen</button>
             </section>
 
             {derivedIdeas && (
               <section className="panel results-panel fade-in">
                 <div className="panel-header">
                   <h2>Abgeleitete Geschäftsideen</h2>
-                  <span className="badge-hypothesis">Hypothesen-Modus</span>
+                  <span className="badge-hypothesis">Vorschläge aus Vorlagen</span>
                 </div>
                 <div className="ideas-list">
                   {derivedIdeas.map((idea, idx) => (
@@ -753,7 +356,7 @@ function App() {
                           className="btn-outline small"
                           onClick={() => handleAutoPopulate(idea)}
                         >
-                          Validieren
+                          Als Idee übernehmen
                         </button>
                       </div>
                       <p>
@@ -762,65 +365,72 @@ function App() {
                       <p>
                         <strong>Potenzial:</strong> {idea.potential}
                       </p>
+                      <details><summary>Verwendete Beobachtungen ({idea.researchEntries.length})</summary><ul>{idea.researchEntries.map(entry => <li key={entry.id}>{entry.topic} · {entry.source} · {entry.observedOn} · {entry.region}</li>)}</ul></details>
                     </div>
                   ))}
                 </div>
               </section>
             )}
           </div>
-        )}
-        {mode === 'compare' && (
-          <div className="dashboard-grid single-col">
+          <div hidden={mode !== 'compare'} className="dashboard-grid single-col" aria-label="Vergleich gespeicherter Ideen">
             <section className="panel results-panel fade-in">
-              <div className="panel-header">
-                <h2>Ideen-Vergleich</h2>
-              </div>
-              {ideas.filter(i => i.marketAnalysis).length < 2 ? (
-                <p>Du benötigst mindestens 2 validierte Ideen für einen Vergleich.</p>
+<p className="helper-text">Vergleiche zuerst die Datenbasis und die offenen Fragen. Scores sind keine Erfolgsprognose.</p>
+              {comparableIdeas.length < 2 ? (
+                <div className="empty-state"><p>Du benötigst mindestens 2 gespeicherte Berichte für einen Vergleich.</p><button className="btn-primary" onClick={() => navigate('evaluate')}>Idee prüfen</button></div>
               ) : (
-                <div className="compare-table-container" style={{overflowX: 'auto'}}>
-                  <table className="compare-table" style={{width: '100%', textAlign: 'left', borderCollapse: 'collapse'}}>
+                <div className="compare-table-container" role="region" aria-label="Vergleichstabelle, bei Bedarf seitlich scrollen" tabIndex={0}>
+                  <table className="compare-table" >
                     <thead>
                       <tr>
-                        <th style={{padding: '12px', borderBottom: '2px solid #e2e8f0'}}>Metrik</th>
-                        {ideas.filter(i => i.marketAnalysis).map(idea => (
-                          <th key={idea.id} style={{padding: '12px', borderBottom: '2px solid #e2e8f0'}}>{idea.title} <br/><small>{idea.region}</small></th>
+                        <th>Metrik</th>
+                        {comparableIdeas.map(idea => (
+                          <th key={idea.id}>{idea.title} {!idea.title.toLocaleLowerCase('de-DE').includes(idea.region.toLocaleLowerCase('de-DE')) && <><br/><small>{idea.region}</small></>}</th>
                         ))}
                       </tr>
                     </thead>
                     <tbody>
                       <tr>
-                        <td style={{padding: '12px', borderBottom: '1px solid #e2e8f0', fontWeight: 'bold'}}>Score</td>
-                        {ideas.filter(i => i.marketAnalysis).map(idea => (
-                          <td key={idea.id} style={{padding: '12px', borderBottom: '1px solid #e2e8f0'}}>
-                            <strong style={{color: '#1d4ed8'}}>{idea.marketAnalysis?.scoreAtGeneration}</strong>
+                        <td>Datenbasis</td>
+                        {comparableIdeas.map(idea => (
+                          <td key={idea.id}>{describeDataBasis(idea.marketAnalysis)}</td>
+                        ))}
+                      </tr>
+                      <tr>
+                        <td>Passende Beobachtungen</td>
+                        {comparableIdeas.map(idea => <td key={idea.id}>{idea.marketAnalysis.researchEntries?.length ?? 'Nicht dokumentiert'}</td>)}
+                      </tr>
+                      <tr>
+                        <td>Orientierungs-Score</td>
+                        {comparableIdeas.map(idea => (
+                          <td key={idea.id}>
+                            <strong>{idea.marketAnalysis?.scoreAtGeneration}</strong>
                           </td>
                         ))}
                       </tr>
                       <tr>
-                        <td style={{padding: '12px', borderBottom: '1px solid #e2e8f0'}}>Suchvolumen</td>
-                        {ideas.filter(i => i.marketAnalysis).map(idea => (
-                          <td key={idea.id} style={{padding: '12px', borderBottom: '1px solid #e2e8f0'}}>{idea.marketAnalysis?.metrics.searchVolume}</td>
+                        <td>Suchvolumen</td>
+                        {comparableIdeas.map(idea => (
+                          <td key={idea.id}>{idea.marketAnalysis?.metrics.searchVolume}</td>
                         ))}
                       </tr>
                       <tr>
-                        <td style={{padding: '12px', borderBottom: '1px solid #e2e8f0'}}>Konkurrenz</td>
-                        {ideas.filter(i => i.marketAnalysis).map(idea => (
-                          <td key={idea.id} style={{padding: '12px', borderBottom: '1px solid #e2e8f0'}}>{idea.marketAnalysis?.metrics.competition}</td>
+                        <td>Konkurrenz</td>
+                        {comparableIdeas.map(idea => (
+                          <td key={idea.id}>{idea.marketAnalysis?.metrics.competition}</td>
                         ))}
                       </tr>
                       <tr>
-                        <td style={{padding: '12px', borderBottom: '1px solid #e2e8f0'}}>Daten-Qualität</td>
-                        {ideas.filter(i => i.marketAnalysis).map(idea => (
-                          <td key={idea.id} style={{padding: '12px', borderBottom: '1px solid #e2e8f0'}}>
-                            {idea.marketAnalysis?.evidencePercent}% ({idea.marketAnalysis?.evidenceQuality})
+                        <td>Recherche-Fortschritt</td>
+                        {comparableIdeas.map(idea => (
+                          <td key={idea.id}>
+                            {idea.marketAnalysis.evidencePercent === undefined ? 'Nicht dokumentiert' : `${idea.marketAnalysis.evidencePercent}% der Recherchemerkmale vorhanden`}
                           </td>
                         ))}
                       </tr>
                       <tr>
-                        <td style={{padding: '12px', borderBottom: '1px solid #e2e8f0'}}>Fazit</td>
-                        {ideas.filter(i => i.marketAnalysis).map(idea => (
-                          <td key={idea.id} style={{padding: '12px', borderBottom: '1px solid #e2e8f0', fontSize: '0.9rem'}}>{idea.marketAnalysis?.verdict}</td>
+                        <td>Fazit</td>
+                        {comparableIdeas.map(idea => (
+                          <td key={idea.id}>{idea.marketAnalysis?.verdict}</td>
                         ))}
                       </tr>
                     </tbody>
@@ -829,8 +439,9 @@ function App() {
               )}
             </section>
           </div>
-        )}
-      </main>
+          </div>
+        </main>
+      </div>
     </div>
   )
 }

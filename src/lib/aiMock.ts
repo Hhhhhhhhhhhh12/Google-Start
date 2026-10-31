@@ -33,6 +33,7 @@ export async function evaluateIdeaMock(ideaTitle: string, region: string): Promi
   const tempIdea: BusinessIdea = {
     id: crypto.randomUUID(),
     title: ideaTitle,
+    dataBasis: 'assumptions',
     region: region,
     targetAudience: 'Zielgruppe offen',
     keywords: [ideaTitle],
@@ -66,16 +67,12 @@ export async function evaluateIdeaMock(ideaTitle: string, region: string): Promi
       
       resolve({
         demandScore: analysis.scoreAtGeneration,
-        sources: [
-          'Google Keyword Planner (Heuristik)',
-          'Google Maps API (Heuristik)',
-          'Local Demand Engine',
-        ],
+        sources: analysis.sources,
         metrics: {
           competition: analysis.competitionAnalysis,
           searchVolume: analysis.demandAnalysis,
-          trend: 'Stabil bis Wachsend',
-          cpc: '0.85€ - 2.40€',
+          trend: analysis.metrics.trend,
+          cpc: analysis.metrics.cpc,
         },
         summary: analysis.verdict,
         swot: analysis.swot,
@@ -107,8 +104,8 @@ export async function deriveIdeasMock(searchTerms: string): Promise<DerivedIdea[
 
       resolve(results.map(r => ({
         title: r.title || 'Neue Idee',
-        reason: `Basierend auf Suchtrends für ${terms[0] || 'lokale Bedarfe'}.`,
-        potential: 'Hoch (Marktlücke vermutet)',
+        reason: `Aus deinen Eingaben zu ${terms[0] || 'lokalen Bedarfen'} mit festen Vorlagen kombiniert.`,
+        potential: 'Offen – regionale Nachfrage und Wettbewerb erst recherchieren',
       })));
     }, 1500);
   });

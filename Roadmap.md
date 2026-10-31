@@ -1,66 +1,28 @@
-# Roadmap — Ideen Scout
+# Roadmap — Local Demand Scanner / Ideen Scout
 
-Stand: 27.10.2026. Grundlage: Quellprüfung des übernommenen Hauptzweigs `97b332d`, ohne Ausführung der App oder technischer Prüfungen.
+Stand: 31.10.2026. Technische Umsetzung, technische Prüfung, visuelle Nutzerabnahme, Integration und Veröffentlichung sind getrennte Zustände.
 
-**Historischer Übernahmestand:** Die folgenden Tabellen dokumentieren `97b332d`. Sie sind keine aktuelle Fehlstellenliste für den inzwischen weiterentwickelten Workflow-Zweig. Der [Variantenabgleich vom 27.10.2026](docs/VARIANTENABGLEICH-2026-10-27.txt) ergänzt den neuesten gelesenen Stand `ac4bb33` und die bestätigten Folgeentscheidungen.
+## Umgesetzt und im Arbeitsstand geprüft
 
-## Aktualisierte Einordnung nach Variantenabgleich
+- Speichern und Bearbeiten anhand fester IDs; Notizen, Recherche und Gewichte bleiben erhalten. Geänderte Eingaben machen den angezeigten Bericht ungültig. Löschen der letzten Idee, Rückgängig-Funktion und verständliche Speicherfehler.
+- Manueller Rechercheablauf mit Thema, Art, Region, Quelle, Datum, optionalem Link und Unsicherheit; vorhandener Query Builder als manuell geöffnete Recherchehilfe.
+- Abgenommene Journalgestaltung umgesetzt: reduzierte Symbolnavigation, Sammlung, Einstellungen oben rechts, drei Prüfschritte, Papier-/Serifengestaltung und lokale Illustration; aufklappbare Ergebnisdetails. Nachweis in [docs/GUIDED_LAYOUT.md](docs/GUIDED_LAYOUT.md).
+- Regionale Ideenableitung aus ausgewählten Beobachtungen mit Quellenübernahme; fehlende Signale werden nicht erfunden.
+- Sichtbare Abfragefehler, sichere Fehlermeldungen, begrenzte Anfragezeit, Teilresultate und Abbruch. Serper-Schlüssel standardmäßig in der Sitzung, Geräteablage nur ausdrücklich; Löschen beider Ablagen.
+- Kennzeichnung von Annahmen und ungeklärter Herkunft in Bericht, Vergleich und Markdown-Export. Kein erfundenes monatliches Suchvolumen aus Trefferzahlen.
 
-- Im neueren Arbeitsstand bereits vorhanden: manueller Rechercheablauf, Speicherkorrekturen, regionale Vorschläge, nachvollziehbare Abfragefehler, Sitzungsschlüssel als Standard und geführtes Layout. Keine doppelte Umsetzung aus alten Plänen.
-- Bestätigt eingeplant: vollständiger JSON-Export und geprüfter Import mit expliziter Konfliktentscheidung, ohne API-Schlüssel; danach Score-Zusammensetzung und fehlende Belege erklären, Formel vorerst erhalten.
-- Als spätere eigenständige Funktionen bestätigt vorgemerkt: Was-wäre-wenn und Finanzrechner.
-- Offene Abnahmestufen des neuen Arbeitsstands sowie Integration nach `main` und GitHub-Übertragung getrennt behandeln. Die Migrationsentscheidungen dieses Zweigs bei einer späteren Zusammenführung erhalten.
+Die Nachweise stehen in [docs/WORKFLOW_IMPROVEMENTS.md](docs/WORKFLOW_IMPROVEMENTS.md).
 
-## Historische Migrationsbewertung ab `97b332d`
+## Nächste eigenständige Aufgaben
 
-## Ziel und Statusregeln
+- Visuelle Nutzerabnahme der tatsächlichen App mit dem technisch geprüften Journal-Einbau; Details siehe [Layoutnachweis](docs/GUIDED_LAYOUT.md).
+- Vollständige JSON-Sicherung und geprüfter Wiederimport: in PR #4 entwickelt, noch nicht nach `main` übernommen; eigene technische Prüfung und Nutzerabnahme erforderlich. Persönliche Datenübernahme nur nach ausdrücklicher Zustimmung.
+- Spätere Quellenabdeckung: Messzeiträume, Aktualität und unterschiedliche geografische Granularität fachlich präzisieren.
+- Umfang und Aussagekraft des Orientierungs-Scores separat beurteilen; fehlende Zahlungsbereitschaft oder Nachfrage bleiben offene Belege.
+- Geräteübergreifende Bedienprüfung und echte externe Abfragen benötigen jeweils einen eigenen freigegebenen Umfang. Öffentliche App-Veröffentlichung ist ein eigener Schritt.
 
-Bestätigtes Ziel: **Recherchehilfe mit belegbaren Daten; Automatik unterstützt.** Serper bleibt optional. Die frühere pauschale Aussage „alle Phasen abgeschlossen“ wird durch die folgenden Einzelstände ersetzt. Vorhandener Code, technische Prüfung, visuelle Abnahme und Veröffentlichung sind verschiedene Zustände.
+## Bestätigte Richtung und spätere Aufgaben
 
-## Übernommener Stand
+Recherchehilfe mit belegbaren Daten; Serper bleibt optional. Regeln und Vorlagen sind keine abgeschlossene KI- oder Marktvalidierung. Den Gesamt-Score als nachrangige Orientierung behalten und seine Annahmen sowie fehlende Belege erklären; Formel vorerst erhalten. Was-wäre-wenn und Finanzrechner bleiben spätere eigenständige Aufgaben.
 
-| Bereich | Im Quellcode vorhanden | Grenze / nächster Bedarf |
-| --- | --- | --- |
-| Ideensammlung | Speichern, Öffnen und Löschen; lokale Speicherung | Speichern und insbesondere Löschen der letzten Idee später gezielt prüfen; kein vollständiger Datenimport/-export |
-| Bewertung und Bericht | Gewichteter Score, Bericht, SWOT, Strategie | Vorbelegte Annahmen werden zu weitreichend interpretiert; keine belastbare Validierung bestätigt |
-| Externe Recherche | Optionaler Serper-Aufruf für Maps und Suche | Herkunft, Abruffehler, Abdeckung und Kosten sichtbar machen; kein Nachweis von Keyword-Planner- oder Trends-Abfragen |
-| Manuelle Recherche | Datenfelder, Typen und Hilfslogik teilweise vorhanden | Der vollständige manuelle Arbeitsablauf ist in der aktuellen Oberfläche nicht vorhanden |
-| Ideen ableiten | Regelbasierte Kombination von Eingaben, Kennzeichnung als Hypothese | Hinweise auf aktuelle Suchtrends und hohes Potenzial sind so nicht belegt |
-| Vergleich | Tabelle gespeicherter Berichte | Übernimmt deren Datenlücken; Anzeige unvollständiger Daten später prüfen |
-| Export | Bericht als Markdown | Keine vollständige Sicherung der Ideensammlung und kein Import |
-| Prüfungen | Drei Testdateien für Bewertungs-, Anfrage- und Berichtslogik | Bei dieser Migration nicht ausgeführt; alte grüne Zähler sind keine aktuelle Freigabe |
-
-## Priorität 1 — Daten ehrlich einordnen
-
-Noch umzusetzen, keine technische Umsetzung durch diese Dokumentänderung:
-
-- [ ] Gemessene Werte, abgeleitete Schätzungen, manuelle Angaben und Demo-Annahmen getrennt kennzeichnen.
-- [ ] Aus Google-Treffern abgeleitete Werte nicht als gemessenes monatliches Suchvolumen ausgeben.
-- [ ] Fehlende Trend-, Zahlungsbereitschafts- und Kundendaten als fehlend behandeln; neutrale Vorgaben nicht als Untersuchungsergebnis darstellen.
-- [ ] Quellen und Recherche-Checkliste aus tatsächlich vorhandenen Belegen ableiten; Serper-Suche ersetzt keine Keyword-Planner-, CPC- oder Trends-Prüfung.
-- [ ] Quellenbezeichnungen, „Live“-Badge, UI-Versprechen und Berichtsexport an die tatsächliche Datenbasis anpassen.
-- [ ] Ideen aus Vorlagen als Hypothesen beschreiben; unbewiesene Trend- und Potenzialaussagen entfernen oder begründen.
-
-## Priorität 2 — Belegbare Recherche unterstützen
-
-- [ ] Einen überschaubaren manuellen Rechercheablauf ausarbeiten: Beobachtung, Quelle, Region, Abrufdatum, Kennzahl und Unsicherheit.
-- [ ] Vorhandene Recherchefelder und Hilfsfunktionen nach Eignung wiederverwenden; keine automatische Wiederherstellung der alten Oberfläche.
-- [ ] Serper als freiwillige Ergänzung mit nachvollziehbaren Abruffehlern und Quellen behandeln.
-- [ ] Aufbewahrung und Löschung des Serper-Schlüssels sowie Einsatzgrenzen vor breiterer Nutzung klären.
-- [ ] Abdeckung/Verlässlichkeit der Belege getrennt vom Attraktivitäts-Score erklären.
-
-## Priorität 3 — Daten und Bedienung absichern
-
-- [ ] Vollständigen Datenexport und Import als gesonderten Umfang planen.
-- [ ] Persistenz beim letzten Löschvorgang und beim Bearbeiten vorhandener Ideen prüfen.
-- [ ] Vergleich und Export auch bei fehlenden Belegen verständlich gestalten.
-- [ ] Die bestehenden unveröffentlichten Korrekturen auf `codex/local-demand-build-fix` getrennt prüfen; nicht als Teil dieser Migration übernehmen.
-
-## Spätere Freigaben
-
-- [ ] Begrenzten technischen Prüfumfang ausdrücklich freigeben lassen und durchführen.
-- [ ] Oberfläche im freigegebenen Umfang ansehen und visuell abnehmen.
-- [ ] Funktionsänderungen separat zur Integration freigeben.
-- [ ] Hosting, öffentliche App-Veröffentlichung oder echte kostenpflichtige Abfragen separat beauftragen.
-
-Die bestätigten Richtungsentscheidungen und die Auflösung der alten Widersprüche stehen in [docs/DECISIONS.md](docs/DECISIONS.md). Die alte Roadmap bleibt in der Git-Historie des Übernahmestands erhalten.
+Workflow und Recherchejournal wurden am 28.10.2026 bereits nach `main` übernommen. Der [Integrationsplan](docs/INTEGRATION_2026-10-31.md) trennt historische Befunde von heutigen Änderungen und noch offenen Abnahmen.

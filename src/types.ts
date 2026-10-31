@@ -16,6 +16,38 @@ export interface PainPointEntry {
 
 export type TrendDirection = 'rising' | 'stable' | 'declining' | 'seasonal'
 
+export type ResearchKind = 'keyword-volume' | 'trend' | 'competition' | 'pain-point' | 'observation'
+
+export interface ResearchEntry {
+  id: string
+  kind: ResearchKind
+  topic: string
+  region: string
+  source: string
+  sourceUrl?: string
+  observedOn: string
+  recordedAt: number
+  value?: number
+  trend?: TrendDirection
+  notes: string
+}
+
+export interface ExternalResearch {
+  queriedAt: number
+  mapsQueriedAt?: number
+  searchQueriedAt?: number
+  region: string
+  topic: string
+  mapsSucceeded: boolean
+  searchSucceeded: boolean
+  warnings: string[]
+  competitors?: CompetitorEntry[]
+  organicResults?: OrganicResult[]
+  peopleAlsoAsk?: string[]
+  relatedSearches?: string[]
+  totalResults?: number
+}
+
 export interface OrganicResult {
   title: string
   link: string
@@ -36,6 +68,9 @@ export interface BusinessIdea {
   targetAudience: string
   keywords: string[]
   weights?: ScoringWeights
+  dataBasis?: 'assumptions' | 'external-mixed' | 'manual' | 'researched'
+  researchEntries?: ResearchEntry[]
+  externalResearch?: ExternalResearch
 
   keywordData: KeywordData[]
 
@@ -100,6 +135,9 @@ export interface ScoreInput {
 }
 
 export interface MarketAnalysis {
+  dataBasis?: BusinessIdea['dataBasis'] | 'unverified'
+  researchEntries?: ResearchEntry[]
+  researchWarnings?: string[]
   verdict: string
   demandAnalysis: string
   competitionAnalysis: string

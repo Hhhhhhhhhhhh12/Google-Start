@@ -1,5 +1,9 @@
 # Entscheidungen und geklärte Widersprüche
 
+## Aktuelle Einordnung am 31.10.2026
+
+Die Produktausrichtung bleibt verbindlich. Die folgenden Widersprüche und offenen Punkte beschreiben den historischen Stand `97b332d`, keine heutige Fehlstellenliste. Rechercheworkflows und Journalgestaltung bis `2142705` sind inzwischen in `main` (`6bdc33c`) enthalten. JSON-Sicherung und Import sind separat in PR #4 entwickelt; ihre Nutzerabnahme und Integration bleiben offen. Der [Integrationsplan](INTEGRATION_2026-10-31.md) ist die aktuelle Übersicht. Alte Prüfgrenzen gelten für den damaligen Auftrag; der Auftrag vom 31.10.2026 erlaubt die technische Integrationsprüfung im dort dokumentierten Umfang.
+
 ## Bestätigt am 27.10.2026
 
 | Gegenstand | Geltungsbereich | Entscheidung | Status |
