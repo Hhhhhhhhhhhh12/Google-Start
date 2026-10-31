@@ -1,6 +1,6 @@
 # Roadmap — Local Demand Scanner / Ideen Scout
 
-Stand: 27.10.2026. Technische Umsetzung, technische Prüfung, visuelle Nutzerabnahme, Integration und Veröffentlichung sind getrennte Zustände.
+Stand: 31.10.2026. Technische Umsetzung, technische Prüfung, visuelle Nutzerabnahme, Integration und Veröffentlichung sind getrennte Zustände.
 
 ## Umgesetzt und im Arbeitsstand geprüft
 
@@ -16,8 +16,13 @@ Die Nachweise stehen in [docs/WORKFLOW_IMPROVEMENTS.md](docs/WORKFLOW_IMPROVEMEN
 ## Nächste eigenständige Aufgaben
 
 - Visuelle Nutzerabnahme der tatsächlichen App mit dem technisch geprüften Journal-Einbau; Details siehe [Layoutnachweis](docs/GUIDED_LAYOUT.md).
-- Workflow-Verbesserungen samt Journal-Einbau am 28.10.2026 auf Nutzerauftrag nach `main` übernommen und zu GitHub übertragen; Nachweis im [Layoutnachweis](docs/GUIDED_LAYOUT.md). Getrennte Migrations- und Backup-Zweige bleiben eigenständig.
-- Vollständiger Datenexport, Wiederimport und nachvollziehbare Datenübernahme bei einem Wechsel der lokalen Adresse.
+- Vollständige JSON-Sicherung und geprüfter Wiederimport: in PR #4 entwickelt, noch nicht nach `main` übernommen; eigene technische Prüfung und Nutzerabnahme erforderlich. Persönliche Datenübernahme nur nach ausdrücklicher Zustimmung.
 - Spätere Quellenabdeckung: Messzeiträume, Aktualität und unterschiedliche geografische Granularität fachlich präzisieren.
 - Umfang und Aussagekraft des Orientierungs-Scores separat beurteilen; fehlende Zahlungsbereitschaft oder Nachfrage bleiben offene Belege.
 - Geräteübergreifende Bedienprüfung und echte externe Abfragen benötigen jeweils einen eigenen freigegebenen Umfang. Öffentliche App-Veröffentlichung ist ein eigener Schritt.
+
+## Bestätigte Richtung und spätere Aufgaben
+
+Recherchehilfe mit belegbaren Daten; Serper bleibt optional. Regeln und Vorlagen sind keine abgeschlossene KI- oder Marktvalidierung. Den Gesamt-Score als nachrangige Orientierung behalten und seine Annahmen sowie fehlende Belege erklären; Formel vorerst erhalten. Was-wäre-wenn und Finanzrechner bleiben spätere eigenständige Aufgaben.
+
+Workflow und Recherchejournal wurden am 28.10.2026 bereits nach `main` übernommen. Der [Integrationsplan](docs/INTEGRATION_2026-10-31.md) trennt historische Befunde von heutigen Änderungen und noch offenen Abnahmen.

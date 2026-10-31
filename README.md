@@ -28,3 +28,11 @@ npm run dev
 Die im Terminal angezeigte lokale Adresse im Browser öffnen.
 
 [Bedienung & Datenbasis](docs/BEDIENUNG.md) · [Roadmap](Roadmap.md) · [Layout & Prüfnachweise](docs/GUIDED_LAYOUT.md)
+
+## Bestätigte Produktausrichtung
+
+Ideen Scout ist eine nachvollziehbare Recherchehilfe mit belegbaren Daten und optionaler Serper-Unterstützung. Die vorhandenen Regeln und Vorlagen ersetzen keine generative KI oder tatsächliche Marktvalidierung. Quellen, Annahmen, Schätzungen und fehlende Belege müssen erkennbar bleiben.
+
+Die Recherchefunktionen und das Recherchejournal sind bereits in `main` enthalten. Die vollständige JSON-Sicherung wird getrennt in PR #4 vorbereitet. Browserdaten gehören zur jeweiligen lokalen Adresse und zum Browserprofil; ein Quellcodewechsel überträgt sie nicht.
+
+[Bestätigte Entscheidungen](docs/DECISIONS.md) · [Historische Migration](docs/MIGRATION.md) · [Integrationsplan und Abnahme](docs/INTEGRATION_2026-10-31.md)
