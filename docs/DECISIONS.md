@@ -40,3 +40,8 @@ In diesem Chat ausdrücklich bestätigt; Umfang ist Planung, keine Funktionsimpl
 | Was-wäre-wenn und Finanzrechner | Beide als spätere eigenständige Funktionen vormerken | Vom User bestätigt; fachliche Prüfung und Umsetzung offen |
 
 Die bereits im Chat „Local Demand Scanner fortführen“ ausgewählte geführte Oberfläche bleibt berücksichtigt. `codex/local-demand-core-workflows` bei `ac4bb33` ist die empfohlene neueste Arbeitsgrundlage, noch keine hier integrierte oder visuell abgenommene Fassung. Vollständiger Quellenvergleich, Wiederverwendung und Grenzen: [Variantenabgleich](VARIANTENABGLEICH-2026-10-27.txt).
+
+
+## JSON-Arbeitsstand nach Konfliktbereinigung am 31.10.2026
+
+PR #4 ergänzt Export und geprüften Import auf dem aktuellen Recherchejournal. Gleiche IDs werden nur nach ausdrücklicher Auswahl ersetzt; Quellen, Berichte, Gewichte und Zeitangaben bleiben erhalten. Die Dokumentationsbasis aus PR #3 wird gemeinsam verwendet. [Technischer Umfang](JSON_BACKUP.md) und [aktuelle Abnahme](JSON_ACCEPTANCE.md) trennen technische Prüfung, visuelle Freigabe, Merge und Veröffentlichung. Andere Projekte gehören nicht zu diesem Auftrag.

@@ -15,6 +15,8 @@ import { deleteApiKey, loadApiKey, saveApiKey } from './lib/apiKey'
 import { ResearchPanel } from './components/ResearchPanel'
 import { AnalysisReport } from './components/AnalysisReport'
 import { AppNavigation, NavigationIcon, type AppMode } from './components/AppNavigation'
+import { BackupPanel } from './components/BackupPanel'
+import { saveImportedIdeas } from './lib/backup'
 
 type EvaluationStep = 0 | 1 | 2
 
@@ -123,6 +125,23 @@ function App() {
     const error = initialStore.error ?? saveIdeas(next)
     if (error) { setSaveError(error); return false }
     setIdeas(next); setSaveError(''); return true
+  }
+
+  function importCollection(next: BusinessIdea[]): string | null {
+    if (draftDirty || isEvaluating) return 'Bitte den aktuellen Entwurf zuerst speichern oder bewusst verwerfen und laufende Abfragen beenden.'
+    const failure = initialStore.error ?? saveImportedIdeas(ideas, next)
+    if (failure) return failure
+    setIdeas(next)
+    setDeletedIdeas(previous => previous.filter(deleted => !next.some(idea => idea.id === deleted.id)))
+    const importedDraft = next.find(idea => idea.id === draft.id)
+    if (importedDraft) {
+      setDraft(importedDraft)
+      setKeywordsText(importedDraft.keywords.join(', '))
+      setReport(importedDraft.marketAnalysis ? prepareReportForDisplay(importedDraft.marketAnalysis) : null)
+      setResearchErrors(importedDraft.externalResearch?.warnings ?? [])
+    }
+    setSaveError(''); setNotice('')
+    return null
   }
 
   function persistDraft(candidate: BusinessIdea, analysis?: MarketAnalysis): boolean {
@@ -261,6 +280,7 @@ function App() {
 
             <section hidden={mode !== 'home'} aria-label="Gespeicherte Ideen">
               <div className="section-heading"><h2>Deine Ideen ({ideas.length})</h2><button className="btn-text" onClick={() => startNewIdea()}>Neue Idee</button></div>
+              <BackupPanel ideas={ideas} exportBlocked={!!initialStore.error} importBlocked={!!initialStore.error || draftDirty || isEvaluating} onImport={importCollection} />
               {ideas.length === 0 ? <div className="empty-state"><p>Noch keine Ideen gespeichert.</p><p className="helper-text">Prüfe deine erste Idee oder entwickle ein Angebot aus lokalen Beobachtungen.</p><div className="button-row"><button className="btn-primary" onClick={() => navigate('evaluate')}>Idee prüfen</button><button className="btn-secondary" onClick={() => navigate('discover')}>Ideen finden</button></div></div> :
                 <div className="ideas-list">{ideas.map(idea => <article className="idea-card" key={idea.id}>
                   <div className="idea-card-header"><h3>{idea.title}</h3><button className="btn-secondary" onClick={() => openIdea(idea)}>Öffnen</button></div>

@@ -16,7 +16,7 @@ Die Nachweise stehen in [docs/WORKFLOW_IMPROVEMENTS.md](docs/WORKFLOW_IMPROVEMEN
 ## Nächste eigenständige Aufgaben
 
 - Visuelle Nutzerabnahme der tatsächlichen App mit dem technisch geprüften Journal-Einbau; Details siehe [Layoutnachweis](docs/GUIDED_LAYOUT.md).
-- Vollständige JSON-Sicherung und geprüfter Wiederimport: in PR #4 entwickelt, noch nicht nach `main` übernommen; eigene technische Prüfung und Nutzerabnahme erforderlich. Persönliche Datenübernahme nur nach ausdrücklicher Zustimmung.
+- Vollständige JSON-Sicherung und geprüfter Wiederimport: in diesem PR-Arbeitsstand ergänzt, noch nicht nach `main` übernommen; technische Integrationsnachweise und offene Nutzerabnahme siehe [Abnahmeplan](docs/JSON_ACCEPTANCE.md). Persönliche Datenübernahme nur nach ausdrücklicher Zustimmung.
 - Spätere Quellenabdeckung: Messzeiträume, Aktualität und unterschiedliche geografische Granularität fachlich präzisieren.
 - Umfang und Aussagekraft des Orientierungs-Scores separat beurteilen; fehlende Zahlungsbereitschaft oder Nachfrage bleiben offene Belege.
 - Geräteübergreifende Bedienprüfung und echte externe Abfragen benötigen jeweils einen eigenen freigegebenen Umfang. Öffentliche App-Veröffentlichung ist ein eigener Schritt.
